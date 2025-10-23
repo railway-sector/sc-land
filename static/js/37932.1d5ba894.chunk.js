@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksc_land=self.webpackChunksc_land||[]).push([[37932],{37932:(s,a,c)=>{c.r(a),c.d(a,{build:()=>e.b});c(47233),c(79138),c(86955),c(72790),c(70571),c(2687);var e=c(62854)}}]);
