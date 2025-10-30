@@ -18,33 +18,24 @@ export default function DropdownData() {
       ],
     },
   ]);
+  const [municipalitySelected, setMunicipalitySelected] = useState(null);
 
-  const [municipality, setMunicipality] = useState(null);
-  const [barangay, setBarangay] = useState(null);
+  const [barangaySelected, setBarangaySelected] = useState(null);
   const [barangayList, setBarangayList] = useState([]);
-  const [municipalSelected, setMunicipalSelected] = useState({
-    municipality: "",
-    barangay: [
-      {
-        name: "",
-      },
-    ],
-  });
-  const [barangaySelected, setBarangaySelected] = useState({ name: "" });
 
   useEffect(() => {
     getMuniciaplityBarangayPair().then((response: any) => {
+      console.log(response);
       setInitMunicipalBarangay(response);
     });
   }, []);
 
   // handle change event of the Municipality dropdown
   const handleMunicipalityChange = (obj: any) => {
-    setMunicipalSelected(obj);
-    setMunicipality(obj);
+    console.log(obj);
+    setMunicipalitySelected(obj);
     setBarangayList(obj.barangay);
-    setBarangay(null);
-    setBarangaySelected({ name: "" });
+    setBarangaySelected(null);
     updateMunicipals(obj.municipality);
     updateBarangays(undefined);
   };
@@ -52,7 +43,6 @@ export default function DropdownData() {
   // handle change event of the barangay dropdownff
   const handleBarangayChange = (obj: any) => {
     setBarangaySelected(obj);
-    setBarangay(obj);
     updateBarangays(obj.name);
   };
 
@@ -61,9 +51,9 @@ export default function DropdownData() {
       <DropdownListDisplay
         handleMunicipalityChange={handleMunicipalityChange}
         handleBarangayChange={handleBarangayChange}
-        municipality={municipality}
+        municipalitySelected={municipalitySelected}
         initMunicipalBarangay={initMunicipalBarangay}
-        barangay={barangay}
+        barangaySelected={barangaySelected}
         barangayList={barangayList}
       ></DropdownListDisplay>
     </>
@@ -73,9 +63,9 @@ export default function DropdownData() {
 export function DropdownListDisplay({
   handleMunicipalityChange,
   handleBarangayChange,
-  municipality,
+  municipalitySelected,
   initMunicipalBarangay,
-  barangay,
+  barangaySelected,
   barangayList,
 }: any) {
   // Style CSS
@@ -117,7 +107,7 @@ export function DropdownListDisplay({
       </div>
       <Select
         placeholder="Select Municipality"
-        value={municipality}
+        value={municipalitySelected}
         options={initMunicipalBarangay}
         onChange={handleMunicipalityChange}
         getOptionLabel={(x: any) => x.municipality}
@@ -137,7 +127,7 @@ export function DropdownListDisplay({
       </div>
       <Select
         placeholder="Select Barangay"
-        value={barangay}
+        value={barangaySelected}
         options={barangayList}
         onChange={handleBarangayChange}
         getOptionLabel={(x: any) => x.name}
