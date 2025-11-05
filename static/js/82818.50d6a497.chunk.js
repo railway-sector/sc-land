@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksc_land=self.webpackChunksc_land||[]).push([[82818],{82818:(e,s,a)=>{a.d(s,{PieChartAm5:()=>c.r,PieSeriesAm5:()=>r.w});var c=a(28704),r=a(15457)}}]);
