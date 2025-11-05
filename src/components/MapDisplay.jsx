@@ -15,14 +15,12 @@ import {
   structureLayer,
   pierAccessLayer,
   stationLayer,
-  prowLayer,
   alignmentGroupLayer,
   nloLoOccupancyGroupLayer,
   lotGroupLayer,
   lotLayer,
   ngcp7_groupLayer,
   ngcp6_groupLayer,
-  pierHeadColumnLayer,
   somco_fense_layer,
   handedOverLotLayer,
 } from "../layers";
@@ -42,12 +40,11 @@ function MapDisplay() {
       arcgisScene.map.add(structureLayer);
       arcgisScene.map.add(nloLoOccupancyGroupLayer);
       arcgisScene.map.add(alignmentGroupLayer);
-      // arcgisScene.map.add(prowLayer);
       arcgisScene.map.add(stationLayer);
-      // arcgisScene.map.add(pierHeadColumnLayer);
       arcgisScene.map.add(somco_fense_layer);
       arcgisScene.map.add(handedOverLotLayer);
       arcgisScene.map.ground.navigationConstraint = "none";
+      arcgisScene.view.ui.components = [];
 
       arcgisSearch.sources = [
         {
@@ -97,14 +94,14 @@ function MapDisplay() {
         setSceneView(event.target);
       }}
     >
-      <arcgis-compass position="top-right"></arcgis-compass>
-      <arcgis-expand close-on-esc position="top-right" mode="floating">
+      <arcgis-compass slot="top-right"></arcgis-compass>
+      <arcgis-expand close-on-esc slot="top-right" mode="floating">
         <arcgis-search></arcgis-search>
         {/* <arcgis-placement>
           <calcite-button>Placeholder</calcite-button>
         </arcgis-placement> */}
       </arcgis-expand>
-      <arcgis-zoom position="bottom-right"></arcgis-zoom>
+      <arcgis-zoom slot="bottom-right"></arcgis-zoom>
     </arcgis-scene>
   );
 }
