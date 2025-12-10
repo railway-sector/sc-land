@@ -1745,23 +1745,23 @@ const landOptimizationRenderer = new UniqueValueRenderer({
   ],
 });
 
-export const landOptimizationLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 1,
-  renderer: landOptimizationRenderer,
-  definitionExpression: "ForNonAcqui = 1",
-  popupEnabled: false,
-  labelsVisible: false,
-  title: "For Land Optimization",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
+// export const landOptimizationLayer = new FeatureLayer({
+//   portalItem: {
+//     id: "99500faf0251426ea1df934a739faa6f",
+//     portal: {
+//       url: "https://gis.railway-sector.com/portal",
+//     },
+//   },
+//   layerId: 1,
+//   renderer: landOptimizationRenderer,
+//   definitionExpression: "ForNonAcqui = 1",
+//   popupEnabled: false,
+//   labelsVisible: false,
+//   title: "For Land Optimization",
+//   elevationInfo: {
+//     mode: "on-the-ground",
+//   },
+// });
 
 /* For SC Substation */
 const scSubstationRenderer = new SimpleRenderer({
@@ -1847,13 +1847,7 @@ export const lotGroupLayer = new GroupLayer({
   title: "Land",
   visible: true,
   visibilityMode: "independent",
-  layers: [
-    lotLayer,
-    tunnelAffectedLotLayer,
-    pnrLayer,
-    accessibleLotAreaLayer,
-    landOptimizationLayer,
-  ],
+  layers: [lotLayer, tunnelAffectedLotLayer, pnrLayer, accessibleLotAreaLayer],
 });
 
 export const ngcp6_groupLayer = new GroupLayer({
