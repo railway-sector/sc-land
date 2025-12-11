@@ -49,6 +49,7 @@ import {
   tunnelAffectLotField,
   valueLabelColor,
 } from "./uniqueValues";
+
 /* Standalone table for Dates */
 export const dateTable = new FeatureLayer({
   portalItem: {
@@ -709,14 +710,15 @@ export const lotLayer = new FeatureLayer({
 });
 
 /* Optmized lots for NSCR-Ex Passenger Line */
+
 const optimizedLotRenderer = new SimpleRenderer({
   symbol: new SimpleFillSymbol({
     color: "#808080",
-    style: "backward-diagonal",
+    style: "diagonal-cross",
     outline: {
       // autocasts as new SimpleLineSymbol()
       color: [110, 110, 110],
-      width: 1,
+      width: 1.5,
     },
   }),
 });
@@ -733,7 +735,7 @@ export const optimizedLots_passengerLineLayer = new FeatureLayer({
   labelingInfo: [lotIdLabel],
   renderer: optimizedLotRenderer,
   popupTemplate: templateLot,
-  title: "Optimized Lots for NSCR-Ex Passenger Line",
+  title: "Optimized Lots for NSCR-Ex Passenger & Freight Line",
   minScale: 150000,
   maxScale: 0,
   //labelsVisible: false,
@@ -746,7 +748,7 @@ export const optimizedLots_passengerLineLayer = new FeatureLayer({
 const studiedLotRenderer = new SimpleRenderer({
   symbol: new SimpleFillSymbol({
     color: "#808080",
-    style: "forward-diagonal",
+    style: "horizontal",
     outline: {
       // autocasts as new SimpleLineSymbol()
       color: [110, 110, 110],
@@ -767,7 +769,7 @@ export const studiedLots_optimizationLayer = new FeatureLayer({
   labelingInfo: [lotIdLabel],
   renderer: studiedLotRenderer,
   popupTemplate: templateLot,
-  title: "Studied Lots of NSCR-Ex Freight Line for Optimization",
+  title: "Candidate Lots of NSCR-Ex Passenger & Freight Line for Optimization",
   minScale: 150000,
   maxScale: 0,
   //labelsVisible: false,
