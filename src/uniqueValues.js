@@ -338,6 +338,8 @@ export async function defineActions(event) {
   item.title === "Super Urgent Lot" ||
   item.title === "Handed-Over (public + private)" ||
   item.title === "For Land Optimization" ||
+  item.title === "Optimized Lots for NSCR-Ex Passenger Line" ||
+  item.title === "Studied Lots of NSCR-Ex Freight Line for Optimization" ||
   item.title === "Tunnel Affected" ||
   item.title === "Structure" ||
   item.title === "Households" ||

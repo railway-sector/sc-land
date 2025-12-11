@@ -708,6 +708,74 @@ export const lotLayer = new FeatureLayer({
   },
 });
 
+/* Optmized lots for NSCR-Ex Passenger Line */
+const optimizedLotRenderer = new SimpleRenderer({
+  symbol: new SimpleFillSymbol({
+    color: "#FFFF00",
+    style: "solid",
+    outline: {
+      // autocasts as new SimpleLineSymbol()
+      color: [110, 110, 110],
+      width: 0.7,
+    },
+  }),
+});
+
+export const optimizedLots_passengerLineLayer = new FeatureLayer({
+  portalItem: {
+    id: "99500faf0251426ea1df934a739faa6f",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 1,
+  definitionExpression: "OptLotsIIA = 1",
+  labelingInfo: [lotIdLabel],
+  renderer: optimizedLotRenderer,
+  popupTemplate: templateLot,
+  title: "Optimized Lots for NSCR-Ex Passenger Line",
+  minScale: 150000,
+  maxScale: 0,
+  //labelsVisible: false,
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
+/* Studied Lots of NSCR-Ex Freight Line for Optimization */
+const studiedLotRenderer = new SimpleRenderer({
+  symbol: new SimpleFillSymbol({
+    color: "#1E90FF",
+    style: "solid",
+    outline: {
+      // autocasts as new SimpleLineSymbol()
+      color: [110, 110, 110],
+      width: 0.7,
+    },
+  }),
+});
+
+export const studiedLots_optimizationLayer = new FeatureLayer({
+  portalItem: {
+    id: "99500faf0251426ea1df934a739faa6f",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 1,
+  definitionExpression: "OptLotsIIB = 1",
+  labelingInfo: [lotIdLabel],
+  renderer: studiedLotRenderer,
+  popupTemplate: templateLot,
+  title: "Studied Lots of NSCR-Ex Freight Line for Optimization",
+  minScale: 150000,
+  maxScale: 0,
+  //labelsVisible: false,
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
 /* Handed-Over Lot (public + private) */
 const handedOverLotRenderer = new UniqueValueRenderer({
   field: "HandedOver",
@@ -1847,7 +1915,14 @@ export const lotGroupLayer = new GroupLayer({
   title: "Land",
   visible: true,
   visibilityMode: "independent",
-  layers: [lotLayer, tunnelAffectedLotLayer, pnrLayer, accessibleLotAreaLayer],
+  layers: [
+    optimizedLots_passengerLineLayer,
+    studiedLots_optimizationLayer,
+    lotLayer,
+    tunnelAffectedLotLayer,
+    pnrLayer,
+    accessibleLotAreaLayer,
+  ],
 });
 
 export const ngcp6_groupLayer = new GroupLayer({
