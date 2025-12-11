@@ -711,12 +711,12 @@ export const lotLayer = new FeatureLayer({
 /* Optmized lots for NSCR-Ex Passenger Line */
 const optimizedLotRenderer = new SimpleRenderer({
   symbol: new SimpleFillSymbol({
-    color: "#FFFF00",
-    style: "solid",
+    color: "#808080",
+    style: "backward-diagonal",
     outline: {
       // autocasts as new SimpleLineSymbol()
       color: [110, 110, 110],
-      width: 0.7,
+      width: 1,
     },
   }),
 });
@@ -745,12 +745,12 @@ export const optimizedLots_passengerLineLayer = new FeatureLayer({
 /* Studied Lots of NSCR-Ex Freight Line for Optimization */
 const studiedLotRenderer = new SimpleRenderer({
   symbol: new SimpleFillSymbol({
-    color: "#1E90FF",
-    style: "solid",
+    color: "#808080",
+    style: "forward-diagonal",
     outline: {
       // autocasts as new SimpleLineSymbol()
       color: [110, 110, 110],
-      width: 0.7,
+      width: 1,
     },
   }),
 });
@@ -1916,9 +1916,9 @@ export const lotGroupLayer = new GroupLayer({
   visible: true,
   visibilityMode: "independent",
   layers: [
+    lotLayer,
     optimizedLots_passengerLineLayer,
     studiedLots_optimizationLayer,
-    lotLayer,
     tunnelAffectedLotLayer,
     pnrLayer,
     accessibleLotAreaLayer,
