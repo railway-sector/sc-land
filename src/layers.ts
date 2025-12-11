@@ -15,6 +15,7 @@ import {
   SimpleMarkerSymbol,
   LineSymbol3D,
   PathSymbol3DLayer,
+  WebStyleSymbol,
 } from "@arcgis/core/symbols";
 import SolidEdges3D from "@arcgis/core/symbols/edges/SolidEdges3D";
 import CustomContent from "@arcgis/core/popup/content/CustomContent";
@@ -710,7 +711,6 @@ export const lotLayer = new FeatureLayer({
 });
 
 /* Optmized lots for NSCR-Ex Passenger Line */
-
 const optimizedLotRenderer = new SimpleRenderer({
   symbol: new SimpleFillSymbol({
     color: "#808080",
