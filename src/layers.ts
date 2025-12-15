@@ -717,8 +717,8 @@ const optimizedLotRenderer = new SimpleRenderer({
     style: "diagonal-cross",
     outline: {
       // autocasts as new SimpleLineSymbol()
-      color: [110, 110, 110],
-      width: 1.5,
+      color: [0, 255, 255, 1], //[110, 110, 110],
+      width: "4px",
     },
   }),
 });
