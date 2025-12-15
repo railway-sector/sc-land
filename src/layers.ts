@@ -709,7 +709,7 @@ export const lotLayer = new FeatureLayer({
     mode: "on-the-ground",
   },
 });
-
+// // //
 /* Optmized lots for NSCR-Ex Passenger Line */
 const optimizedLotRenderer = new SimpleRenderer({
   symbol: new SimpleFillSymbol({
