@@ -751,8 +751,8 @@ const studiedLotRenderer = new SimpleRenderer({
     style: "horizontal",
     outline: {
       // autocasts as new SimpleLineSymbol()
-      color: [110, 110, 110],
-      width: 1,
+      color: "#DF73FF", //[110, 110, 110],
+      width: "6px",
     },
   }),
 });
