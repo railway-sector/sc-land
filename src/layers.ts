@@ -240,6 +240,27 @@ export const prowLayer = new FeatureLayer({
 });
 // prowLayer.listMode = "hide";
 
+/* ROW Layer version 7.1.6 */
+var prowoldRenderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#DF00FF",
+    width: "2px",
+    // style: "long-dash-dot",
+  }),
+});
+
+export const prowLayerold = new FeatureLayer({
+  portalItem: {
+    id: "84ba987eed264fe9b18938000ddf702d",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  title: "SC Alignment 7.1.6",
+  popupEnabled: false,
+  renderer: prowoldRenderer,
+});
+
 /* Meralco site 1 additioinal PROW Layer */
 
 export const meralco_site1_prowLayer = new FeatureLayer({
@@ -1902,6 +1923,7 @@ export const alignmentGroupLayer = new GroupLayer({
     substationLayer,
     scFutureTrackLayer,
     meralco_site1_prowLayer,
+    prowLayerold,
     prowLayer,
   ],
 }); //map.add(alignmentGroupLayer, 0);
