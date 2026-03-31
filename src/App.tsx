@@ -4,7 +4,6 @@ import IdentityManager from "@arcgis/core/identity/IdentityManager";
 import Portal from "@arcgis/core/portal/Portal";
 import { MyContext } from "./contexts/MyContext";
 import MapDisplay from "./components/MapDisplay";
-import { superurgent_items } from "./uniqueValues";
 import ActionPanel from "./components/ActionPanel";
 import Header from "./components/Header";
 import MainChart from "./components/MainChart";
@@ -13,7 +12,7 @@ export function App(): React.JSX.Element {
   const [loggedInState, setLoggedInState] = useState<boolean>(false);
   useEffect(() => {
     const info = new OAuthInfo({
-      appId: "48xyFWCr20nwRSXv",
+      appId: "AY0soYzKroa8akoy",
       popup: false,
       portalUrl: "https://gis.railway-sector.com/portal",
     });
@@ -42,18 +41,15 @@ export function App(): React.JSX.Element {
   const [municipals, setMunicipals] = useState<any>();
   const [barangays, setBarangays] = useState<any>();
   const [statusdatefield, setStatusdatefield] = useState<any>();
-  const [superurgenttype, setSuperurgenttype] = useState<any>(
-    superurgent_items[0],
-  );
   const [datefields, setDatefields] = useState<any>();
   const [timesliderstate, setTimesliderstate] = useState<boolean>(false);
   const [asofdate, setAsofdate] = useState<any>();
   const [latestasofdate, setLatestasofdate] = useState<any>();
-  const [dateforhandedover, setDateforhandedover] = useState<any>();
   const [handedoverDatefield, setHandedoverDatefield] = useState<any>();
   const [handedoverAreafield, setHandedoverAreafield] = useState<any>();
-  const [affectedAreafield, setAffectedAreafield] = useState<any>();
+  const [newAffectedAreafield, setNewAffectedAreafield] = useState<any>();
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
+  const [newHandedOverfield, setNewHandedOverfield] = useState<any>();
 
   const updateMunicipals = (newMunicipal: any) => {
     setMunicipals(newMunicipal);
@@ -65,10 +61,6 @@ export function App(): React.JSX.Element {
 
   const updateStatusdatefield = (newStatusfield: any) => {
     setStatusdatefield(newStatusfield);
-  };
-
-  const updateSuperurgenttype = (newSuperurgenttype: any) => {
-    setSuperurgenttype(newSuperurgenttype);
   };
 
   const updateDatefields = (newDateFields: any) => {
@@ -87,10 +79,6 @@ export function App(): React.JSX.Element {
     setLatestasofdate(newAsofdate);
   };
 
-  const updateDateforhandedover = (newDate: any) => {
-    setDateforhandedover(newDate);
-  };
-
   const updateHandedoverDatefield = (newDatefield: any) => {
     setHandedoverDatefield(newDatefield);
   };
@@ -99,12 +87,16 @@ export function App(): React.JSX.Element {
     setHandedoverAreafield(newAreafield);
   };
 
-  const updateAffectedAreafield = (newAreafield: any) => {
-    setAffectedAreafield(newAreafield);
+  const updateNewAffectedAreafield = (newAreafield: any) => {
+    setNewAffectedAreafield(newAreafield);
   };
 
   const updateChartPanelwidth = (newWidth: any) => {
     setChartPanelwidth(newWidth);
+  };
+
+  const updateNewHandedOverfield = (newHandedOverfield: any) => {
+    setNewHandedOverfield(newHandedOverfield);
   };
 
   return (
@@ -123,29 +115,27 @@ export function App(): React.JSX.Element {
               municipals,
               barangays,
               statusdatefield,
-              superurgenttype,
               datefields,
               timesliderstate,
               asofdate,
               latestasofdate,
-              dateforhandedover,
               handedoverDatefield,
               handedoverAreafield,
-              affectedAreafield,
+              newAffectedAreafield,
               chartPanelwidth,
+              newHandedOverfield,
               updateMunicipals,
               updateBarangays,
               updateStatusdatefield,
-              updateSuperurgenttype,
               updateDatefields,
               updateTimesliderstate,
               updateAsofdate,
               updateLatestasofdate,
-              updateDateforhandedover,
               updateHandedoverDatefield,
               updateHandedoverAreafield,
-              updateAffectedAreafield,
+              updateNewAffectedAreafield,
               updateChartPanelwidth,
+              updateNewHandedOverfield,
             }}
           >
             <MainChart />

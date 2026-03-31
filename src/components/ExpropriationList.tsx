@@ -13,7 +13,7 @@ import "@esri/calcite-components/components/calcite-chip-group";
 import "@esri/calcite-components/components/calcite-avatar";
 import "@esri/calcite-components/components/calcite-action-bar";
 
-import { chart_width, lotStatusField, statusLotNumber } from "../uniqueValues";
+import { chart_width, lotStatusField, lotStatusQuery } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 
 import "../index.css";
@@ -51,7 +51,7 @@ const ExpropriationList = () => {
   const { municipals, barangays } = use(MyContext);
 
   // Obtain Status number for 'For Expropriation'
-  const find = statusLotNumber.filter((e) =>
+  const find = lotStatusQuery.filter((e: any) =>
     e.category.includes("Expropriation"),
   );
   const statusExproValue = find[0]?.value;

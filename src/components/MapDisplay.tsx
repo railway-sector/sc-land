@@ -10,14 +10,16 @@ import "@esri/calcite-components/components/calcite-navigation-logo";
 import type { ArcgisScene } from "@arcgis/map-components/components/arcgis-scene";
 import {
   structureLayer,
-  pierAccessLayer,
   stationLayer,
   alignmentGroupLayer,
   nloLoOccupancyGroupLayer,
   lotGroupLayer,
-  ngcp2_groupLayer,
   lotLayer,
-  lotLayerRenderer,
+  ngcp7_groupLayer,
+  ngcp6_groupLayer,
+  somco_fense_layer,
+  handedOverLotLayer,
+  pierAccessLayer,
 } from "../layers";
 import { use, useEffect } from "react";
 import type { ArcgisSearch } from "@arcgis/map-components/components/arcgis-search";
@@ -28,7 +30,8 @@ export default function MapDisplay() {
     updateDatefields,
     updateStatusdatefield,
     updateHandedoverAreafield,
-    updateAffectedAreafield,
+    updateNewAffectedAreafield,
+    updateNewHandedOverfield,
   } = use(MyContext);
 
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
@@ -65,22 +68,26 @@ export default function MapDisplay() {
       updateDatefields(date_fields);
       updateStatusdatefield(latest_date);
       updateHandedoverAreafield(`${latest_date}_HOA`);
-      updateAffectedAreafield(`${latest_date}_TAA`);
+      updateNewAffectedAreafield(`${latest_date}_TAA`);
+      updateNewHandedOverfield(`${latest_date}_HO`);
 
       // Default lot layer renderer
-      lotLayerRenderer.field = latest_date;
-      lotLayer.renderer = lotLayerRenderer;
+      // lotLayerRenderer.field = latest_date;
+      // lotLayer.renderer = lotLayerRenderer;
     });
   }, []);
 
   arcgisScene?.viewOnReady(() => {
     arcgisScene?.map?.add(pierAccessLayer);
     arcgisScene?.map?.add(lotGroupLayer);
-    arcgisScene?.map?.add(ngcp2_groupLayer);
+    arcgisScene?.map?.add(ngcp7_groupLayer);
+    arcgisScene?.map?.add(ngcp6_groupLayer);
     arcgisScene?.map?.add(structureLayer);
     arcgisScene?.map?.add(nloLoOccupancyGroupLayer);
     arcgisScene?.map?.add(alignmentGroupLayer);
     arcgisScene?.map?.add(stationLayer);
+    arcgisScene?.map?.add(somco_fense_layer);
+    arcgisScene?.map?.add(handedOverLotLayer);
 
     // Search components
     const sources: any = [

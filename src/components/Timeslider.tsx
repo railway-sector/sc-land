@@ -11,9 +11,9 @@ export default function Timeslider() {
     latestasofdate,
     updateTimesliderstate,
     updateAsofdate,
-    updateDateforhandedover,
     updateHandedoverAreafield,
-    updateAffectedAreafield,
+    updateNewAffectedAreafield,
+    updateNewHandedOverfield,
   } = use(MyContext);
   const arcgisScene = document.querySelector("arcgis-scene");
 
@@ -64,9 +64,6 @@ export default function Timeslider() {
           });
           updateAsofdate(`${c_month} ${day}, ${year}`);
 
-          // Date for filtering handed-over lots number
-          updateDateforhandedover(`${year}-${month}-${day}`);
-
           const yyyy0mdd = `x${year}0${month}${day}`;
           const yyyymmdd = `x${year}${month}${day}`;
 
@@ -84,7 +81,12 @@ export default function Timeslider() {
           // Updating Affected-Area field:
           const new_affectedarea_field =
             month <= 9 ? `${yyyy0mdd}_TAA` : `${yyyymmdd}_TAA`;
-          updateAffectedAreafield(new_affectedarea_field);
+          updateNewAffectedAreafield(new_affectedarea_field);
+
+          // Updating Haned-Over field
+          const new_handedover_field =
+            month <= 9 ? `${yyyy0mdd}_HO` : `${yyyymmdd}_HO`;
+          updateNewHandedOverfield(new_handedover_field);
         }
       },
     );

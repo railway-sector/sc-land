@@ -1,14 +1,30 @@
 import Collection from "@arcgis/core/core/Collection";
 import ActionButton from "@arcgis/core/support/actions/ActionButton";
 
-// Chart width
+// month
+export const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+// Media parameters
+export const image_scales = [1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4];
+export const img_size = 280;
+export const timestamp_field = "timestamp";
+
+// chart width
 export const chart_width = "26vw";
 export const chart_box_width = 250;
-
-// Pier Workable properties
-export const color_workable = "#38A800";
-export const color_nonworkable = "#FF0000";
-export const color_completed = "#0070ff";
 
 // Updated Dates
 export const updatedDateCategoryNames = [
@@ -18,31 +34,30 @@ export const updatedDateCategoryNames = [
 ];
 export const cutoff_days = 30;
 
-// Lot Status
-export const superUrgentField = "Urgent";
-export const querySuperUrgent = `${superUrgentField} = 0`;
-export const superurgent_items = ["OFF", "ON"];
-// export const superUrgentProperty = []
-
+// Lot fields definitions
 export const lotHandOverDateField = "HandOverDate";
 export const lotTargetActualField = "TargetActual";
 export const lotTargetActualDateField = "TargetActualDate";
 
-// Handed Over Date and Handed Over Area
 export const lotIdField = "LotID";
-export const percentHandedOverField = "percentHandedOver";
+export const lotPriorityField = "Priority1_1";
+export const lotStatusField = "StatusLA";
 export const municipalityField = "Municipality";
 export const barangayField = "Barangay";
 export const landOwnerField = "LandOwner";
 export const cpField = "CP";
 export const landUseField = "LandUse";
 export const endorsedField = "Endorsed";
-export const handedOverLotField = "HandedOver";
+export const lotHandedOverField = "HandedOver";
 export const lotHandedOverDateField = "HandedOverDate";
 export const lotHandedOverAreaField = "HandedOverArea";
-export const lotStatusField = "StatusLA";
+export const percentHandedOverField = "percentHandedOver";
+export const tunnelAffectLotField = "TunnelAffected";
 export const affectedAreaField = "AffectedArea";
-export const statusLotLabel = [
+
+// Lot Status
+
+export const lotStatusLabel = [
   "Paid",
   "For Payment Processing",
   "For Legal Pass",
@@ -50,18 +65,10 @@ export const statusLotLabel = [
   "For Notice of Taking",
   "With PTE",
   "For Expropriation",
-  "Harmonized/Optimized",
+  "Optimized",
 ];
 
-export const statusLotNumber = statusLotLabel.map((stat, index) => {
-  return Object.assign({
-    category: stat,
-    value: index + 1,
-  });
-});
-
-// export const statusLotColor = ['#00734d', '#0070ff', '#ffff00', '#ffaa00', '#ff0000'];
-export const statusLotColor = [
+export const lotStatusColor = [
   "#00734d",
   "#0070ff",
   "#ffff00",
@@ -71,34 +78,34 @@ export const statusLotColor = [
   "#FF0000",
   "#B2B2B2",
 ];
-
-export const statusLotQuery = statusLotLabel.map((status, index) => {
+export const lotStatusQuery = lotStatusLabel.map((status, index) => {
   return Object.assign({
     category: status,
     value: index + 1,
-    color: statusLotColor[index],
+    color: lotStatusColor[index],
   });
 });
 
-// Permit to Enter for lot
-export const lotPteField = "PTE";
+export const lotUseArray = [
+  "Agricultural",
+  "Agricultural & Commercial",
+  "Agricultural / Residential",
+  "Commercial",
+  "Industrial",
+  "Irrigation",
+  "Residential",
+  "Road",
+  "Road Lot",
+  "Special Exempt",
+];
 
-// Endorsed Lot
-export const statusLotEndorsedLabel = ["Not Endorsed", "Endorsed", "NA"];
-export const statusLotEndorsedColor = ["#ff0000", "#006eff", "#d3d3d3"];
-export const statusLotEndorsedQuery = statusLotEndorsedLabel.map(
-  (status, index) => {
-    return Object.assign({
-      category: status,
-      value: index,
-      color: statusLotEndorsedColor[index],
-    });
-  },
-);
+// Lot Endorsed
+export const endorsedStatus = ["Not Endorsed", "Endorsed", "NA"];
 
 // Structure
 export const structureStatusField = "StatusStruc";
-export const statusStructureLabel = [
+export const structureIdField = "StrucID";
+export const structureStatusLabel = [
   "Demolished",
   "Paid",
   "For Payment Processing",
@@ -108,32 +115,32 @@ export const statusStructureLabel = [
   "No Need to Acquire",
 ];
 
-export const statusStructureColorHex = [
+export const structureStatusColorHex = [
   "#00C5FF",
   "#70AD47",
   "#0070FF",
   "#FFFF00",
   "#FFAA00",
-  "#FF5733", //'#FF0000',
+  "#FF5733",
   "#B2BEB5",
 ];
-export const statusStructureColorRgb = [
+export const structureStatusColorRgb = [
   [0, 197, 255, 0.6],
   [112, 173, 71, 0.6],
   [0, 112, 255, 0.6],
   [255, 255, 0, 0.6],
   [255, 170, 0, 0.6],
-  [255, 87, 51, 0.6], //[255, 0, 0, 0.6],
+  [255, 83, 73, 0.6],
   [178, 190, 181, 0.6],
 ];
 
-export const statusStructureQuery = statusStructureLabel.map(
+export const structureStatusQuery = structureStatusLabel.map(
   (status, index) => {
     return Object.assign({
       category: status,
       value: index + 1,
-      colorLayer: statusStructureColorRgb[index],
-      color: statusStructureColorHex[index],
+      colorLayer: structureStatusColorRgb[index],
+      color: structureStatusColorHex[index],
     });
   },
 );
@@ -141,20 +148,33 @@ export const statusStructureQuery = statusStructureLabel.map(
 // Permit to Enter for structure
 export const structurePteField = "PTE";
 
+// Structure MOA
+export const structureMoaField = "MoA";
+export const structureMoaStatus = [
+  "For Negotiation",
+  "Expropriation",
+  "Donation",
+  "No Need to Acquire",
+];
+
+export const structureMoaQuery = structureMoaStatus.map((status, index) => {
+  return Object.assign({
+    category: status,
+    value: index + 1,
+  });
+});
+
 // NLO
-export const occupancyField = "Occupancy";
-export const nloLoStatusField = "Status";
-export const structureIdField = "StrucID";
 export const nloStatusField = "StatusRC";
-export const statusNloLabel = [
+export const nloStatusLabel = [
   "Relocated",
   "Paid",
   "For Payment Processing",
   "For Legal Pass",
   "For Appraisal/OtC/Requirements for Other Entitlements",
-  "LBP Account Opening",
+  "For Notice of Taking",
 ];
-export const statusNloColor = [
+export const nloStatusColor = [
   "#00C5FF",
   "#70AD47",
   "#0070FF",
@@ -163,7 +183,7 @@ export const statusNloColor = [
   "#FF0000",
 ];
 
-export const statusNloSymbolRef = [
+export const nloStatusSymbolRef = [
   "https://EijiGorilla.github.io/Symbols/3D_Web_Style/ISF/ISF_Relocated.svg",
   "https://EijiGorilla.github.io/Symbols/3D_Web_Style/ISF/ISF_Paid.svg",
   "https://EijiGorilla.github.io/Symbols/3D_Web_Style/ISF/ISF_PaymentProcess.svg",
@@ -172,24 +192,26 @@ export const statusNloSymbolRef = [
   "https://EijiGorilla.github.io/Symbols/3D_Web_Style/ISF/ISF_LBP.svg",
 ];
 
-export const statusNloQuery = statusNloLabel.map((status, index) => {
+export const nloStatusQuery = nloStatusLabel.map((status, index) => {
   return Object.assign({
     category: status,
     value: index + 1,
-    color: statusNloColor[index],
+    color: nloStatusColor[index],
   });
 });
 
 // Structure Ownership
-export const statusStructureOwnershipLabel = ["LO (Land Owner)", "Households"];
-export const statusStructureOwnershipColor = [
+export const structureOwnershipStatusField = "Status";
+export const structureOwnershipStatusLabel = ["LO (Land Owner)", "Households"];
+export const structureOwnershipColor = [
   [128, 128, 128, 1],
   [128, 128, 128, 1],
 ];
 
 // Structure Occupancy
-export const statusStructureOccupancyLabel = ["Occupied", "Relocated"];
-export const statusStructureOccupancyRef = [
+export const structureOccupancyStatusField = "Occupancy";
+export const structureOccupancyStatusLabel = ["Occupied", "Relocated"];
+export const structureOccupancyRef = [
   "https://EijiGorilla.github.io/Symbols/Demolished.png",
   "https://EijiGorilla.github.io/Symbols/DemolishComplete_v2.png",
 ];
@@ -206,8 +228,12 @@ export const pierAccessValueDateColor = [
   [0, 255, 0, 0.9], // Accessible
   [255, 255, 255, 0.9], // Dates are missing
 ];
+
 export const pierAccessStatusField = "AccessStatus";
 export const pierAccessBatchField = "BatchNo";
+
+// Handed Over Date and Handed Over Area
+export const handedOverLotField = "HandedOver";
 
 // Chart and chart label color
 export const primaryLabelColor = "#9ca3af";
@@ -217,42 +243,80 @@ export const valueLabelColor = "#d1d5db";
 export async function defineActions(event: any) {
   const { item } = event;
 
-  if (item.title === "Sapang Balen River Realignment") {
+  // NGCP Site 6
+  if (item.title === "Proposed Pole Working Areas") {
     item.actionsSections = new Collection([
       new Collection([
         new ActionButton({
           title: "Zoom to Area",
           icon: "zoom-in-fixed",
-          id: "full-extent-sapangbalenriver",
+          id: "full-extent-ngcpwa6",
         }),
       ]),
     ]);
   }
 
-  if (item.title === "NGCP Pole Relocation Working Area") {
+  if (item.title === "Proposed/Recorded NGCP Lines") {
     item.actionsSections = new Collection([
       new Collection([
         new ActionButton({
           title: "Zoom to Area",
           icon: "zoom-in-fixed",
-          id: "full-extent-ngcpwa",
+          id: "full-extent-ngcpline6",
         }),
       ]),
     ]);
   }
 
-  if (item.title === "NGCP Pole Relocation Tagged Structures") {
+  if (item.title === "Proposed Pole Relocation") {
     item.actionsSections = new Collection([
       new Collection([
         new ActionButton({
           title: "Zoom to Area",
           icon: "zoom-in-fixed",
-          id: "full-extent-ngcptagged",
+          id: "full-extent-ngcppolerelo6",
         }),
       ]),
     ]);
+  }
 
-    // highlightLot(ngcp_tagged_structureLayer);
+  // NGCP Site 7
+  // if (item.title === "Proposed Pole Working Areas") {
+  //   item.actionsSections = new Collection([
+  //     new Collection([
+  //       new ActionButton({
+  //         title: "Zoom to Area",
+  //         icon: "zoom-in-fixed",
+  //         id: "full-extent-ngcpwa7",
+  //       }),
+  //     ]),
+  //   ]);
+
+  //   // highlightLot(ngcp_tagged_structureLayer);
+  // }
+
+  if (item.title === "Proposed/Recorded NGCP Lines") {
+    item.actionsSections = new Collection([
+      new Collection([
+        new ActionButton({
+          title: "Zoom to Area",
+          icon: "zoom-in-fixed",
+          id: "full-extent-ngcpline7",
+        }),
+      ]),
+    ]);
+  }
+
+  if (item.title === "Proposed Pole Relocation") {
+    item.actionsSections = new Collection([
+      new Collection([
+        new ActionButton({
+          title: "Zoom to Area",
+          icon: "zoom-in-fixed",
+          id: "full-extent-ngcppolerelo7",
+        }),
+      ]),
+    ]);
   }
 
   if (item.layer.type !== "group") {
@@ -262,20 +326,34 @@ export async function defineActions(event: any) {
     };
   }
 
+  // if (item.title === "Super Urgent Lot") {
+  //   // highlightLot(superUrgentLotLayer);
+  // } else if (item.title === "Handed-Over (public + private)") {
+  //   // highlightLot(handedOverLotLayer);
+  // } else if (item.title === "Tunnel Affected") {
+  //   highlightLot(tunnelAffectedLotLayer, arcgisScene);
+  // }
+
   item.title === "Chainage" ||
-  item.title === "Pier Head/Column" ||
+  item.title === "SC Alignment 7.1.6" ||
+  item.title === "SC Alignment 3.9.3" ||
+  item.title === "Substation" ||
+  item.title === "Future Track" ||
   item.title === "Households Ownership (Structure)" ||
-  // item.title === 'Super Urgent Lot' ||
-  item.title === "Land Acquisition (Endorsed Status)" ||
+  item.title === "Super Urgent Lot" ||
   item.title === "Handed-Over (public + private)" ||
+  item.title === "For Land Optimization" ||
+  item.title === "Tunnel Affected" ||
+  item.title ===
+    "Candidate Lots of NSCR-Ex Passenger & Freight Line for Optimization" ||
+  item.title === "Optimized Lots with Issued Notice of Taking" ||
   item.title === "Structure" ||
-  item.title === "NGCP Pole Relocation Working Area" ||
-  item.title === "NGCP Pole Relocation Tagged Structures" ||
   item.title === "Households" ||
   item.title === "Occupancy (Structure)" ||
-  item.title === "Handed-Over Area" ||
-  item.title ===
-    "Candidate Lots of NSCR-Ex Passenger & Freight Line for Optimization"
+  item.title === "Proposed Pole Working Areas" ||
+  item.title === "Proposed/Recorded NGCP Lines" ||
+  item.title === "Proposed Pole Relocation" ||
+  item.title === "Handed-Over Area"
     ? (item.visible = false)
     : (item.visible = true);
 }

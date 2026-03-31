@@ -15,7 +15,7 @@ import "../index.css";
 import {
   cutoff_days,
   primaryLabelColor,
-  statusStructureQuery,
+  structureStatusQuery,
   structureStatusField,
   updatedDateCategoryNames,
   valueLabelColor,
@@ -77,7 +77,6 @@ const StructureChart = () => {
 
   useEffect(() => {
     queryLayersExpression({
-      superurgenttype: undefined,
       municipal: municipals,
       barangay: barangays,
       arcgisScene: arcgisScene,
@@ -158,7 +157,7 @@ const StructureChart = () => {
       pieInnerLabelFontSize: new_pieInnerLabelFontSize,
       pieInnerValueFontSize: new_pieInnerValueFontSize,
       layer: structureLayer,
-      statusArray: statusStructureQuery,
+      statusArray: structureStatusQuery,
     });
 
     return () => {

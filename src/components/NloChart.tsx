@@ -16,7 +16,7 @@ import {
   cutoff_days,
   nloStatusField,
   primaryLabelColor,
-  statusNloQuery,
+  nloStatusQuery,
   updatedDateCategoryNames,
   valueLabelColor,
 } from "../uniqueValues";
@@ -166,7 +166,7 @@ const NloChart = memo(() => {
       pieInnerLabelFontSize: new_pieInnerLabelFontSize,
       pieInnerValueFontSize: new_pieInnerValueFontSize,
       layer: nloLayer,
-      statusArray: statusNloQuery,
+      statusArray: nloStatusQuery,
     });
 
     return () => {

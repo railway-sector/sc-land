@@ -162,7 +162,7 @@ const HandedOverAreaChart = memo(() => {
       <div
         id={chartID}
         style={{
-          height: "35vh",
+          height: "55vh",
           width: "30%",
           backgroundColor: "#2b2b2b",
           color: "white",

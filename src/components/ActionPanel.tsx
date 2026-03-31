@@ -10,15 +10,18 @@ import "@arcgis/map-components/components/arcgis-legend";
 import "@arcgis/map-components/components/arcgis-direct-line-measurement-3d";
 import "@arcgis/map-components/components/arcgis-area-measurement-3d";
 import { defineActions } from "../uniqueValues";
-import {
-  ngcp_tagged_structureLayer,
-  ngcp_working_area,
-  prowOthersLayer,
-} from "../layers";
+
 import HandedOverAreaChart from "./HandedOverAreaChart";
 import { MyContext } from "../contexts/MyContext";
 import { updateLotSymbology } from "../Query";
 import Timeslider from "./Timeslider";
+import {
+  ngcp_line6,
+  ngcp_line7,
+  ngcp_pole6,
+  ngcp_pole7,
+  ngcp_working_area6,
+} from "../layers";
 
 function ActionPanel() {
   const {
@@ -193,38 +196,45 @@ function ActionPanel() {
             show-filter
             filter-placeholder="Filter layers"
             listItemCreatedFunction={defineActions}
-            onarcgisTriggerAction={(event: any) => {
+            onarcgisTriggerAction={(event) => {
               const { id } = event.detail.action;
-              if (id === "full-extent-ngcpwa") {
-                if (ngcp_working_area.fullExtent) {
+              if (id === "full-extent-ngcpwa6") {
+                ngcp_working_area6.fullExtent &&
                   arcgisScene
-                    ?.goTo(ngcp_working_area.fullExtent)
-                    .catch((error: any) => {
-                      if (error.name !== "AbortError") {
-                        console.error(error);
-                      }
-                    });
-                }
-              } else if (id === "full-extent-ngcptagged") {
-                if (ngcp_tagged_structureLayer.fullExtent) {
-                  arcgisScene
-                    ?.goTo(ngcp_tagged_structureLayer.fullExtent)
+                    ?.goTo(ngcp_working_area6.fullExtent)
                     .catch((error) => {
                       if (error.name !== "AbortError") {
                         console.error(error);
                       }
                     });
-                }
-              } else if (id === "full-extent-sapangbalenriver") {
-                if (prowOthersLayer.fullExtent) {
-                  arcgisScene
-                    ?.goTo(prowOthersLayer.fullExtent)
-                    .catch((error) => {
-                      if (error.name !== "AbortError") {
-                        console.error(error);
-                      }
-                    });
-                }
+              } else if (id === "full-extent-ngcpline6") {
+                ngcp_line6.fullExtent &&
+                  arcgisScene?.goTo(ngcp_line6.fullExtent).catch((error) => {
+                    if (error.name !== "AbortError") {
+                      console.error(error);
+                    }
+                  });
+              } else if (id === "full-extent-ngcpline7") {
+                ngcp_line7.fullExtent &&
+                  arcgisScene?.goTo(ngcp_line7.fullExtent).catch((error) => {
+                    if (error.name !== "AbortError") {
+                      console.error(error);
+                    }
+                  });
+              } else if (id === "full-extent-ngcppolerelo6") {
+                ngcp_pole6.fullExtent &&
+                  arcgisScene?.goTo(ngcp_pole6.fullExtent).catch((error) => {
+                    if (error.name !== "AbortError") {
+                      console.error(error);
+                    }
+                  });
+              } else if (id === "full-extent-ngcppolerelo7") {
+                ngcp_pole7.fullExtent &&
+                  arcgisScene?.goTo(ngcp_pole7.fullExtent).catch((error) => {
+                    if (error.name !== "AbortError") {
+                      console.error(error);
+                    }
+                  });
               }
             }}
           ></arcgis-layer-list>

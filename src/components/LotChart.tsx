@@ -5,7 +5,6 @@ import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
 import {
-  affectedAreaValue,
   chartRenderer,
   dateUpdate,
   generateAffectedAreaForPie,
@@ -14,21 +13,17 @@ import {
   generateLotData,
   generateLotNumber,
   generateTotalAffectedArea,
-  highlightLot,
-  highlightRemove,
   queryLayersExpression,
   thousands_separators,
 } from "../Query";
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
 import "@esri/calcite-components/dist/components/calcite-checkbox";
-
 import {
   cutoff_days,
   lotStatusField,
+  lotStatusQuery,
   primaryLabelColor,
-  statusLotQuery,
-  superurgent_items,
   updatedDateCategoryNames,
   valueLabelColor,
 } from "../uniqueValues";
@@ -54,16 +49,13 @@ const LotChart = () => {
     municipals,
     barangays,
     statusdatefield,
-    superurgenttype,
-    updateSuperurgenttype,
     timesliderstate,
     updateAsofdate,
     asofdate,
     updateLatestasofdate,
-    updateDateforhandedover,
-    dateforhandedover,
     handedoverAreafield,
-    affectedAreafield,
+    newAffectedAreafield,
+    newHandedOverfield,
     chartPanelwidth,
     updateChartPanelwidth,
   } = use(MyContext);
@@ -78,9 +70,9 @@ const LotChart = () => {
       // Default latest date for handed over
       const latest_date = response[0][2];
       updateLatestasofdate(latest_date);
-      updateDateforhandedover(
-        `${latest_date.getFullYear()}-${latest_date.getMonth() + 1}-${latest_date.getDate()}`,
-      );
+      // updateDateforhandedover(
+      //   `${latest_date.getFullYear()}-${latest_date.getMonth() + 1}-${latest_date.getDate()}`,
+      // );
 
       // For calculating the number of days passed since the latest date
       setDaysPass(response[0][1] >= cutoff_days ? true : false);
@@ -93,7 +85,6 @@ const LotChart = () => {
   const new_fontSize = chartPanelwidth / 22.3;
   const new_valueSize = new_fontSize * 1.55;
   const new_imageSize = chartPanelwidth * 0.03;
-  const new_sementedListSize = chartPanelwidth * 0.55;
   const new_asofDateSize = chartPanelwidth * 0.032;
   const new_pieSeriesScale = 220;
   const new_pieInnerValueFontSize = "1.1rem";
@@ -122,14 +113,6 @@ const LotChart = () => {
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
 
   useEffect(() => {
-    if (superurgenttype === superurgent_items[1]) {
-      highlightLot(lotLayer, arcgisScene);
-    } else {
-      highlightRemove();
-    }
-  }, [superurgenttype]);
-
-  useEffect(() => {
     if (handedOverCheckBox === true) {
       handedOverLotLayer.visible = true;
     } else {
@@ -143,87 +126,64 @@ const LotChart = () => {
     // statusdatefield is not
     if (statusdatefield) {
       queryLayersExpression({
-        superurgenttype: superurgenttype,
         municipal: municipals,
         barangay: barangays,
         arcgisScene: arcgisScene,
         timesliderstate: timesliderstate,
       });
 
-      generateLotData(
-        superurgenttype,
-        municipals,
-        barangays,
-        statusdatefield,
-      ).then((result) => {
+      generateLotData(municipals, barangays, statusdatefield).then((result) => {
         setLotData(result);
       });
 
       // Lot number
-      generateLotNumber(
-        superurgenttype,
-        municipals,
-        barangays,
-        statusdatefield,
-      ).then((response: any) => {
-        setLotNumber(response);
-      });
+      generateLotNumber(municipals, barangays, statusdatefield).then(
+        (response: any) => {
+          setLotNumber(response);
+        },
+      );
 
       // total affected areas for pie chart
-      generateAffectedAreaForPie(
-        superurgenttype,
-        municipals,
-        barangays,
-        statusdatefield,
-      ).then((response: any) => {
-        setAffectAreaPie(response);
-      });
+      generateAffectedAreaForPie(municipals, barangays, statusdatefield).then(
+        (response: any) => {
+          setAffectAreaPie(response);
+        },
+      );
 
       // total affected area for
       generateTotalAffectedArea(
-        superurgenttype,
         municipals,
         barangays,
-        affectedAreafield,
+        newAffectedAreafield,
       ).then((response: any) => {
         setTotalAffectedArea(response);
       });
 
-      // Handed Over
+      // // Handed Over
       generateHandedOverLotsNumber(
-        superurgenttype,
         municipals,
         barangays,
-        dateforhandedover,
+        newHandedOverfield,
       ).then((response: any) => {
         setHandedOverNumber(response);
       });
 
-      generateHandedOverArea(
-        superurgenttype,
-        municipals,
-        barangays,
-        handedoverAreafield,
-      ).then((response) => {
-        setHandedOverArea(response);
-      });
+      generateHandedOverArea(municipals, barangays, handedoverAreafield).then(
+        (response) => {
+          setHandedOverArea(response);
+        },
+      );
     }
-  }, [
-    superurgenttype,
-    municipals,
-    barangays,
-    statusdatefield,
-    dateforhandedover,
-  ]);
+  }, [municipals, barangays, statusdatefield, newHandedOverfield]);
 
   useEffect(() => {
     // Dispose previously created root element
     maybeDisposeRoot(chartID);
-    // Define root
+
     const root = am5.Root.new(chartID);
     root.container.children.clear();
     root._logo?.dispose();
-    // Set themesf
+
     root.setThemes([
       am5themes_Animated.new(root),
       am5themes_Responsive.new(root),
@@ -243,8 +203,8 @@ const LotChart = () => {
         name: "Series",
         categoryField: "category",
         valueField: "value",
-        legendLabelText:
-          '{category}[/] ([#C9CC3F; bold]{valuePercentTotal.formatNumber("#.")}%[/]) ',
+        // legendLabelText: "{category}",
+        legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
         radius: am5.percent(45), // outer radius
         innerRadius: am5.percent(28),
       }),
@@ -278,9 +238,8 @@ const LotChart = () => {
       pieInnerLabelFontSize: new_pieInnerLabelFontSize,
       pieInnerValueFontSize: new_pieInnerValueFontSize,
       layer: lotLayer,
-      statusArray: statusLotQuery,
+      statusArray: lotStatusQuery,
     });
-    affectedAreaValue(legend, affectAreaPie);
 
     // Dispose root
     return () => {
@@ -363,48 +322,6 @@ const LotChart = () => {
         </dl>
       </div>
 
-      <div style={{ display: "flex" }}>
-        <div
-          style={{
-            marginLeft: "15px",
-            fontSize: `${new_fontSize}px`,
-            color: primaryLabelColor,
-            marginTop: "auto",
-            marginBottom: "auto",
-            marginRight: "10px",
-          }}
-        >
-          Super Urgent Lot:{" "}
-        </div>
-        <calcite-segmented-control
-          scale="s"
-          width="full"
-          style={{
-            width: `${new_sementedListSize}px`,
-            // marginRight: "80px",
-            // marginTop: "auto",
-            marginBottom: "auto",
-          }}
-          oncalciteSegmentedControlChange={(event: any) =>
-            updateSuperurgenttype(event.target.selectedItem.id)
-          }
-        >
-          {superurgenttype &&
-            superurgent_items.map((priority, index) => {
-              return (
-                <calcite-segmented-control-item
-                  {...(superurgenttype === priority ? { checked: true } : {})}
-                  key={index}
-                  value={priority}
-                  id={priority}
-                >
-                  {priority}
-                </calcite-segmented-control-item>
-              );
-            })}
-        </calcite-segmented-control>
-      </div>
-
       <div
         style={{
           color: daysPass === true ? "red" : "gray",
@@ -426,6 +343,7 @@ const LotChart = () => {
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
           marginBottom: "1%",
+          marginTop: "5%",
         }}
       ></div>
 
