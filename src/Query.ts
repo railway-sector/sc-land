@@ -303,7 +303,7 @@ export function queryStatisticsLayer({
 
     let queryWhere: any;
     if (!municipal) {
-      queryWhere = queryField;
+      queryWhere = !queryField ? "1=1" : queryField;
     } else if (municipal && !barangay) {
       queryWhere = !queryField
         ? typeExpression[0]
@@ -598,6 +598,7 @@ export async function generateHandedOverArea(
   barangay: any,
   handedoverAreafield: any,
 ) {
+  console.log(handedoverAreafield);
   const handed_over_area = new StatisticDefinition({
     onStatisticField: handedoverAreafield,
     outStatisticFieldName: "handed_over_area",

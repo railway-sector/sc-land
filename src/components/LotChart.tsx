@@ -159,7 +159,7 @@ const LotChart = () => {
         setTotalAffectedArea(response);
       });
 
-      // // Handed Over
+      // Handed Over
       generateHandedOverLotsNumber(
         municipals,
         barangays,
