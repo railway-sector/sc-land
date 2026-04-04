@@ -795,7 +795,7 @@ export const lotLayer = new FeatureLayer({
   renderer: lotLayerRenderer,
   popupTemplate: templateLot,
   title: "Land Acquisition",
-  minScale: 10000,
+  minScale: 30000,
   maxScale: 0,
   //labelsVisible: false,
   elevationInfo: {

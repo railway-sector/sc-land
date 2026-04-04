@@ -13,8 +13,9 @@ import {
   generateLotData,
   generateLotNumber,
   generateTotalAffectedArea,
-  queryLayersExpression,
+  queryDefinitionExpression,
   thousands_separators,
+  queryExpression,
 } from "../Query";
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
@@ -125,11 +126,14 @@ const LotChart = () => {
     // Ensure to execute functions below only whe
     // statusdatefield is not
     if (statusdatefield) {
-      queryLayersExpression({
-        municipal: municipals,
-        barangay: barangays,
-        arcgisScene: arcgisScene,
-        timesliderstate: timesliderstate,
+      queryDefinitionExpression({
+        queryExpression: queryExpression({
+          municipal: municipals,
+          barangay: barangays,
+        }),
+        featureLayer: [lotLayer, handedOverLotLayer],
+        timesliderstate,
+        arcgisScene,
       });
 
       generateLotData(municipals, barangays, statusdatefield).then((result) => {
@@ -174,7 +178,13 @@ const LotChart = () => {
         },
       );
     }
-  }, [municipals, barangays, statusdatefield, newHandedOverfield]);
+  }, [
+    municipals,
+    barangays,
+    statusdatefield,
+    newHandedOverfield,
+    handedoverAreafield,
+  ]);
 
   useEffect(() => {
     // Dispose previously created root element

@@ -9,7 +9,8 @@ import {
   dateUpdate,
   generateNloData,
   generateNloNumber,
-  queryLayersExpression,
+  queryDefinitionExpression,
+  queryExpression,
   thousands_separators,
 } from "../Query";
 import {
@@ -36,13 +37,8 @@ function maybeDisposeRoot(divId: any) {
 /// Draw chart
 const NloChart = memo(() => {
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
-  const {
-    municipals,
-    barangays,
-    timesliderstate,
-    chartPanelwidth,
-    updateChartPanelwidth,
-  } = use(MyContext);
+  const { municipals, barangays, chartPanelwidth, updateChartPanelwidth } =
+    use(MyContext);
 
   const new_fontSize = chartPanelwidth / 22.3;
   const new_valueSize = new_fontSize * 1.55;
@@ -80,11 +76,12 @@ const NloChart = memo(() => {
   const chartID = "nlo-chart";
 
   useEffect(() => {
-    queryLayersExpression({
-      municipal: municipals,
-      barangay: barangays,
-      arcgisScene: arcgisScene,
-      timesliderstate: timesliderstate,
+    queryDefinitionExpression({
+      queryExpression: queryExpression({
+        municipal: municipals,
+        barangay: barangays,
+      }),
+      featureLayer: [nloLayer],
     });
 
     generateNloData(municipals, barangays).then((result: any) => {

@@ -8,7 +8,8 @@ import {
   dateUpdate,
   generateStrucNumber,
   generateStructureData,
-  queryLayersExpression,
+  queryDefinitionExpression,
+  queryExpression,
   thousands_separators,
 } from "../Query";
 import "../index.css";
@@ -22,7 +23,7 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
-import { structureLayer } from "../layers";
+import { occupancyLayer, structureLayer } from "../layers";
 
 // Dispose function
 function maybeDisposeRoot(divId: any) {
@@ -38,13 +39,8 @@ function maybeDisposeRoot(divId: any) {
 /// Draw chart
 const StructureChart = () => {
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
-  const {
-    municipals,
-    barangays,
-    timesliderstate,
-    chartPanelwidth,
-    updateChartPanelwidth,
-  } = use(MyContext);
+  const { municipals, barangays, chartPanelwidth, updateChartPanelwidth } =
+    use(MyContext);
 
   // 0. Updated date
   const [asOfDate, setAsOfDate] = useState<undefined | any | unknown>(null);
@@ -76,11 +72,12 @@ const StructureChart = () => {
   const [structureNumber, setStructureNumber] = useState([]);
 
   useEffect(() => {
-    queryLayersExpression({
-      municipal: municipals,
-      barangay: barangays,
-      arcgisScene: arcgisScene,
-      timesliderstate: timesliderstate,
+    queryDefinitionExpression({
+      queryExpression: queryExpression({
+        municipal: municipals,
+        barangay: barangays,
+      }),
+      featureLayer: [structureLayer, occupancyLayer],
     });
 
     generateStructureData(municipals, barangays).then((result: any) => {

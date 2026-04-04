@@ -7,8 +7,6 @@ import {
   lotLayer,
   nloLayer,
   structureLayer,
-  handedOverLotLayer,
-  occupancyLayer,
   lotDefaultSymbol,
   uniqueValueInfosLotStatus,
 } from "./layers";
@@ -164,21 +162,12 @@ export function chartRenderer({
 
   // Disabling labels and ticksll
   pieSeries.labels.template.setAll({
-    // fill: am5.color('#ffffff'),
-    // fontSize: '0.5rem',
     visible: false,
     scale: 0,
-    // oversizedBehavior: 'wrap',
-    // maxWidth: 65,
-    // text: "{category}: [#C9CC3F; fontSize: 10px;]{valuePercentTotal.formatNumber('#.')}%[/]",
   });
 
   // pieSeries.labels.template.set('visible', true);
   pieSeries.ticks.template.setAll({
-    // fillOpacity: 0.9,
-    // stroke: am5.color('#ffffff'),
-    // strokeWidth: 0.3,
-    // strokeOpacity: 1,
     visible: false,
     scale: 0,
   });
@@ -208,20 +197,14 @@ export function chartRenderer({
   legend.labels.template.setAll({
     oversizedBehavior: "truncate",
     fill: am5.color("#ffffff"),
-    //textDecoration: "underline"
-    //width: am5.percent(200)
-    //fontWeight: "300"
   });
 
   legend.valueLabels.template.setAll({
     textAlign: "right",
-    //width: valueLabelsWidth,
     fill: am5.color("#ffffff"),
-    //fontSize: LEGEND_FONT_SIZE,
   });
 
   legend.itemContainers.template.setAll({
-    // set space between legend items
     paddingTop: 3,
     paddingBottom: 1,
   });
@@ -232,6 +215,41 @@ export function chartRenderer({
 // ****************************
 //    Dropdown Parameters
 // ****************************
+interface queryExpressionType {
+  municipal: string;
+  barangay: string;
+  queryField?: any;
+}
+export function queryExpression({
+  municipal,
+  barangay,
+  queryField,
+}: queryExpressionType) {
+  const queryMunicipality = `${municipalityField} = '${municipal}'`;
+  const queryBarangay = `${barangayField} = '${barangay}'`;
+  const queryMunicipalBarangay = `${queryMunicipality} AND ${queryBarangay}`;
+
+  let expression = "";
+  if (queryField) {
+    if (!municipal) {
+      expression = "1=1" + " AND " + queryField;
+    } else if (municipal && !barangay) {
+      expression = `${queryMunicipality} AND ${queryField}`;
+    } else if (municipal && barangay) {
+      `${queryMunicipalBarangay} AND ${queryField}`;
+    }
+  } else {
+    if (!municipal) {
+      expression = "1=1";
+    } else if (municipal && !barangay) {
+      expression = queryMunicipality;
+    } else if (municipal && barangay) {
+      expression = queryMunicipalBarangay;
+    }
+  }
+
+  return expression;
+}
 
 // Query function for lotLayer
 export const queryDropdownTypes = (municipal: any, barangay: any) => {
@@ -242,84 +260,121 @@ export const queryDropdownTypes = (municipal: any, barangay: any) => {
   return [queryMunicipality, queryMunicipalBarangay];
 };
 
-interface queryLayerExpressionType {
-  municipal: string;
-  barangay: string;
-  arcgisScene: any;
-  timesliderstate: boolean;
+interface queryDefinitionExpressionType {
+  queryExpression?: string;
+  featureLayer?:
+    | [FeatureLayer, FeatureLayer?, FeatureLayer?, FeatureLayer?, FeatureLayer?]
+    | any;
+  arcgisScene?: any;
+  timesliderstate?: boolean;
 }
-export function queryLayersExpression({
-  municipal,
-  barangay,
-  arcgisScene,
+
+export function queryDefinitionExpression({
+  queryExpression,
+  featureLayer,
   timesliderstate,
-}: queryLayerExpressionType) {
-  try {
-    const typeExpression = queryDropdownTypes(municipal, barangay);
-
-    if (!municipal) {
-      lotLayer.definitionExpression = "1=1";
-      handedOverLotLayer.definitionExpression = "1=1";
-      structureLayer.definitionExpression = "1=1";
-      nloLayer.definitionExpression = "1=1";
-      occupancyLayer.definitionExpression = "1=1";
-    } else if (municipal && !barangay) {
-      lotLayer.definitionExpression = typeExpression[0];
-      handedOverLotLayer.definitionExpression = typeExpression[0];
-      structureLayer.definitionExpression = typeExpression[0];
-      nloLayer.definitionExpression = typeExpression[0];
-      occupancyLayer.definitionExpression = typeExpression[0];
-    } else if (municipal && barangay) {
-      lotLayer.definitionExpression = typeExpression[1];
-      handedOverLotLayer.definitionExpression = typeExpression[1];
-      structureLayer.definitionExpression = typeExpression[1];
-      nloLayer.definitionExpression = typeExpression[1];
-      occupancyLayer.definitionExpression = typeExpression[1];
+  arcgisScene,
+}: queryDefinitionExpressionType) {
+  if (queryExpression) {
+    if (featureLayer) {
+      if (Array.isArray(featureLayer)) {
+        featureLayer.forEach((layer) => {
+          if (layer) {
+            layer.definitionExpression = queryExpression;
+          }
+        });
+      } else {
+        featureLayer.definitionExpression = queryExpression;
+      }
     }
+  }
 
-    if (!timesliderstate) {
-      zoomToLayer(lotLayer, arcgisScene);
-      zoomToLayer(structureLayer, arcgisScene);
-    }
-  } catch (error) {
-    console.error("Error fetching data from FeatureServer:", error);
+  if (!timesliderstate) {
+    zoomToLayer(lotLayer, arcgisScene);
+    zoomToLayer(structureLayer, arcgisScene);
   }
 }
 
-interface queryStatisticsType {
-  superurgent?: any;
-  municipal: any;
-  barangay: any;
-  queryField?: any;
-}
+//-----------------------------------------------------------
 
-export function queryStatisticsLayer({
-  municipal,
-  barangay,
-  queryField,
-}: queryStatisticsType) {
-  try {
-    const typeExpression = queryDropdownTypes(municipal, barangay);
+// interface queryLayerExpressionType {
+//   municipal: string;
+//   barangay: string;
+//   arcgisScene: any;
+//   timesliderstate: boolean;
+// }
+// export function queryLayersExpression({
+//   municipal,
+//   barangay,
+//   arcgisScene,
+//   timesliderstate,
+// }: queryLayerExpressionType) {
+//   try {
+//     const typeExpression = queryDropdownTypes(municipal, barangay);
 
-    let queryWhere: any;
-    if (!municipal) {
-      queryWhere = !queryField ? "1=1" : queryField;
-    } else if (municipal && !barangay) {
-      queryWhere = !queryField
-        ? typeExpression[0]
-        : queryField + " AND " + typeExpression[0];
-    } else if (municipal && barangay) {
-      queryWhere = !queryField
-        ? typeExpression[1]
-        : queryField + " AND " + typeExpression[1];
-    }
+//     if (!municipal) {
+//       lotLayer.definitionExpression = "1=1";
+//       handedOverLotLayer.definitionExpression = "1=1";
+//       structureLayer.definitionExpression = "1=1";
+//       nloLayer.definitionExpression = "1=1";
+//       occupancyLayer.definitionExpression = "1=1";
+//     } else if (municipal && !barangay) {
+//       lotLayer.definitionExpression = typeExpression[0];
+//       handedOverLotLayer.definitionExpression = typeExpression[0];
+//       structureLayer.definitionExpression = typeExpression[0];
+//       nloLayer.definitionExpression = typeExpression[0];
+//       occupancyLayer.definitionExpression = typeExpression[0];
+//     } else if (municipal && barangay) {
+//       lotLayer.definitionExpression = typeExpression[1];
+//       handedOverLotLayer.definitionExpression = typeExpression[1];
+//       structureLayer.definitionExpression = typeExpression[1];
+//       nloLayer.definitionExpression = typeExpression[1];
+//       occupancyLayer.definitionExpression = typeExpression[1];
+//     }
 
-    return queryWhere;
-  } catch (error) {
-    console.error("Error fetching data from FeatureServer:", error);
-  }
-}
+//     if (!timesliderstate) {
+//       zoomToLayer(lotLayer, arcgisScene);
+//       zoomToLayer(structureLayer, arcgisScene);
+//     }
+//   } catch (error) {
+//     console.error("Error fetching data from FeatureServer:", error);
+//   }
+// }
 
+// interface queryStatisticsType {
+//   superurgent?: any;
+//   municipal: any;
+//   barangay: any;
+//   queryField?: any;
+// }
+
+// export function queryStatisticsLayer({
+//   municipal,
+//   barangay,
+//   queryField,
+// }: queryStatisticsType) {
+//   try {
+//     const typeExpression = queryDropdownTypes(municipal, barangay);
+
+//     let queryWhere: any;
+//     if (!municipal) {
+//       queryWhere = !queryField ? "1=1" : queryField;
+//     } else if (municipal && !barangay) {
+//       queryWhere = !queryField
+//         ? typeExpression[0]
+//         : queryField + " AND " + typeExpression[0];
+//     } else if (municipal && barangay) {
+//       queryWhere = !queryField
+//         ? typeExpression[1]
+//         : queryField + " AND " + typeExpression[1];
+//     }
+
+//     return queryWhere;
+//   } catch (error) {
+//     console.error("Error fetching data from FeatureServer:", error);
+//   }
+// }
+//-----------------------------------------------------------
 // Change symbology of lot layer
 export function updateLotSymbology(new_date_field: any) {
   try {
@@ -349,7 +404,7 @@ export function lastDateOfMonth(date: Date) {
 export async function dateUpdate(category: any) {
   const query = dateTable.createQuery();
   const queryExpression =
-    "project = 'N2'" + " AND " + "category = '" + category + "'";
+    "project = 'SC'" + " AND " + "category = '" + category + "'";
   query.where = queryExpression; // "project = 'N2'" + ' AND ' + "category = 'Land Acquisition'";
 
   return dateTable.queryFeatures(query).then((response: any) => {
@@ -394,7 +449,7 @@ export async function generateLotData(
     query.outStatistics = [total_count];
     query.orderByFields = [statusdatefield];
     query.groupByFieldsForStatistics = [statusdatefield];
-    query.where = queryStatisticsLayer({
+    query.where = queryExpression({
       municipal: municipal,
       barangay: barangay,
       // queryField: queryField,
@@ -456,7 +511,7 @@ export async function generateLotNumber(
   const query = lotLayer.createQuery();
   query.outFields = [lotIdField, newHandedOverfield];
   query.outStatistics = [total_lot_number, total_lot_pie];
-  query.where = queryStatisticsLayer({
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
   });
@@ -482,7 +537,6 @@ export async function generateTotalAffectedArea(
   newAffectedAreafield: any,
 ) {
   // const queryField = `${affectedAreafield} IS NOT NULL`;
-  console.log(affectedAreaField);
   const total_affected_area = new StatisticDefinition({
     onStatisticField: newAffectedAreafield,
     outStatisticFieldName: "total_affected_area",
@@ -492,7 +546,7 @@ export async function generateTotalAffectedArea(
   const query = lotLayer.createQuery();
   query.outFields = [newAffectedAreafield];
   query.outStatistics = [total_affected_area];
-  query.where = queryStatisticsLayer({
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
   });
@@ -522,7 +576,7 @@ export async function generateAffectedAreaForPie(
     query.outStatistics = [total_affected_area];
     query.orderByFields = [statusdatefield];
     query.groupByFieldsForStatistics = [statusdatefield];
-    query.where = queryStatisticsLayer({
+    query.where = queryExpression({
       municipal: municipal,
       barangay: barangay,
       queryField: statusQuery,
@@ -578,7 +632,7 @@ export async function generateHandedOverLotsNumber(
   const query = lotLayer.createQuery();
   query.outStatistics = [total_handedover_lot, total_lot_N];
   query.outFields = [lotIdField, newHandedOverfield];
-  query.where = queryStatisticsLayer({
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
   });
@@ -598,7 +652,7 @@ export async function generateHandedOverArea(
   barangay: any,
   handedoverAreafield: any,
 ) {
-  console.log(handedoverAreafield);
+  //--- If returns error, check the field type is 'double' not string.
   const handed_over_area = new StatisticDefinition({
     onStatisticField: handedoverAreafield,
     outStatisticFieldName: "handed_over_area",
@@ -607,15 +661,17 @@ export async function generateHandedOverArea(
 
   const query = lotLayer.createQuery();
   query.outStatistics = [handed_over_area];
-  query.where = queryStatisticsLayer({
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
   });
 
-  return lotLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features[0].attributes;
-    const value = stats.handed_over_area;
-    return value;
+  return lotLayer?.queryFeatures(query).then((response: any) => {
+    if (response.features.length > 0) {
+      const stats = response?.features[0]?.attributes;
+      const value = stats.handed_over_area;
+      return value;
+    }
   });
 }
 
@@ -675,8 +731,7 @@ export async function generateStructureData(municipal: any, barangay: any) {
   query.orderByFields = [structureStatusField];
   query.groupByFieldsForStatistics = [structureStatusField];
 
-  query.where = queryStatisticsLayer({
-    superurgent: undefined,
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
     queryField: undefined,
@@ -732,7 +787,7 @@ export async function generateStrucNumber(municipal: any, barangay: any) {
   });
 
   const query = structureLayer.createQuery();
-  query.where = queryStatisticsLayer({
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
   });
@@ -760,7 +815,7 @@ export async function generateNloData(municipal: any, barangay: any) {
   query.outStatistics = [total_count];
   query.orderByFields = [nloStatusField];
   query.groupByFieldsForStatistics = [nloStatusField];
-  query.where = queryStatisticsLayer({
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
   });
@@ -804,7 +859,7 @@ export async function generateNloNumber(municipal: any, barangay: any) {
     statisticType: "sum",
   });
   const query = nloLayer.createQuery();
-  query.where = queryStatisticsLayer({
+  query.where = queryExpression({
     municipal: municipal,
     barangay: barangay,
   });
