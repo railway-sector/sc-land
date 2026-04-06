@@ -5,7 +5,6 @@
 import {
   dateTable,
   lotLayer,
-  nloLayer,
   structureLayer,
   lotDefaultSymbol,
   uniqueValueInfosLotStatus,
@@ -13,28 +12,18 @@ import {
 import StatisticDefinition from "@arcgis/core/rest/support/StatisticDefinition";
 import * as am5 from "@amcharts/amcharts5";
 import {
-  nloStatusLabel,
-  nloStatusQuery,
-  lotStatusLabel,
-  lotStatusQuery,
-  nloStatusField,
-  structurePteField,
-  structureStatusField,
-  structureStatusLabel,
-  structureStatusQuery,
   lotHandedOverAreaField,
   handedOverLotField,
   municipalityField,
   barangayField,
-  lotIdField,
   affectedAreaField,
   cpField,
-  lotStatusField,
 } from "./uniqueValues";
 import FeatureFilter from "@arcgis/core/layers/support/FeatureFilter";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import Query from "@arcgis/core/rest/support/Query";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
+import type { statisticsType } from "./uniqueValues";
 
 // ****************************
 //    Chart Parameters
@@ -295,85 +284,150 @@ export function queryDefinitionExpression({
   }
 }
 
-//-----------------------------------------------------------
+//---------------------------------------------//
+//           Pie Chart Data Generation         //
+//---------------------------------------------//
 
-// interface queryLayerExpressionType {
-//   municipal: string;
-//   barangay: string;
-//   arcgisScene: any;
-//   timesliderstate: boolean;
-// }
-// export function queryLayersExpression({
-//   municipal,
-//   barangay,
-//   arcgisScene,
-//   timesliderstate,
-// }: queryLayerExpressionType) {
-//   try {
-//     const typeExpression = queryDropdownTypes(municipal, barangay);
+interface pieChartStatusDataType {
+  municipal: string;
+  barangay: string;
+  layer: any;
+  statusList?: any;
+  statusColor?: any;
+  statusField?: any;
+  idField?: any;
+  valueSumField?: any;
+  queryField?: any;
+  statisticType?: statisticsType;
+}
+export async function pieChartStatusData({
+  municipal,
+  barangay,
+  layer,
+  statusList,
+  statusColor,
+  statusField,
+  valueSumField,
+  queryField,
+  statisticType,
+}: pieChartStatusDataType) {
+  //--- Main statistics
+  let statsCollect: any;
+  if (statisticType === "count") {
+    statsCollect = new StatisticDefinition({
+      onStatisticField: statusField,
+      outStatisticFieldName: "statsCollect",
+      statisticType: statisticType,
+    });
+  } else if (statisticType === "sum") {
+    statsCollect = new StatisticDefinition({
+      onStatisticField: valueSumField,
+      outStatisticFieldName: "statsCollect",
+      statisticType: statisticType,
+    });
+  }
 
-//     if (!municipal) {
-//       lotLayer.definitionExpression = "1=1";
-//       handedOverLotLayer.definitionExpression = "1=1";
-//       structureLayer.definitionExpression = "1=1";
-//       nloLayer.definitionExpression = "1=1";
-//       occupancyLayer.definitionExpression = "1=1";
-//     } else if (municipal && !barangay) {
-//       lotLayer.definitionExpression = typeExpression[0];
-//       handedOverLotLayer.definitionExpression = typeExpression[0];
-//       structureLayer.definitionExpression = typeExpression[0];
-//       nloLayer.definitionExpression = typeExpression[0];
-//       occupancyLayer.definitionExpression = typeExpression[0];
-//     } else if (municipal && barangay) {
-//       lotLayer.definitionExpression = typeExpression[1];
-//       handedOverLotLayer.definitionExpression = typeExpression[1];
-//       structureLayer.definitionExpression = typeExpression[1];
-//       nloLayer.definitionExpression = typeExpression[1];
-//       occupancyLayer.definitionExpression = typeExpression[1];
-//     }
+  //--- Query
+  const query = new Query();
+  query.outStatistics = [statsCollect];
 
-//     if (!timesliderstate) {
-//       zoomToLayer(lotLayer, arcgisScene);
-//       zoomToLayer(structureLayer, arcgisScene);
-//     }
-//   } catch (error) {
-//     console.error("Error fetching data from FeatureServer:", error);
-//   }
-// }
+  const expression = queryExpression({
+    municipal: municipal,
+    barangay: barangay,
+    queryField: queryField,
+  });
 
-// interface queryStatisticsType {
-//   superurgent?: any;
-//   municipal: any;
-//   barangay: any;
-//   queryField?: any;
-// }
+  query.where = expression;
+  queryDefinitionExpression({
+    queryExpression: expression,
+    featureLayer: [layer],
+  });
+  query.orderByFields = [statusField];
+  query.groupByFieldsForStatistics = [statusField];
 
-// export function queryStatisticsLayer({
-//   municipal,
-//   barangay,
-//   queryField,
-// }: queryStatisticsType) {
-//   try {
-//     const typeExpression = queryDropdownTypes(municipal, barangay);
+  //--- Query features using statistics definitions
+  let total_count = 0;
+  return layer?.queryFeatures(query).then(async (response: any) => {
+    const stats = response.features;
+    const data = stats.map((result: any) => {
+      const attributes = result.attributes;
+      total_count += attributes.statsCollect;
+      return Object.assign({
+        category: statusList[attributes[statusField] - 1],
+        value: attributes.statsCollect,
+      });
+    });
 
-//     let queryWhere: any;
-//     if (!municipal) {
-//       queryWhere = !queryField ? "1=1" : queryField;
-//     } else if (municipal && !barangay) {
-//       queryWhere = !queryField
-//         ? typeExpression[0]
-//         : queryField + " AND " + typeExpression[0];
-//     } else if (municipal && barangay) {
-//       queryWhere = !queryField
-//         ? typeExpression[1]
-//         : queryField + " AND " + typeExpression[1];
-//     }
+    //--- Account for zero count
+    const data0 = statusList.map((status: any, index: any) => {
+      const find = data.find((emp: any) => emp.category === status);
+      const value = find === undefined ? 0 : find?.value;
+      return Object.assign({
+        category: status,
+        value: value,
+        sliceSettings: {
+          fill: am5.color(statusColor[index]),
+        },
+      });
+    });
+    return [data0, total_count];
+  });
+}
 
-//     return queryWhere;
-//   } catch (error) {
-//     console.error("Error fetching data from FeatureServer:", error);
-//   }
-// }
+export async function totalFieldCount({
+  municipal,
+  barangay,
+  layer,
+  idField,
+  queryField,
+}: pieChartStatusDataType) {
+  const statsCollect = new StatisticDefinition({
+    onStatisticField: idField,
+    outStatisticFieldName: "statsCollect",
+    statisticType: "count",
+  });
+
+  //--- Query
+  const query = new Query();
+  query.outStatistics = [statsCollect];
+  query.where = queryExpression({
+    municipal: municipal,
+    barangay: barangay,
+    queryField: queryField,
+  });
+
+  return layer?.queryFeatures(query).then((response: any) => {
+    return response.features[0].attributes.statsCollect;
+  });
+}
+
+export async function totalFieldSum({
+  municipal: municipal,
+  barangay: barangay,
+  layer,
+  valueSumField,
+  queryField,
+}: pieChartStatusDataType) {
+  const statsCollect = new StatisticDefinition({
+    onStatisticField: valueSumField,
+    outStatisticFieldName: "statsCollect",
+    statisticType: "sum",
+  });
+
+  //--- Query
+  const query = new Query();
+  query.outStatistics = [statsCollect];
+  query.where = queryExpression({
+    municipal: municipal,
+    barangay: barangay,
+    queryField: queryField,
+  });
+
+  return layer?.queryFeatures(query).then((response: any) => {
+    return response.features[0].attributes.statsCollect;
+  });
+}
+
 //-----------------------------------------------------------
 // Change symbology of lot layer
 export function updateLotSymbology(new_date_field: any) {
@@ -430,251 +484,6 @@ export async function dateUpdate(category: any) {
   });
 }
 
-// Lot Status Query
-export async function generateLotData(
-  municipal: any,
-  barangay: any,
-  statusdatefield: any,
-) {
-  // const queryField = `${statusdatefield} IS NOT NULL`;
-  if (statusdatefield) {
-    const total_count = new StatisticDefinition({
-      onStatisticField: statusdatefield,
-      outStatisticFieldName: "total_count",
-      statisticType: "count",
-    });
-
-    const query = lotLayer.createQuery();
-    query.outFields = [statusdatefield];
-    query.outStatistics = [total_count];
-    query.orderByFields = [statusdatefield];
-    query.groupByFieldsForStatistics = [statusdatefield];
-    query.where = queryExpression({
-      municipal: municipal,
-      barangay: barangay,
-      // queryField: queryField,
-    });
-
-    return lotLayer.queryFeatures(query).then((response: any) => {
-      const stats = response.features;
-      const data = stats.map((result: any) => {
-        const attributes = result.attributes;
-        const status_id = attributes[statusdatefield];
-        const count = attributes.total_count;
-        return Object.assign({
-          category: lotStatusLabel[status_id - 1],
-          value: count,
-        });
-      });
-
-      const data1: any = [];
-      lotStatusLabel.map((status: any, index: any) => {
-        const find = data.find((emp: any) => emp.category === status);
-        const value = find === undefined ? 0 : find?.value;
-        const object = {
-          category: status,
-          value: value,
-          sliceSettings: {
-            fill: am5.color(lotStatusQuery[index].color),
-          },
-        };
-        data1.push(object);
-      });
-
-      return data1;
-    });
-  }
-}
-
-export async function generateLotNumber(
-  municipal: any,
-  barangay: any,
-  newHandedOverfield: any,
-) {
-  // const queryField = `${lotIdField} IS NOT NULL`;
-
-  const onStatisticsFieldValue: string =
-    "CASE WHEN " + newHandedOverfield + " >= 1 THEN 1 ELSE 0 END";
-
-  const total_lot_number = new StatisticDefinition({
-    onStatisticField: lotIdField,
-    outStatisticFieldName: "total_lot_number",
-    statisticType: "count",
-  });
-
-  const total_lot_pie = new StatisticDefinition({
-    onStatisticField: onStatisticsFieldValue,
-    outStatisticFieldName: "total_lot_pie",
-    statisticType: "sum",
-  });
-
-  const query = lotLayer.createQuery();
-  query.outFields = [lotIdField, newHandedOverfield];
-  query.outStatistics = [total_lot_number, total_lot_pie];
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-  });
-
-  return lotLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features[0].attributes;
-    const totalLotNumber = stats.total_lot_number;
-    const totalLotPie = stats.total_lot_pie;
-    return [totalLotNumber, totalLotPie];
-  });
-}
-
-// type layerInformationTypes = {
-//   superurgent: any;
-//   municipal: any;
-//   barangay: any;
-//   statusdatefield?: any;
-// };
-
-export async function generateTotalAffectedArea(
-  municipal: any,
-  barangay: any,
-  newAffectedAreafield: any,
-) {
-  // const queryField = `${affectedAreafield} IS NOT NULL`;
-  const total_affected_area = new StatisticDefinition({
-    onStatisticField: newAffectedAreafield,
-    outStatisticFieldName: "total_affected_area",
-    statisticType: "sum",
-  });
-
-  const query = lotLayer.createQuery();
-  query.outFields = [newAffectedAreafield];
-  query.outStatistics = [total_affected_area];
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-  });
-
-  return lotLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features[0].attributes;
-    const value = stats.total_affected_area;
-    return value;
-  });
-}
-
-export async function generateAffectedAreaForPie(
-  municipal: any,
-  barangay: any,
-  statusdatefield: any,
-) {
-  if (statusdatefield) {
-    const statusQuery = `${statusdatefield} >= 1`;
-
-    const total_affected_area = new StatisticDefinition({
-      onStatisticField: affectedAreaField,
-      outStatisticFieldName: "total_affected_area",
-      statisticType: "sum",
-    });
-
-    const query = lotLayer.createQuery();
-    query.outStatistics = [total_affected_area];
-    query.orderByFields = [statusdatefield];
-    query.groupByFieldsForStatistics = [statusdatefield];
-    query.where = queryExpression({
-      municipal: municipal,
-      barangay: barangay,
-      queryField: statusQuery,
-    });
-
-    return lotLayer.queryFeatures(query).then((response: any) => {
-      const stats = response.features;
-      const data = stats.map((result: any) => {
-        const attributes = result.attributes;
-        const affected = attributes.total_affected_area;
-        const status_id = attributes[statusdatefield];
-
-        return Object.assign({
-          category: lotStatusQuery[status_id - 1],
-          value: affected,
-        });
-      });
-
-      const data1: any = [];
-      lotStatusQuery.map((status: any) => {
-        const find = data.find((emp: any) => emp.category === status);
-        const value1 = find === undefined ? 0 : (find?.value).toFixed(0);
-        const object = {
-          category: status,
-          value: value1,
-        };
-        data1.push(object);
-      });
-      return data1;
-    });
-  }
-}
-
-// Handed Over
-export async function generateHandedOverLotsNumber(
-  municipal: any,
-  barangay: any,
-  newHandedOverfield: any,
-) {
-  const onStatisticsFieldValue: string = `CASE WHEN (${newHandedOverfield} = 1 AND ${lotStatusField} <> 8) THEN 1 ELSE 0 END`;
-  const total_handedover_lot = new StatisticDefinition({
-    onStatisticField: onStatisticsFieldValue,
-    outStatisticFieldName: "total_handedover_lot",
-    statisticType: "sum",
-  });
-
-  const total_lot_N = new StatisticDefinition({
-    onStatisticField: lotIdField,
-    outStatisticFieldName: "total_lot_N",
-    statisticType: "count",
-  });
-
-  const query = lotLayer.createQuery();
-  query.outStatistics = [total_handedover_lot, total_lot_N];
-  query.outFields = [lotIdField, newHandedOverfield];
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-  });
-
-  return lotLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features[0].attributes;
-    const handedover = stats.total_handedover_lot;
-    const totaln = stats.total_lot_N;
-    const percent = ((handedover / totaln) * 100).toFixed(0);
-
-    return [percent, handedover];
-  });
-}
-
-export async function generateHandedOverArea(
-  municipal: any,
-  barangay: any,
-  handedoverAreafield: any,
-) {
-  //--- If returns error, check the field type is 'double' not string.
-  const handed_over_area = new StatisticDefinition({
-    onStatisticField: handedoverAreafield,
-    outStatisticFieldName: "handed_over_area",
-    statisticType: "sum",
-  });
-
-  const query = lotLayer.createQuery();
-  query.outStatistics = [handed_over_area];
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-  });
-
-  return lotLayer?.queryFeatures(query).then((response: any) => {
-    if (response.features.length > 0) {
-      const stats = response?.features[0]?.attributes;
-      const value = stats.handed_over_area;
-      return value;
-    }
-  });
-}
-
 export async function generateHandedOverAreaData() {
   const total_affected_area = new StatisticDefinition({
     onStatisticField: affectedAreaField,
@@ -714,162 +523,6 @@ export async function generateHandedOverAreaData() {
     });
 
     return data;
-  });
-}
-
-// Structure
-export async function generateStructureData(municipal: any, barangay: any) {
-  const total_count = new StatisticDefinition({
-    onStatisticField: structureStatusField,
-    outStatisticFieldName: "total_count",
-    statisticType: "count",
-  });
-
-  const query = structureLayer.createQuery();
-  query.outFields = [structureStatusField, municipalityField, barangayField];
-  query.outStatistics = [total_count];
-  query.orderByFields = [structureStatusField];
-  query.groupByFieldsForStatistics = [structureStatusField];
-
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-    queryField: undefined,
-  });
-
-  return structureLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features;
-    const data = stats.map((result: any) => {
-      const attributes = result.attributes;
-      const status_id = attributes.StatusStruc;
-      const count = attributes.total_count;
-      return Object.assign({
-        category: structureStatusLabel[status_id - 1],
-        value: count,
-      });
-    });
-
-    const data1: any = [];
-    structureStatusLabel.map((status: any, index: any) => {
-      const find = data.find((emp: any) => emp.category === status);
-      const value = find === undefined ? 0 : find?.value;
-      const object = {
-        category: status,
-        value: value,
-        sliceSettings: {
-          fill: am5.color(structureStatusQuery[index].color),
-        },
-      };
-      data1.push(object);
-    });
-    return data1;
-  });
-}
-
-// For Permit-to-Enter
-export async function generateStrucNumber(municipal: any, barangay: any) {
-  const onStatisticsFieldValue: string =
-    "CASE WHEN " + structureStatusField + " >= 1 THEN 1 ELSE 0 END";
-
-  const onStatisticFieldValuePte: string =
-    "CASE WHEN " + structurePteField + " = 1 THEN 1 ELSE 0 END";
-
-  const total_pte_structure = new StatisticDefinition({
-    onStatisticField: onStatisticFieldValuePte,
-    outStatisticFieldName: "total_pte_structure",
-    statisticType: "sum",
-  });
-
-  const total_struc_N = new StatisticDefinition({
-    onStatisticField: onStatisticsFieldValue,
-    outStatisticFieldName: "total_struc_N",
-    statisticType: "sum",
-  });
-
-  const query = structureLayer.createQuery();
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-  });
-
-  query.outStatistics = [total_pte_structure, total_struc_N];
-  return structureLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features[0].attributes;
-    const pte = stats.total_pte_structure;
-    const totaln = stats.total_struc_N;
-    const percPTE = Number(((pte / totaln) * 100).toFixed(0));
-    return [percPTE, pte, totaln];
-  });
-}
-
-// Non-Land Owner
-export async function generateNloData(municipal: any, barangay: any) {
-  const total_count = new StatisticDefinition({
-    onStatisticField: nloStatusField,
-    outStatisticFieldName: "total_count",
-    statisticType: "count",
-  });
-
-  const query = nloLayer.createQuery();
-  query.outFields = [nloStatusField, municipalityField, barangayField];
-  query.outStatistics = [total_count];
-  query.orderByFields = [nloStatusField];
-  query.groupByFieldsForStatistics = [nloStatusField];
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-  });
-
-  return nloLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features;
-    const data = stats.map((result: any) => {
-      const attributes = result.attributes;
-      const status_id = attributes.StatusRC;
-      const count = attributes.total_count;
-      return Object.assign({
-        category: nloStatusLabel[status_id - 1],
-        value: count,
-      });
-    });
-
-    const data1: any = [];
-    nloStatusLabel.map((status: any, index: any) => {
-      const find = data.find((emp: any) => emp.category === status);
-      const value = find === undefined ? 0 : find?.value;
-      const object = {
-        category: status,
-        value: value,
-        sliceSettings: {
-          fill: am5.color(nloStatusQuery[index].color),
-        },
-      };
-      data1.push(object);
-    });
-    return data1;
-  });
-}
-
-export async function generateNloNumber(municipal: any, barangay: any) {
-  const onStatisticsFieldValue: string =
-    "CASE WHEN " + nloStatusField + " >= 1 THEN 1 ELSE 0 END";
-
-  const total_lbp = new StatisticDefinition({
-    onStatisticField: onStatisticsFieldValue,
-    outStatisticFieldName: "total_lbp",
-    statisticType: "sum",
-  });
-  const query = nloLayer.createQuery();
-  query.where = queryExpression({
-    municipal: municipal,
-    barangay: barangay,
-  });
-
-  query.outStatistics = [total_lbp];
-  return nloLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features[0].attributes;
-    const totalnlo = stats.total_lbp;
-
-    return totalnlo;
   });
 }
 

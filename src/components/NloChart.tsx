@@ -7,8 +7,7 @@ import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
 import {
   chartRenderer,
   dateUpdate,
-  generateNloData,
-  generateNloNumber,
+  pieChartStatusData,
   queryDefinitionExpression,
   queryExpression,
   thousands_separators,
@@ -20,6 +19,8 @@ import {
   nloStatusQuery,
   updatedDateCategoryNames,
   valueLabelColor,
+  nloStatusLabel,
+  nloStatusColor,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
@@ -62,7 +63,7 @@ const NloChart = memo(() => {
   const pieSeriesRef = useRef<unknown | any | undefined>({});
   const legendRef = useRef<unknown | any | undefined>({});
   const chartRef = useRef<unknown | any | undefined>({});
-  const [nloData, SetNloData] = useState([
+  const [nloData, setNloData] = useState([
     {
       category: String,
       value: Number,
@@ -84,14 +85,28 @@ const NloChart = memo(() => {
       featureLayer: [nloLayer],
     });
 
-    generateNloData(municipals, barangays).then((result: any) => {
-      SetNloData(result);
+    //--- chart data
+    pieChartStatusData({
+      municipal: municipals,
+      barangay: barangays,
+      layer: nloLayer,
+      statusList: nloStatusLabel,
+      statusColor: nloStatusColor,
+      statusField: nloStatusField,
+      statisticType: "count",
+    }).then((result: any) => {
+      setNloData(result[0]);
+      setNloNumber(result[1]);
     });
 
-    // NLO
-    generateNloNumber(municipals, barangays).then((response: any) => {
-      setNloNumber(response);
-    });
+    // generateNloData(municipals, barangays).then((result: any) => {
+    //   SetNloData(result);
+    // });
+
+    // // NLO
+    // generateNloNumber(municipals, barangays).then((response: any) => {
+    //   setNloNumber(response);
+    // });
   }, [municipals, barangays]);
 
   useEffect(() => {

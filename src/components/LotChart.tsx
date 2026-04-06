@@ -7,22 +7,22 @@ import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
 import {
   chartRenderer,
   dateUpdate,
-  generateAffectedAreaForPie,
-  generateHandedOverArea,
-  generateHandedOverLotsNumber,
-  generateLotData,
-  generateLotNumber,
-  generateTotalAffectedArea,
   queryDefinitionExpression,
   thousands_separators,
   queryExpression,
+  pieChartStatusData,
+  totalFieldSum,
+  totalFieldCount,
 } from "../Query";
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
 import "@esri/calcite-components/dist/components/calcite-checkbox";
 import {
   cutoff_days,
+  lotIdField,
+  lotStatusColor,
   lotStatusField,
+  lotStatusLabel,
   lotStatusQuery,
   primaryLabelColor,
   updatedDateCategoryNames,
@@ -99,18 +99,13 @@ const LotChart = () => {
   // Define chart id
   const chartID = "pie-two";
 
-  const [lotNumber, setLotNumber] = useState([]);
-  // Affected Area for Pie Chart
-  const [affectAreaPie, setAffectAreaPie] = useState<
-    Array<{ category: string; value: number }>
-  >([]);
+  const [lotNumber, setLotNumber] = useState<number>(0);
   const [totalAffectedArea, setTotalAffectedArea] = useState<
     number | undefined
   >();
-
-  // Handed Over
-  const [handedOverNumber, setHandedOverNumber] = useState<any>([]);
-  const [handedOverArea, setHandedOverArea] = useState<any>();
+  const [handedOverNumber, setHandedOverNumber] = useState<number>(0);
+  const [handedOverPercent, setHandedOverPercent] = useState<number>(0);
+  const [handedOverArea, setHandedOverArea] = useState<number>(0);
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
 
   useEffect(() => {
@@ -121,10 +116,13 @@ const LotChart = () => {
     }
   }, [handedOverCheckBox]);
 
-  // Chart data and calculate statistics
   useEffect(() => {
-    // Ensure to execute functions below only whe
-    // statusdatefield is not
+    setHandedOverPercent(
+      Number(((handedOverNumber / lotNumber) * 100).toFixed(0)),
+    );
+  }, [handedOverNumber, lotNumber]);
+
+  useEffect(() => {
     if (statusdatefield) {
       queryDefinitionExpression({
         queryExpression: queryExpression({
@@ -136,47 +134,116 @@ const LotChart = () => {
         arcgisScene,
       });
 
-      generateLotData(municipals, barangays, statusdatefield).then((result) => {
-        setLotData(result);
+      //--- chart data
+      pieChartStatusData({
+        municipal: municipals,
+        barangay: barangays,
+        layer: lotLayer,
+        statusList: lotStatusLabel,
+        statusColor: lotStatusColor,
+        statusField: statusdatefield,
+        statisticType: "count",
+      }).then((result: any) => {
+        setLotData(result[0]);
       });
 
-      // Lot number
-      generateLotNumber(municipals, barangays, statusdatefield).then(
-        (response: any) => {
-          setLotNumber(response);
-        },
-      );
+      //--- total number of lots (public + private)
+      totalFieldCount({
+        municipal: municipals,
+        barangay: barangays,
+        layer: lotLayer,
+        idField: lotIdField,
+      }).then((result: any) => {
+        setLotNumber(result);
+      });
+
+      //-- Total affected area
+      totalFieldSum({
+        municipal: municipals,
+        barangay: barangays,
+        layer: lotLayer,
+        valueSumField: newAffectedAreafield,
+      }).then((result: any) => {
+        setTotalAffectedArea(result);
+      });
+
+      //--- Total handed-over area
+      totalFieldSum({
+        municipal: municipals,
+        barangay: barangays,
+        layer: lotLayer,
+        valueSumField: handedoverAreafield,
+        // queryField: `${lotStatusField} <> 8`,
+      }).then((result: any) => {
+        setHandedOverArea(result);
+      });
+
+      //--- Total handed-over lots
+      totalFieldSum({
+        municipal: municipals,
+        barangay: barangays,
+        layer: lotLayer,
+        valueSumField: newHandedOverfield,
+        queryField: `${lotStatusField} <> 8`,
+      }).then((result: any) => {
+        setHandedOverNumber(result);
+      });
+
+      //--- Affected area for each status
+      pieChartStatusData({
+        municipal: municipals,
+        barangay: barangays,
+        layer: lotLayer,
+        statusList: lotStatusLabel,
+        statusColor: lotStatusColor,
+        statusField: statusdatefield,
+        statisticType: "count",
+        queryField: `${statusdatefield} >= 1`,
+      }).then((result: any) => {
+        setLotData(result[0]);
+      });
+
+      // generateLotData(municipals, barangays, statusdatefield).then((result) => {
+      //   setLotData(result);
+      // });
+
+      // // Lot number
+      // generateLotNumber(municipals, barangays, statusdatefield).then(
+      //   (response: any) => {
+      //     setLotNumber(response);
+      //   },
+      // );
 
       // total affected areas for pie chart
-      generateAffectedAreaForPie(municipals, barangays, statusdatefield).then(
-        (response: any) => {
-          setAffectAreaPie(response);
-        },
-      );
+      // generateAffectedAreaForPie(municipals, barangays, statusdatefield).then(
+      //   (response: any) => {
+      //     setAffectAreaPie(response);
+      //   },
+      // );
 
-      // total affected area for
-      generateTotalAffectedArea(
-        municipals,
-        barangays,
-        newAffectedAreafield,
-      ).then((response: any) => {
-        setTotalAffectedArea(response);
-      });
+      // // total affected area for
+      // generateTotalAffectedArea(
+      //   municipals,
+      //   barangays,
+      //   newAffectedAreafield,
+      // ).then((response: any) => {
+      //   setTotalAffectedArea(response);
+      // });
 
-      // Handed Over
-      generateHandedOverLotsNumber(
-        municipals,
-        barangays,
-        newHandedOverfield,
-      ).then((response: any) => {
-        setHandedOverNumber(response);
-      });
+      // // Handed Over
+      // generateHandedOverLotsNumber(
+      //   municipals,
+      //   barangays,
+      //   newHandedOverfield,
+      // ).then((response: any) => {
+      //   setHandedOverNumber(response);
+      // });
 
-      generateHandedOverArea(municipals, barangays, handedoverAreafield).then(
-        (response) => {
-          setHandedOverArea(response);
-        },
-      );
+      // generateHandedOverArea(municipals, barangays, handedoverAreafield).then(
+      //   (response) => {
+      //     setHandedOverArea(response);
+      //   },
+      // );
     }
   }, [
     municipals,
@@ -255,7 +322,7 @@ const LotChart = () => {
     return () => {
       root.dispose();
     };
-  }, [chartID, lotData, affectAreaPie]);
+  }, [chartID, lotData, newAffectedAreafield, newHandedOverfield]);
 
   useEffect(() => {
     pieSeriesRef.current?.data.setAll(lotData);
@@ -297,7 +364,7 @@ const LotChart = () => {
               margin: "auto",
             }}
           >
-            {thousands_separators(lotNumber[0])}
+            {thousands_separators(lotNumber)}
           </dd>
         </dl>
         <dl style={{ alignItems: "center" }}>
@@ -400,7 +467,7 @@ const LotChart = () => {
               margin: "auto",
             }}
           >
-            {handedOverNumber[0]}% ({thousands_separators(handedOverNumber[1])})
+            {handedOverPercent}% ({thousands_separators(handedOverNumber)})
           </dd>
         </dl>
         <dl style={{ alignItems: "center" }}>
