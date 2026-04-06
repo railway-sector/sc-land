@@ -232,7 +232,7 @@ const StructureChart = () => {
       ></div>
 
       {/* Permit-to-Enter */}
-      <div
+      {/* <div
         style={{
           display: "flex",
           // marginTop: "3px",
@@ -268,7 +268,6 @@ const StructureChart = () => {
                 {thousands_separators(structureNumber[1])})
               </span>
             )}
-            {/* {structureNumber[0]}% ({thousands_separators(structureNumber[1])}) */}
           </dd>
         </dl>
         <img
@@ -277,7 +276,7 @@ const StructureChart = () => {
           height={`${new_imageSize}%`}
           width={`${new_imageSize}%`}
         />
-      </div>
+      </div> */}
     </>
   );
 }; // End of lotChartgs
