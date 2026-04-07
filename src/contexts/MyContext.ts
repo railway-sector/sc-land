@@ -9,7 +9,7 @@ type MyDropdownContextType = {
   asofdate: any;
   latestasofdate: any;
   handedoverDatefield: any;
-  handedoverAreafield: any;
+  newHandedoverAreafield: any;
   newAffectedAreafield: any;
   chartPanelwidth: any;
   newHandedOverfield: any;
@@ -21,7 +21,7 @@ type MyDropdownContextType = {
   updateAsofdate: any;
   updateLatestasofdate: any;
   updateHandedoverDatefield: any;
-  updateHandedoverAreafield: any;
+  updateNewHandedoverAreafield: any;
   updateNewAffectedAreafield: any;
   updateChartPanelwidth: any;
   updateNewHandedOverfield: any;
@@ -36,7 +36,7 @@ const initialState = {
   asofdate: undefined,
   latestasofdate: undefined,
   handedoverDatefield: undefined,
-  handedoverAreafield: undefined,
+  newHandedoverAreafield: undefined,
   newAffectedAreafield: undefined,
   chartPanelwidth: undefined,
   newHandedOverfield: undefined,
@@ -48,7 +48,7 @@ const initialState = {
   updateAsofdate: undefined,
   updateLatestasofdate: undefined,
   updateHandedoverDatefield: undefined,
-  updateHandedoverAreafield: undefined,
+  updateNewHandedoverAreafield: undefined,
   updateNewAffectedAreafield: undefined,
   updateChartPanelwidth: undefined,
   updateNewHandedOverfield: undefined,

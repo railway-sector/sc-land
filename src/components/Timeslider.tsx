@@ -11,7 +11,7 @@ export default function Timeslider() {
     latestasofdate,
     updateTimesliderstate,
     updateAsofdate,
-    updateHandedoverAreafield,
+    updateNewHandedoverAreafield,
     updateNewAffectedAreafield,
     updateNewHandedOverfield,
   } = use(MyContext);
@@ -84,7 +84,7 @@ export default function Timeslider() {
 
           // Updating Handed-Over Area field:
           const new_handedoverarea_field = `${new_date_field}_HOA`;
-          updateHandedoverAreafield(new_handedoverarea_field);
+          updateNewHandedoverAreafield(new_handedoverarea_field);
 
           // Updating Affected-Area field:
           const new_affectedarea_field = `${new_date_field}_TAA`;

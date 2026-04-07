@@ -64,6 +64,43 @@ export function responsiveChart(
   });
 }
 
+type layerViewQueryProps = {
+  layer?: any;
+  qExpression?: any;
+  view: any;
+};
+
+export const highlightFilterLayerView = ({
+  layer,
+  qExpression,
+  view,
+}: layerViewQueryProps) => {
+  const query = layer.createQuery();
+  query.where = qExpression;
+  let highlightSelect: any;
+
+  view?.whenLayerView(layer).then((layerView: any) => {
+    layer?.queryObjectIds(query).then((results: any) => {
+      const objID = results;
+
+      highlightSelect && highlightSelect.remove();
+      highlightSelect = layerView.highlight(objID);
+    });
+
+    layerView.filter = new FeatureFilter({
+      where: qExpression,
+    });
+
+    // For initial state, we need to add this
+    view?.on("click", () => {
+      layerView.filter = new FeatureFilter({
+        where: undefined,
+      });
+      highlightSelect && highlightSelect.remove();
+    });
+  });
+};
+
 interface chartType {
   chart: any;
   pieSeries: any;
@@ -140,8 +177,8 @@ export function chartRenderer({
     const statusSelected = find?.value;
     const qExpression = `Municipality = '${municipals}' AND ${status_field} = ${statusSelected}`;
 
-    polygonViewQueryFeatureHighlight({
-      polygonLayer: layer,
+    highlightFilterLayerView({
+      layer: layer,
       qExpression: qExpression,
       view: arcgisScene?.view,
     });
@@ -239,15 +276,6 @@ export function queryExpression({
 
   return expression;
 }
-
-// Query function for lotLayer
-export const queryDropdownTypes = (municipal: any, barangay: any) => {
-  const queryMunicipality = `${municipalityField} = '` + municipal + "'";
-  const queryBarangay = `${barangayField} = '` + barangay + "'";
-  const queryMunicipalBarangay = queryMunicipality + " AND " + queryBarangay;
-
-  return [queryMunicipality, queryMunicipalBarangay];
-};
 
 interface queryDefinitionExpressionType {
   queryExpression?: string;
@@ -623,67 +651,3 @@ export function highlightRemove() {
     highlight.remove();
   }
 }
-
-// Highlight selected utility feature in the Chart
-export const highlightSelectedUtil = (
-  featureLayer: any,
-  qExpression: any,
-  view: any,
-) => {
-  const query = featureLayer.createQuery();
-  query.where = qExpression;
-  let highlightSelect: any;
-
-  view?.whenLayerView(featureLayer).then((layerView: any) => {
-    featureLayer?.queryObjectIds(query).then((results: any) => {
-      const objID = results;
-
-      const queryExt = new Query({
-        objectIds: objID,
-      });
-
-      try {
-        featureLayer?.queryExtent(queryExt).then((result: any) => {
-          if (result?.extent) {
-            view?.goTo(result.extent);
-          }
-        });
-      } catch (error) {
-        console.error("Error querying extent for point layer:", error);
-      }
-
-      highlightSelect && highlightSelect.remove();
-      highlightSelect = layerView.highlight(objID);
-    });
-
-    layerView.filter = new FeatureFilter({
-      where: qExpression,
-    });
-
-    // For initial state, we need to add this
-    view?.on("click", () => {
-      layerView.filter = new FeatureFilter({
-        where: undefined,
-      });
-      highlightSelect && highlightSelect.remove();
-    });
-  });
-};
-
-type layerViewQueryProps = {
-  pointLayer1?: FeatureLayer;
-  pointLayer2?: FeatureLayer;
-  lineLayer1?: FeatureLayer;
-  lineLayer2?: FeatureLayer;
-  polygonLayer?: FeatureLayer;
-  qExpression?: any;
-  view: any;
-};
-
-export const polygonViewQueryFeatureHighlight = ({
-  polygonLayer,
-  qExpression,
-  view,
-}: layerViewQueryProps) => {
-  highlightSelectedUtil(polygonLayer, qExpression, view);
-};

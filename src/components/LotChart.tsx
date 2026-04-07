@@ -18,7 +18,10 @@ import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
 import "@esri/calcite-components/dist/components/calcite-checkbox";
 import {
+  affectedAreaField,
   cutoff_days,
+  lotHandedOverAreaField,
+  lotHandedOverField,
   lotIdField,
   lotStatusColor,
   lotStatusField,
@@ -54,7 +57,7 @@ const LotChart = () => {
     updateAsofdate,
     asofdate,
     updateLatestasofdate,
-    handedoverAreafield,
+    newHandedoverAreafield,
     newAffectedAreafield,
     newHandedOverfield,
     chartPanelwidth,
@@ -141,7 +144,7 @@ const LotChart = () => {
         layer: lotLayer,
         statusList: lotStatusLabel,
         statusColor: lotStatusColor,
-        statusField: statusdatefield,
+        statusField: timesliderstate ? statusdatefield : lotStatusField,
         statisticType: "count",
       }).then((result: any) => {
         setLotData(result[0]);
@@ -162,7 +165,9 @@ const LotChart = () => {
         municipal: municipals,
         barangay: barangays,
         layer: lotLayer,
-        valueSumField: newAffectedAreafield,
+        valueSumField: timesliderstate
+          ? newAffectedAreafield
+          : affectedAreaField,
       }).then((result: any) => {
         setTotalAffectedArea(result);
       });
@@ -172,7 +177,9 @@ const LotChart = () => {
         municipal: municipals,
         barangay: barangays,
         layer: lotLayer,
-        valueSumField: handedoverAreafield,
+        valueSumField: timesliderstate
+          ? newHandedoverAreafield
+          : lotHandedOverAreaField,
         // queryField: `${lotStatusField} <> 8`,
       }).then((result: any) => {
         setHandedOverArea(result);
@@ -183,74 +190,34 @@ const LotChart = () => {
         municipal: municipals,
         barangay: barangays,
         layer: lotLayer,
-        valueSumField: newHandedOverfield,
+        valueSumField: timesliderstate
+          ? newHandedOverfield
+          : lotHandedOverField,
         queryField: `${lotStatusField} <> 8`,
       }).then((result: any) => {
         setHandedOverNumber(result);
       });
 
       //--- Affected area for each status
-      pieChartStatusData({
-        municipal: municipals,
-        barangay: barangays,
-        layer: lotLayer,
-        statusList: lotStatusLabel,
-        statusColor: lotStatusColor,
-        statusField: statusdatefield,
-        statisticType: "count",
-        queryField: `${statusdatefield} >= 1`,
-      }).then((result: any) => {
-        setLotData(result[0]);
-      });
-
-      // generateLotData(municipals, barangays, statusdatefield).then((result) => {
-      //   setLotData(result);
+      // pieChartStatusData({
+      //   municipal: municipals,
+      //   barangay: barangays,
+      //   layer: lotLayer,
+      //   statusList: lotStatusLabel,
+      //   statusColor: lotStatusColor,
+      //   statusField: statusdatefield,
+      //   statisticType: "count",
+      //   queryField: `${statusdatefield} >= 1`,
+      // }).then((result: any) => {
+      //   setLotData(result[0]);
       // });
-
-      // // Lot number
-      // generateLotNumber(municipals, barangays, statusdatefield).then(
-      //   (response: any) => {
-      //     setLotNumber(response);
-      //   },
-      // );
-
-      // total affected areas for pie chart
-      // generateAffectedAreaForPie(municipals, barangays, statusdatefield).then(
-      //   (response: any) => {
-      //     setAffectAreaPie(response);
-      //   },
-      // );
-
-      // // total affected area for
-      // generateTotalAffectedArea(
-      //   municipals,
-      //   barangays,
-      //   newAffectedAreafield,
-      // ).then((response: any) => {
-      //   setTotalAffectedArea(response);
-      // });
-
-      // // Handed Over
-      // generateHandedOverLotsNumber(
-      //   municipals,
-      //   barangays,
-      //   newHandedOverfield,
-      // ).then((response: any) => {
-      //   setHandedOverNumber(response);
-      // });
-
-      // generateHandedOverArea(municipals, barangays, handedoverAreafield).then(
-      //   (response) => {
-      //     setHandedOverArea(response);
-      //   },
-      // );
     }
   }, [
     municipals,
     barangays,
     statusdatefield,
     newHandedOverfield,
-    handedoverAreafield,
+    newHandedoverAreafield,
   ]);
 
   useEffect(() => {

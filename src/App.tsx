@@ -46,7 +46,7 @@ export function App(): React.JSX.Element {
   const [asofdate, setAsofdate] = useState<any>();
   const [latestasofdate, setLatestasofdate] = useState<any>();
   const [handedoverDatefield, setHandedoverDatefield] = useState<any>();
-  const [handedoverAreafield, setHandedoverAreafield] = useState<any>();
+  const [newHandedoverAreafield, setNewHandedoverAreafield] = useState<any>();
   const [newAffectedAreafield, setNewAffectedAreafield] = useState<any>();
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
   const [newHandedOverfield, setNewHandedOverfield] = useState<any>();
@@ -83,8 +83,8 @@ export function App(): React.JSX.Element {
     setHandedoverDatefield(newDatefield);
   };
 
-  const updateHandedoverAreafield = (newAreafield: any) => {
-    setHandedoverAreafield(newAreafield);
+  const updateNewHandedoverAreafield = (newAreafield: any) => {
+    setNewHandedoverAreafield(newAreafield);
   };
 
   const updateNewAffectedAreafield = (newAreafield: any) => {
@@ -120,7 +120,7 @@ export function App(): React.JSX.Element {
               asofdate,
               latestasofdate,
               handedoverDatefield,
-              handedoverAreafield,
+              newHandedoverAreafield,
               newAffectedAreafield,
               chartPanelwidth,
               newHandedOverfield,
@@ -132,7 +132,7 @@ export function App(): React.JSX.Element {
               updateAsofdate,
               updateLatestasofdate,
               updateHandedoverDatefield,
-              updateHandedoverAreafield,
+              updateNewHandedoverAreafield,
               updateNewAffectedAreafield,
               updateChartPanelwidth,
               updateNewHandedOverfield,
