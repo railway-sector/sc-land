@@ -20,6 +20,7 @@ import {
   somco_fense_layer,
   handedOverLotLayer,
   pierAccessLayer,
+  // maintenanceRoadLayer,
 } from "../layers";
 import { use, useEffect } from "react";
 import type { ArcgisSearch } from "@arcgis/map-components/components/arcgis-search";
@@ -88,6 +89,7 @@ export default function MapDisplay() {
     arcgisScene?.map?.add(stationLayer);
     arcgisScene?.map?.add(somco_fense_layer);
     arcgisScene?.map?.add(handedOverLotLayer);
+    // arcgisScene?.map?.add(maintenanceRoadLayer);
 
     // Search components
     const sources: any = [
