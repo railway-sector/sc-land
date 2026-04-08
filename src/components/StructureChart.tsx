@@ -163,6 +163,7 @@ const StructureChart = () => {
       legend: legend,
       root: root,
       municipals: municipals,
+      barangays: barangays,
       status_field: structureStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

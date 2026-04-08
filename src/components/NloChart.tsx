@@ -98,15 +98,6 @@ const NloChart = memo(() => {
       setNloData(result[0]);
       setNloNumber(result[1]);
     });
-
-    // generateNloData(municipals, barangays).then((result: any) => {
-    //   SetNloData(result);
-    // });
-
-    // // NLO
-    // generateNloNumber(municipals, barangays).then((response: any) => {
-    //   setNloNumber(response);
-    // });
   }, [municipals, barangays]);
 
   useEffect(() => {
@@ -169,6 +160,7 @@ const NloChart = memo(() => {
       legend: legend,
       root: root,
       municipals: municipals,
+      barangays: barangays,
       status_field: nloStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

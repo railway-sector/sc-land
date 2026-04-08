@@ -273,6 +273,7 @@ const LotChart = () => {
       legend: legend,
       root: root,
       municipals: municipals,
+      barangays: barangays,
       status_field: lotStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,
