@@ -355,6 +355,8 @@ export async function defineActions(event: any) {
   item.title === "Proposed Pole Working Areas" ||
   item.title === "Proposed/Recorded NGCP Lines" ||
   item.title === "Proposed Pole Relocation" ||
+  item.title === "Proposed East Service Road" ||
+  item.title === "Maintenance Road" ||
   item.title === "Handed-Over Area"
     ? (item.visible = false)
     : (item.visible = true);

@@ -685,21 +685,43 @@ stationLayer.listMode = "hide";
 
 const maintenanceRoadRenderer = new SimpleRenderer({
   symbol: new SimpleLineSymbol({
-    color: "#d9dddc",
-    width: "3px",
-    style: "dash",
+    color: "#98E600",
+    width: "2px",
   }),
 });
 
 export const maintenanceRoadLayer = new FeatureLayer({
   portalItem: {
-    id: "4309e01d87694a789675cc925425f588",
+    id: "e37f3dab086c4063ba28c7e4d4075d60",
     portal: {
       url: "https://gis.railway-sector.com/portal",
     },
   },
   renderer: maintenanceRoadRenderer,
-  title: "SC Maintenance Road",
+  title: "Maintenance Road",
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
+/* Proposed East Service Road */
+const proposedEastServiceRoadRenderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#d9dddc",
+    width: "2px",
+    style: "dash",
+  }),
+});
+
+export const proposedEastServiceRoadLayer = new FeatureLayer({
+  portalItem: {
+    id: "3b160b3125ab42759be419be7fbf1edc",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  title: "Proposed East Service Road",
+  renderer: proposedEastServiceRoadRenderer,
   elevationInfo: {
     mode: "on-the-ground",
   },
@@ -1671,6 +1693,8 @@ export const alignmentGroupLayer = new GroupLayer({
     prowLayerold,
     prowLayerold2,
     prowLayer,
+    maintenanceRoadLayer,
+    proposedEastServiceRoadLayer,
   ],
 }); //map.add(alignmentGroupLayer, 0);
 
