@@ -2,7 +2,6 @@ import StatisticDefinition from "@arcgis/core/rest/support/StatisticDefinition";
 import * as am5 from "@amcharts/amcharts5";
 import Query from "@arcgis/core/rest/support/Query";
 import type { statisticsType } from "./uniqueValues";
-import { queryDefinitionExpression } from "./QueryExpression";
 
 //---------------------------------------------//
 //           Pie Chart Data Generation         //
@@ -51,10 +50,10 @@ export async function pieChartStatusData({
   const expression = qChart;
 
   query.where = expression;
-  queryDefinitionExpression({
-    queryExpression: expression,
-    featureLayer: [layer],
-  });
+  // queryDefinitionExpression({
+  //   queryExpression: expression,
+  //   featureLayer: [layer],
+  // });
   query.orderByFields = [statusField];
   query.groupByFieldsForStatistics = [statusField];
 

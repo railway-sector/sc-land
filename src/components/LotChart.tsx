@@ -185,13 +185,20 @@ const LotChart = () => {
       });
 
       //--- Total handed-over lots
+      const qe2 = queryExpression({
+        q1Value: municipals,
+        q1Field: municipalityField,
+        q2Value: barangays,
+        q2Field: barangayField,
+        qExpression: `${lotStatusField} <> 8`,
+      });
+
       totalFieldSum({
-        qChart: qe,
+        qChart: qe2,
         layer: lotLayer,
         valueSumField: timesliderstate
           ? newHandedOverfield
           : lotHandedOverField,
-        queryField: `${lotStatusField} <> 8`,
       }).then((result: any) => {
         setHandedOverNumber(result);
       });
