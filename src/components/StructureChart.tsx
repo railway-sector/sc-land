@@ -3,14 +3,7 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
-import {
-  chartRenderer,
-  dateUpdate,
-  pieChartStatusData,
-  queryDefinitionExpression,
-  queryExpression,
-  thousands_separators,
-} from "../Query";
+import { dateUpdate, thousands_separators } from "../Query";
 import "../index.css";
 import {
   cutoff_days,
@@ -21,10 +14,15 @@ import {
   valueLabelColor,
   structureStatusLabel,
   structureStatusColorHex,
+  municipalityField,
+  barangayField,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
 import { occupancyLayer, structureLayer } from "../layers";
+import { queryDefinitionExpression, queryExpression } from "../QueryExpression";
+import { chartRenderer } from "../ChartRenderer";
+import { pieChartStatusData } from "../ChartGenerator";
 
 // Dispose function
 function maybeDisposeRoot(divId: any) {
@@ -75,18 +73,21 @@ const StructureChart = () => {
   // const [ptePercent, setPtePercent] = useState<number>(0);
 
   useEffect(() => {
+    const qe = queryExpression({
+      q1Value: municipals,
+      q1Field: municipalityField,
+      q2Value: barangays,
+      q2Field: barangayField,
+    });
+
     queryDefinitionExpression({
-      queryExpression: queryExpression({
-        municipal: municipals,
-        barangay: barangays,
-      }),
+      queryExpression: qe,
       featureLayer: [structureLayer, occupancyLayer],
     });
 
     //--- chart data
     pieChartStatusData({
-      municipal: municipals,
-      barangay: barangays,
+      qChart: qe,
       layer: structureLayer,
       statusList: structureStatusLabel,
       statusColor: structureStatusColorHex,
@@ -162,8 +163,10 @@ const StructureChart = () => {
       pieSeries: pieSeries,
       legend: legend,
       root: root,
-      municipals: municipals,
-      barangays: barangays,
+      q1Value: municipals,
+      q1Field: municipalityField,
+      q2Value: barangays,
+      q2Field: barangayField,
       status_field: structureStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

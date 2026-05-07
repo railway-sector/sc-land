@@ -50,6 +50,7 @@ export function App(): React.JSX.Element {
   const [newAffectedAreafield, setNewAffectedAreafield] = useState<any>();
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
   const [newHandedOverfield, setNewHandedOverfield] = useState<any>();
+  const [queryChartExpression, setQueryChartExpression] = useState<any>();
 
   const updateMunicipals = (newMunicipal: any) => {
     setMunicipals(newMunicipal);
@@ -99,6 +100,10 @@ export function App(): React.JSX.Element {
     setNewHandedOverfield(newHandedOverfield);
   };
 
+  const updateQueryChartExpression = (newQuery: any) => {
+    setQueryChartExpression(newQuery);
+  };
+
   return (
     <>
       {loggedInState && (
@@ -124,6 +129,7 @@ export function App(): React.JSX.Element {
               newAffectedAreafield,
               chartPanelwidth,
               newHandedOverfield,
+              queryChartExpression,
               updateMunicipals,
               updateBarangays,
               updateStatusdatefield,
@@ -136,6 +142,7 @@ export function App(): React.JSX.Element {
               updateNewAffectedAreafield,
               updateChartPanelwidth,
               updateNewHandedOverfield,
+              updateQueryChartExpression,
             }}
           >
             <MainChart />

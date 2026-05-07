@@ -4,21 +4,14 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
-import {
-  chartRenderer,
-  dateUpdate,
-  queryDefinitionExpression,
-  thousands_separators,
-  queryExpression,
-  pieChartStatusData,
-  totalFieldSum,
-  totalFieldCount,
-} from "../Query";
+import { dateUpdate, thousands_separators, zoomToLayer } from "../Query";
+
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
 import "@esri/calcite-components/dist/components/calcite-checkbox";
 import {
   affectedAreaField,
+  barangayField,
   cutoff_days,
   lotHandedOverAreaField,
   lotHandedOverField,
@@ -27,6 +20,7 @@ import {
   lotStatusField,
   lotStatusLabel,
   lotStatusQuery,
+  municipalityField,
   primaryLabelColor,
   updatedDateCategoryNames,
   valueLabelColor,
@@ -35,6 +29,13 @@ import {
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
+import { queryExpression, queryDefinitionExpression } from "../QueryExpression";
+import { chartRenderer } from "../ChartRenderer";
+import {
+  pieChartStatusData,
+  totalFieldCount,
+  totalFieldSum,
+} from "../ChartGenerator";
 
 // Dispose function
 function maybeDisposeRoot(divId: any) {
@@ -127,20 +128,21 @@ const LotChart = () => {
 
   useEffect(() => {
     if (statusdatefield) {
+      const qe = queryExpression({
+        q1Value: municipals,
+        q1Field: municipalityField,
+        q2Value: barangays,
+        q2Field: barangayField,
+      });
+
       queryDefinitionExpression({
-        queryExpression: queryExpression({
-          municipal: municipals,
-          barangay: barangays,
-        }),
+        queryExpression: qe,
         featureLayer: [lotLayer, handedOverLotLayer],
-        timesliderstate,
-        arcgisScene,
       });
 
       //--- chart data
       pieChartStatusData({
-        municipal: municipals,
-        barangay: barangays,
+        qChart: qe,
         layer: lotLayer,
         statusList: lotStatusLabel,
         statusColor: lotStatusColor,
@@ -152,8 +154,7 @@ const LotChart = () => {
 
       //--- total number of lots (public + private)
       totalFieldCount({
-        municipal: municipals,
-        barangay: barangays,
+        qChart: qe,
         layer: lotLayer,
         idField: lotIdField,
       }).then((result: any) => {
@@ -162,8 +163,7 @@ const LotChart = () => {
 
       //-- Total affected area
       totalFieldSum({
-        municipal: municipals,
-        barangay: barangays,
+        qChart: qe,
         layer: lotLayer,
         valueSumField: timesliderstate
           ? newAffectedAreafield
@@ -174,8 +174,7 @@ const LotChart = () => {
 
       //--- Total handed-over area
       totalFieldSum({
-        municipal: municipals,
-        barangay: barangays,
+        qChart: qe,
         layer: lotLayer,
         valueSumField: timesliderstate
           ? newHandedoverAreafield
@@ -187,8 +186,7 @@ const LotChart = () => {
 
       //--- Total handed-over lots
       totalFieldSum({
-        municipal: municipals,
-        barangay: barangays,
+        qChart: qe,
         layer: lotLayer,
         valueSumField: timesliderstate
           ? newHandedOverfield
@@ -197,6 +195,11 @@ const LotChart = () => {
       }).then((result: any) => {
         setHandedOverNumber(result);
       });
+
+      if (!timesliderstate) {
+        zoomToLayer(lotLayer, arcgisScene);
+        // zoomToLayer(structureLayer, arcgisScene);
+      }
 
       //--- Affected area for each status
       // pieChartStatusData({
@@ -272,8 +275,10 @@ const LotChart = () => {
       pieSeries: pieSeries,
       legend: legend,
       root: root,
-      municipals: municipals,
-      barangays: barangays,
+      q1Value: municipals,
+      q1Field: municipalityField,
+      q2Value: barangays,
+      q2Field: barangayField,
       status_field: lotStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

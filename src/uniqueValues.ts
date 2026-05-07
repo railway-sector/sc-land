@@ -2,6 +2,7 @@ import Collection from "@arcgis/core/core/Collection";
 import ActionButton from "@arcgis/core/support/actions/ActionButton";
 
 export type statisticsType = "count" | "sum";
+export type TypeFieldType = "number" | "string";
 
 // month
 export const months = [
