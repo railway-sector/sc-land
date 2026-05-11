@@ -19,8 +19,8 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
-import { nloLayer } from "../layers";
-import { queryDefinitionExpression, queryExpression } from "../QueryExpression";
+import { nloLayer, queryc } from "../layers";
+import { queryDefinitionExpression } from "../QueryExpression";
 import { chartRenderer } from "../ChartRenderer";
 import { pieChartStatusData } from "../ChartGenerator";
 
@@ -75,21 +75,15 @@ const NloChart = memo(() => {
   const chartID = "nlo-chart";
 
   useEffect(() => {
-    const qe = queryExpression({
-      q1Value: municipals,
-      q1Field: municipalityField,
-      q2Value: barangays,
-      q2Field: barangayField,
-    });
-
+    queryc.qValues = [municipals, barangays];
     queryDefinitionExpression({
-      queryExpression: qe,
+      queryExpression: queryc.queryExpression(),
       featureLayer: [nloLayer],
     });
 
     //--- chart data
     pieChartStatusData({
-      qChart: qe,
+      qChart: queryc.queryExpression(),
       layer: nloLayer,
       statusList: nloStatusLabel,
       statusColor: nloStatusColor,

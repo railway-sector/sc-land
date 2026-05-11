@@ -19,8 +19,8 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
-import { occupancyLayer, structureLayer } from "../layers";
-import { queryDefinitionExpression, queryExpression } from "../QueryExpression";
+import { occupancyLayer, queryc, structureLayer } from "../layers";
+import { queryDefinitionExpression } from "../QueryExpression";
 import { chartRenderer } from "../ChartRenderer";
 import { pieChartStatusData } from "../ChartGenerator";
 
@@ -73,21 +73,15 @@ const StructureChart = () => {
   // const [ptePercent, setPtePercent] = useState<number>(0);
 
   useEffect(() => {
-    const qe = queryExpression({
-      q1Value: municipals,
-      q1Field: municipalityField,
-      q2Value: barangays,
-      q2Field: barangayField,
-    });
-
+    queryc.qValues = [municipals, barangays];
     queryDefinitionExpression({
-      queryExpression: qe,
+      queryExpression: queryc.queryExpression(),
       featureLayer: [structureLayer, occupancyLayer],
     });
 
     //--- chart data
     pieChartStatusData({
-      qChart: qe,
+      qChart: queryc.queryExpression(),
       layer: structureLayer,
       statusList: structureStatusLabel,
       statusColor: structureStatusColorHex,

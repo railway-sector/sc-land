@@ -48,6 +48,51 @@ import {
   tunnelAffectLotField,
   valueLabelColor,
 } from "./uniqueValues";
+import QueryExpressionLayers from "query-layers-expression";
+
+export const queryc = new QueryExpressionLayers(
+  [undefined, undefined],
+  [municipalityField, barangayField],
+  undefined,
+  undefined,
+  "string",
+  0,
+  undefined,
+  undefined,
+);
+
+export const queryc2 = new QueryExpressionLayers(
+  [undefined, undefined],
+  [municipalityField, barangayField],
+  undefined,
+  undefined,
+  "string",
+  0,
+  undefined,
+  undefined,
+);
+
+export const queryc3 = new QueryExpressionLayers(
+  [undefined, undefined],
+  [municipalityField, barangayField],
+  undefined,
+  undefined,
+  "string",
+  0,
+  undefined,
+  undefined,
+);
+
+export const querycExpro = new QueryExpressionLayers(
+  [undefined, undefined],
+  [municipalityField, barangayField],
+  undefined,
+  undefined,
+  "string",
+  0,
+  undefined,
+  undefined,
+);
 
 export const drone_video_point_layer = new FeatureLayer({
   portalItem: {

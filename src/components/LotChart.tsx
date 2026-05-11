@@ -1,5 +1,5 @@
 import { use, useEffect, useRef, useState } from "react";
-import { handedOverLotLayer, lotLayer } from "../layers";
+import { handedOverLotLayer, lotLayer, queryc, queryc2 } from "../layers";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
@@ -29,7 +29,7 @@ import {
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
-import { queryExpression, queryDefinitionExpression } from "../QueryExpression";
+import { queryDefinitionExpression } from "../QueryExpression";
 import { chartRenderer } from "../ChartRenderer";
 import {
   pieChartStatusData,
@@ -128,21 +128,15 @@ const LotChart = () => {
 
   useEffect(() => {
     if (statusdatefield) {
-      const qe = queryExpression({
-        q1Value: municipals,
-        q1Field: municipalityField,
-        q2Value: barangays,
-        q2Field: barangayField,
-      });
-
+      queryc.qValues = [municipals, barangays];
       queryDefinitionExpression({
-        queryExpression: qe,
+        queryExpression: queryc.queryExpression(),
         featureLayer: [lotLayer, handedOverLotLayer],
       });
 
       //--- chart data
       pieChartStatusData({
-        qChart: qe,
+        qChart: queryc.queryExpression(),
         layer: lotLayer,
         statusList: lotStatusLabel,
         statusColor: lotStatusColor,
@@ -154,7 +148,7 @@ const LotChart = () => {
 
       //--- total number of lots (public + private)
       totalFieldCount({
-        qChart: qe,
+        qChart: queryc.queryExpression(),
         layer: lotLayer,
         idField: lotIdField,
       }).then((result: any) => {
@@ -163,7 +157,7 @@ const LotChart = () => {
 
       //-- Total affected area
       totalFieldSum({
-        qChart: qe,
+        qChart: queryc.queryExpression(),
         layer: lotLayer,
         valueSumField: timesliderstate
           ? newAffectedAreafield
@@ -174,7 +168,7 @@ const LotChart = () => {
 
       //--- Total handed-over area
       totalFieldSum({
-        qChart: qe,
+        qChart: queryc.queryExpression(),
         layer: lotLayer,
         valueSumField: timesliderstate
           ? newHandedoverAreafield
@@ -185,16 +179,11 @@ const LotChart = () => {
       });
 
       //--- Total handed-over lots
-      const qe2 = queryExpression({
-        q1Value: municipals,
-        q1Field: municipalityField,
-        q2Value: barangays,
-        q2Field: barangayField,
-        qExpression: `${lotStatusField} <> 8`,
-      });
+      queryc2.qValues = [municipals, barangays];
+      queryc2.qExpression = `${lotStatusField} <> 8`;
 
       totalFieldSum({
-        qChart: qe2,
+        qChart: queryc2.queryExpression(),
         layer: lotLayer,
         valueSumField: timesliderstate
           ? newHandedOverfield
@@ -207,20 +196,6 @@ const LotChart = () => {
         zoomToLayer(lotLayer, arcgisScene);
         // zoomToLayer(structureLayer, arcgisScene);
       }
-
-      //--- Affected area for each status
-      // pieChartStatusData({
-      //   municipal: municipals,
-      //   barangay: barangays,
-      //   layer: lotLayer,
-      //   statusList: lotStatusLabel,
-      //   statusColor: lotStatusColor,
-      //   statusField: statusdatefield,
-      //   statisticType: "count",
-      //   queryField: `${statusdatefield} >= 1`,
-      // }).then((result: any) => {
-      //   setLotData(result[0]);
-      // });
     }
   }, [
     municipals,
