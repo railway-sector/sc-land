@@ -12,7 +12,6 @@ import {
   structureStatusField,
   updatedDateCategoryNames,
   valueLabelColor,
-  structureStatusLabel,
   structureStatusColorHex,
   municipalityField,
   barangayField,
@@ -32,8 +31,6 @@ function maybeDisposeRoot(divId: any) {
     }
   });
 }
-
-///*** Others */
 
 /// Draw chart
 const StructureChart = () => {
@@ -83,7 +80,7 @@ const StructureChart = () => {
     pieChartStatusData({
       qChart: queryc.queryExpression(),
       layer: structureLayer,
-      statusList: structureStatusLabel,
+      statusList: structureStatusQuery,
       statusColor: structureStatusColorHex,
       statusField: structureStatusField,
       statisticType: "count",

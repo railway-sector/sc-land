@@ -12,7 +12,6 @@ import {
   nloStatusQuery,
   updatedDateCategoryNames,
   valueLabelColor,
-  nloStatusLabel,
   nloStatusColor,
   municipalityField,
   barangayField,
@@ -85,7 +84,7 @@ const NloChart = memo(() => {
     pieChartStatusData({
       qChart: queryc.queryExpression(),
       layer: nloLayer,
-      statusList: nloStatusLabel,
+      statusList: nloStatusQuery,
       statusColor: nloStatusColor,
       statusField: nloStatusField,
       statisticType: "count",

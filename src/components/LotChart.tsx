@@ -18,7 +18,6 @@ import {
   lotIdField,
   lotStatusColor,
   lotStatusField,
-  lotStatusLabel,
   lotStatusQuery,
   municipalityField,
   primaryLabelColor,
@@ -138,7 +137,7 @@ const LotChart = () => {
       pieChartStatusData({
         qChart: queryc.queryExpression(),
         layer: lotLayer,
-        statusList: lotStatusLabel,
+        statusList: lotStatusQuery,
         statusColor: lotStatusColor,
         statusField: timesliderstate ? statusdatefield : lotStatusField,
         statisticType: "count",
