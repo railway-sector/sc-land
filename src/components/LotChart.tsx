@@ -260,7 +260,7 @@ const LotChart = () => {
       q1Field: municipalityField,
       q2Value: barangays,
       q2Field: barangayField,
-      status_field: lotStatusField,
+      status_field: timesliderstate ? statusdatefield : lotStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,
       data: lotData,
