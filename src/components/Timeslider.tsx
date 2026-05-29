@@ -31,6 +31,8 @@ export default function Timeslider() {
       dateCollect.push(final);
     });
 
+    console.log(dateCollect);
+
     const updatedDateCollect = [...dateCollect.slice(0, -1), latestasofdate];
 
     timeSlider.fullTimeExtent = {

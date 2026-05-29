@@ -83,6 +83,17 @@ export const queryc3 = new QueryExpressionLayers(
   undefined,
 );
 
+export const queryc4 = new QueryExpressionLayers(
+  [undefined, undefined],
+  [municipalityField, barangayField],
+  undefined,
+  undefined,
+  "string",
+  0,
+  undefined,
+  undefined,
+);
+
 export const querycExpro = new QueryExpressionLayers(
   [undefined, undefined],
   [municipalityField, barangayField],

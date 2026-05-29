@@ -3,6 +3,7 @@ import FeatureFilter from "@arcgis/core/layers/support/FeatureFilter";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import Query from "@arcgis/core/rest/support/Query";
 import { queryc3 } from "./layers";
+import { thousands_separators } from "./Query";
 
 // Dynamic chart size
 export function responsiveChart(
@@ -37,6 +38,103 @@ export function responsiveChart(
       to: new_pieSeries_scale,
       duration: 100,
     });
+  });
+}
+
+export function affectedAreaValue(
+  legend: any,
+  affectAreaPie: any,
+  statusLotLabel: any,
+) {
+  legend.valueLabels.template.adapters.add("text", (text: any, target: any) => {
+    const category = target.dataItem?.dataContext?.category;
+    // if (target.dataItem && target.dataItem.get('valuePercentTotal') < 5) {
+    //   return category === 'Paid'
+    //     ? // eslint-disable-next-line no-useless-concat
+    //       "{valuePercentTotal.formatNumber('#.')}% ({value})" + ' (' + testValue + ' sqm)'
+    //     : "{valuePercentTotal.formatNumber('#.')}% ({value})";
+    // }
+    // "[#C9CC3F; fontSize: 12px;][bold]{valuePercentTotal.formatNumber('#.')}% ({value})[/]"
+    if (target.dataItem) {
+      return category === statusLotLabel[0]
+        ? "{value}[/]" +
+            " (" +
+            thousands_separators(
+              affectAreaPie.find((emp: any) => emp.category === category)
+                ?.value,
+            ) +
+            " m2" +
+            ")"
+        : category === statusLotLabel[1]
+          ? "{value}[/]" +
+            " (" +
+            thousands_separators(
+              affectAreaPie?.find((emp: any) => emp.category === category)
+                ?.value,
+            ) +
+            " m2" +
+            ")"
+          : category === statusLotLabel[2]
+            ? "{value}[/]" +
+              " (" +
+              thousands_separators(
+                affectAreaPie?.find((emp: any) => emp.category === category)
+                  ?.value,
+              ) +
+              " m2" +
+              ")"
+            : category === statusLotLabel[3]
+              ? "{value}[/]" +
+                " (" +
+                thousands_separators(
+                  affectAreaPie?.find((emp: any) => emp.category === category)
+                    ?.value,
+                ) +
+                " m2" +
+                ")"
+              : category === statusLotLabel[4]
+                ? "{value}[/]" +
+                  " (" +
+                  thousands_separators(
+                    affectAreaPie?.find((emp: any) => emp.category === category)
+                      ?.value,
+                  ) +
+                  " m2" +
+                  ")"
+                : category === statusLotLabel[5]
+                  ? "{value}[/]" +
+                    " (" +
+                    thousands_separators(
+                      affectAreaPie?.find(
+                        (emp: any) => emp.category === category,
+                      )?.value,
+                    ) +
+                    " m2" +
+                    ")"
+                  : category === statusLotLabel[6]
+                    ? "{value}[/]" +
+                      " (" +
+                      thousands_separators(
+                        affectAreaPie?.find(
+                          (emp: any) => emp.category === category,
+                        )?.value,
+                      ) +
+                      " m2" +
+                      ")"
+                    : category === statusLotLabel[7]
+                      ? "{value}[/]" +
+                        " (" +
+                        thousands_separators(
+                          affectAreaPie?.find(
+                            (emp: any) => emp.category === category,
+                          )?.value,
+                        ) +
+                        " m2" +
+                        ")"
+                      : "{value}";
+    }
+
+    return text;
   });
 }
 

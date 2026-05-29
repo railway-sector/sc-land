@@ -1,5 +1,11 @@
 import { use, useEffect, useRef, useState } from "react";
-import { handedOverLotLayer, lotLayer, queryc, queryc2 } from "../layers";
+import {
+  handedOverLotLayer,
+  lotLayer,
+  queryc,
+  queryc2,
+  queryc4,
+} from "../layers";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
@@ -18,6 +24,7 @@ import {
   lotIdField,
   lotStatusColor,
   lotStatusField,
+  lotStatusLabel,
   lotStatusQuery,
   municipalityField,
   primaryLabelColor,
@@ -29,7 +36,7 @@ import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
 import { queryDefinitionExpression } from "../QueryExpression";
-import { chartRenderer } from "../ChartRenderer";
+import { affectedAreaValue, chartRenderer } from "../ChartRenderer";
 import {
   pieChartStatusData,
   totalFieldCount,
@@ -106,6 +113,9 @@ const LotChart = () => {
   const [totalAffectedArea, setTotalAffectedArea] = useState<
     number | undefined
   >();
+  const [affectAreaPie, setAffectAreaPie] = useState<
+    Array<{ category: string; value: number }>
+  >([]);
   const [handedOverNumber, setHandedOverNumber] = useState<number>(0);
   const [handedOverPercent, setHandedOverPercent] = useState<number>(0);
   const [handedOverArea, setHandedOverArea] = useState<number>(0);
@@ -172,7 +182,6 @@ const LotChart = () => {
         valueSumField: timesliderstate
           ? newHandedoverAreafield
           : lotHandedOverAreaField,
-        // queryField: `${lotStatusField} <> 8`,
       }).then((result: any) => {
         setHandedOverArea(result);
       });
@@ -189,6 +198,24 @@ const LotChart = () => {
           : lotHandedOverField,
       }).then((result: any) => {
         setHandedOverNumber(result);
+      });
+
+      //--- Affected area for each status
+      queryc4.qValues = [municipals, barangays];
+      queryc4.qExpression = `${statusdatefield} >= 1`;
+
+      pieChartStatusData({
+        qChart: queryc4.queryExpression(),
+        layer: lotLayer,
+        statusList: lotStatusQuery,
+        statusColor: lotStatusColor,
+        statusField: timesliderstate ? statusdatefield : lotStatusField,
+        valueSumField: timesliderstate
+          ? newAffectedAreafield
+          : affectedAreaField,
+        statisticType: "sum",
+      }).then((result: any) => {
+        setAffectAreaPie(result[0]);
       });
 
       if (!timesliderstate) {
@@ -232,7 +259,10 @@ const LotChart = () => {
         categoryField: "category",
         valueField: "value",
         // legendLabelText: "{category}",
-        legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
+        // legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
+        legendLabelText:
+          '{category}[/] ([#C9CC3F; bold]{valuePercentTotal.formatNumber("#.")}%[/]) ',
+
         radius: am5.percent(45), // outer radius
         innerRadius: am5.percent(28),
       }),
@@ -271,6 +301,7 @@ const LotChart = () => {
       layer: lotLayer,
       statusArray: lotStatusQuery,
     });
+    affectedAreaValue(legend, affectAreaPie, lotStatusLabel);
 
     // Dispose root
     return () => {
