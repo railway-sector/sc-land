@@ -37,11 +37,7 @@ import "@arcgis/map-components/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
 import { queryDefinitionExpression } from "../QueryExpression";
 import { affectedAreaValue, chartRenderer } from "../ChartRenderer";
-import {
-  pieChartStatusData,
-  totalFieldCount,
-  totalFieldSum,
-} from "../ChartGenerator";
+import { pieChartStatusData, fieldStatistic } from "../ChartGenerator";
 
 // Dispose function
 function maybeDisposeRoot(divId: any) {
@@ -156,32 +152,35 @@ const LotChart = () => {
       });
 
       //--- total number of lots (public + private)
-      totalFieldCount({
+      fieldStatistic({
         qChart: queryc.queryExpression(),
         layer: lotLayer,
-        idField: lotIdField,
+        statisticField: lotIdField,
+        statisticType: "count",
       }).then((result: any) => {
         setLotNumber(result);
       });
 
       //-- Total affected area
-      totalFieldSum({
+      fieldStatistic({
         qChart: queryc.queryExpression(),
         layer: lotLayer,
-        valueSumField: timesliderstate
+        statisticField: timesliderstate
           ? newAffectedAreafield
           : affectedAreaField,
+        statisticType: "sum",
       }).then((result: any) => {
         setTotalAffectedArea(result);
       });
 
       //--- Total handed-over area
-      totalFieldSum({
+      fieldStatistic({
         qChart: queryc.queryExpression(),
         layer: lotLayer,
-        valueSumField: timesliderstate
+        statisticField: timesliderstate
           ? newHandedoverAreafield
           : lotHandedOverAreaField,
+        statisticType: "sum",
       }).then((result: any) => {
         setHandedOverArea(result);
       });
@@ -190,12 +189,13 @@ const LotChart = () => {
       queryc2.qValues = [municipals, barangays];
       queryc2.qExpression = `${lotStatusField} <> 8`;
 
-      totalFieldSum({
+      fieldStatistic({
         qChart: queryc2.queryExpression(),
         layer: lotLayer,
-        valueSumField: timesliderstate
+        statisticField: timesliderstate
           ? newHandedOverfield
           : lotHandedOverField,
+        statisticType: "sum",
       }).then((result: any) => {
         setHandedOverNumber(result);
       });

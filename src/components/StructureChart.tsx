@@ -88,16 +88,6 @@ const StructureChart = () => {
       setStructureData(result[0]);
       setStructureNumber(result[1]);
     });
-
-    //--- total number of pte
-    // totalFieldCount({
-    //   contractcp: contractpackages,
-    //   layer: structureLayer,
-    //   idField: structurePteField,
-    //   queryField: `${structurePteField} = 1`,
-    // }).then((result: any) => {
-    //   setPteNumber(result);
-    // });
   }, [municipals, barangays]);
 
   useEffect(() => {

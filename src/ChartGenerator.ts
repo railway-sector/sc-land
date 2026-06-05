@@ -13,7 +13,7 @@ interface pieChartStatusDataType {
   statusList?: any;
   statusColor?: any;
   statusField?: any;
-  idField?: any;
+  statisticField?: any;
   valueSumField?: any;
   queryField?: any;
   statisticType?: statisticsType;
@@ -94,15 +94,16 @@ export async function pieChartStatusData({
   });
 }
 
-export async function totalFieldCount({
+export async function fieldStatistic({
   qChart,
   layer,
-  idField,
+  statisticField,
+  statisticType,
 }: pieChartStatusDataType) {
   const statsCollect = new StatisticDefinition({
-    onStatisticField: idField,
+    onStatisticField: statisticField,
     outStatisticFieldName: "statsCollect",
-    statisticType: "count",
+    statisticType: statisticType,
   });
 
   //--- Query
@@ -115,23 +116,65 @@ export async function totalFieldCount({
   });
 }
 
-export async function totalFieldSum({
-  qChart,
-  layer,
-  valueSumField,
-}: pieChartStatusDataType) {
-  const statsCollect = new StatisticDefinition({
-    onStatisticField: valueSumField,
-    outStatisticFieldName: "statsCollect",
-    statisticType: "sum",
-  });
+// export async function totalFieldSum({
+//   qChart,
+//   layer,
+//   valueSumField,
+// }: pieChartStatusDataType) {
+//   const statsCollect = new StatisticDefinition({
+//     onStatisticField: valueSumField,
+//     outStatisticFieldName: "statsCollect",
+//     statisticType: "sum",
+//   });
 
-  //--- Query
-  const query = new Query();
-  query.outStatistics = [statsCollect];
-  query.where = qChart;
+//   //--- Query
+//   const query = new Query();
+//   query.outStatistics = [statsCollect];
+//   query.where = qChart;
 
-  return layer?.queryFeatures(query).then((response: any) => {
-    return response.features[0].attributes.statsCollect;
-  });
-}
+//   return layer?.queryFeatures(query).then((response: any) => {
+//     return response.features[0].attributes.statsCollect;
+//   });
+// }
+
+// export async function totalFieldCount({
+//   qChart,
+//   layer,
+//   idField,
+// }: pieChartStatusDataType) {
+//   const statsCollect = new StatisticDefinition({
+//     onStatisticField: idField,
+//     outStatisticFieldName: "statsCollect",
+//     statisticType: "count",
+//   });
+
+//   //--- Query
+//   const query = new Query();
+//   query.outStatistics = [statsCollect];
+//   query.where = qChart;
+
+//   return layer?.queryFeatures(query).then((response: any) => {
+//     return response.features[0].attributes.statsCollect;
+//   });
+// }
+
+// export async function totalFieldSum({
+//   qChart,
+//   layer,
+//   valueSumField,
+// }: pieChartStatusDataType) {
+//   const statsCollect = new StatisticDefinition({
+//     onStatisticField: valueSumField,
+//     outStatisticFieldName: "statsCollect",
+//     statisticType: "sum",
+//   });
+
+//   //--- Query
+//   const query = new Query();
+//   query.outStatistics = [statsCollect];
+//   query.where = qChart;
+
+//   return layer?.queryFeatures(query).then((response: any) => {
+//     return response.features[0].attributes.statsCollect;
+//   });
+// }
