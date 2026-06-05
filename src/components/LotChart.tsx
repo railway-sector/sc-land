@@ -229,6 +229,7 @@ const LotChart = () => {
     statusdatefield,
     newHandedOverfield,
     newHandedoverAreafield,
+    timesliderstate,
   ]);
 
   useEffect(() => {
@@ -307,7 +308,13 @@ const LotChart = () => {
     return () => {
       root.dispose();
     };
-  }, [chartID, lotData, newAffectedAreafield, newHandedOverfield]);
+  }, [
+    chartID,
+    lotData,
+    newAffectedAreafield,
+    newHandedOverfield,
+    affectAreaPie,
+  ]);
 
   useEffect(() => {
     pieSeriesRef.current?.data.setAll(lotData);
