@@ -145,6 +145,7 @@ const LotChart = () => {
         statusList: lotStatusQuery,
         statusColor: lotStatusColor,
         statusField: timesliderstate ? statusdatefield : lotStatusField,
+        statisticField: timesliderstate ? statusdatefield : lotStatusField,
         statisticType: "count",
       }).then((result: any) => {
         setLotData(result[0]);
@@ -209,7 +210,7 @@ const LotChart = () => {
         statusList: lotStatusQuery,
         statusColor: lotStatusColor,
         statusField: timesliderstate ? statusdatefield : lotStatusField,
-        valueSumField: timesliderstate
+        statisticField: timesliderstate
           ? newAffectedAreafield
           : affectedAreaField,
         statisticType: "sum",
