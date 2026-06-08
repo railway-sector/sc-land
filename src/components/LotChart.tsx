@@ -4,6 +4,7 @@ import {
   lotLayer,
   queryc,
   queryc2,
+  queryc3,
   queryc4,
 } from "../layers";
 import * as am5 from "@amcharts/amcharts5";
@@ -17,7 +18,6 @@ import "@esri/calcite-components/dist/components/calcite-segmented-control-item"
 import "@esri/calcite-components/dist/components/calcite-checkbox";
 import {
   affectedAreaField,
-  barangayField,
   cutoff_days,
   lotHandedOverAreaField,
   lotHandedOverField,
@@ -26,7 +26,6 @@ import {
   lotStatusField,
   lotStatusLabel,
   lotStatusQuery,
-  municipalityField,
   primaryLabelColor,
   updatedDateCategoryNames,
   valueLabelColor,
@@ -281,16 +280,15 @@ const LotChart = () => {
     legendRef.current = legend;
     legend.data.setAll(pieSeries.dataItems);
 
+    queryc3.qValues = [municipals, barangays];
+
     // Render chart
     chartRenderer({
       chart: chart,
       pieSeries: pieSeries,
       legend: legend,
       root: root,
-      q1Value: municipals,
-      q1Field: municipalityField,
-      q2Value: barangays,
-      q2Field: barangayField,
+      qChart: queryc3,
       status_field: timesliderstate ? statusdatefield : lotStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

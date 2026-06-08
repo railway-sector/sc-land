@@ -13,12 +13,10 @@ import {
   updatedDateCategoryNames,
   valueLabelColor,
   nloStatusColor,
-  municipalityField,
-  barangayField,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
-import { nloLayer, queryc } from "../layers";
+import { nloLayer, queryc, queryc3 } from "../layers";
 import { queryDefinitionExpression } from "../QueryExpression";
 import { chartRenderer } from "../ChartRenderer";
 import { pieChartStatusData } from "../ChartGenerator";
@@ -147,16 +145,15 @@ const NloChart = memo(() => {
     legendRef.current = legend;
     legend.data.setAll(pieSeries.dataItems);
 
+    queryc3.qValues = [municipals, barangays];
+
     // Render chart
     chartRenderer({
       chart: chart,
       pieSeries: pieSeries,
       legend: legend,
       root: root,
-      q1Value: municipals,
-      q1Field: municipalityField,
-      q2Value: barangays,
-      q2Field: barangayField,
+      qChart: queryc3,
       status_field: nloStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

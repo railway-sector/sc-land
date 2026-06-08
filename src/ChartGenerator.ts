@@ -6,7 +6,6 @@ import type { statisticsType } from "./uniqueValues";
 //---------------------------------------------//
 //           Pie Chart Data Generation         //
 //---------------------------------------------//
-
 interface pieChartStatusDataType {
   qChart: any;
   layer: any;
@@ -115,66 +114,3 @@ export async function fieldStatistic({
     return response.features[0].attributes.statsCollect;
   });
 }
-
-// export async function totalFieldSum({
-//   qChart,
-//   layer,
-//   valueSumField,
-// }: pieChartStatusDataType) {
-//   const statsCollect = new StatisticDefinition({
-//     onStatisticField: valueSumField,
-//     outStatisticFieldName: "statsCollect",
-//     statisticType: "sum",
-//   });
-
-//   //--- Query
-//   const query = new Query();
-//   query.outStatistics = [statsCollect];
-//   query.where = qChart;
-
-//   return layer?.queryFeatures(query).then((response: any) => {
-//     return response.features[0].attributes.statsCollect;
-//   });
-// }
-
-// export async function totalFieldCount({
-//   qChart,
-//   layer,
-//   idField,
-// }: pieChartStatusDataType) {
-//   const statsCollect = new StatisticDefinition({
-//     onStatisticField: idField,
-//     outStatisticFieldName: "statsCollect",
-//     statisticType: "count",
-//   });
-
-//   //--- Query
-//   const query = new Query();
-//   query.outStatistics = [statsCollect];
-//   query.where = qChart;
-
-//   return layer?.queryFeatures(query).then((response: any) => {
-//     return response.features[0].attributes.statsCollect;
-//   });
-// }
-
-// export async function totalFieldSum({
-//   qChart,
-//   layer,
-//   valueSumField,
-// }: pieChartStatusDataType) {
-//   const statsCollect = new StatisticDefinition({
-//     onStatisticField: valueSumField,
-//     outStatisticFieldName: "statsCollect",
-//     statisticType: "sum",
-//   });
-
-//   //--- Query
-//   const query = new Query();
-//   query.outStatistics = [statsCollect];
-//   query.where = qChart;
-
-//   return layer?.queryFeatures(query).then((response: any) => {
-//     return response.features[0].attributes.statsCollect;
-//   });
-// }
