@@ -59,6 +59,7 @@ export const queryc_lot = new QueryExpressionLayers(
   0,
   undefined,
   undefined,
+  undefined,
 );
 
 export const queryc_lot2 = new QueryExpressionLayers(
@@ -68,6 +69,7 @@ export const queryc_lot2 = new QueryExpressionLayers(
   undefined,
   "string",
   0,
+  undefined,
   undefined,
   undefined,
 );
@@ -81,6 +83,7 @@ export const queryc_lot3 = new QueryExpressionLayers(
   0,
   undefined,
   undefined,
+  undefined,
 );
 
 export const queryc_struc = new QueryExpressionLayers(
@@ -90,6 +93,7 @@ export const queryc_struc = new QueryExpressionLayers(
   undefined,
   "string",
   0,
+  undefined,
   undefined,
   undefined,
 );
@@ -103,6 +107,7 @@ export const queryc_nlo = new QueryExpressionLayers(
   0,
   undefined,
   undefined,
+  undefined,
 );
 
 export const querycExpro = new QueryExpressionLayers(
@@ -112,6 +117,7 @@ export const querycExpro = new QueryExpressionLayers(
   undefined,
   "string",
   0,
+  undefined,
   undefined,
   undefined,
 );
