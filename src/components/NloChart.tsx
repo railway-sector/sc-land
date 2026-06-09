@@ -4,7 +4,11 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
-import { dateUpdate, thousands_separators } from "../Query";
+import {
+  queryDefinitionExpression,
+  dateUpdate,
+  thousands_separators,
+} from "../Query";
 import {
   cutoff_days,
   nloStatusField,
@@ -16,8 +20,7 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
-import { nloLayer, queryc, queryc3 } from "../layers";
-import { queryDefinitionExpression } from "../QueryExpression";
+import { nloLayer, queryc_nlo } from "../layers";
 import { chartRenderer } from "../ChartRenderer";
 import { pieChartStatusData } from "../ChartGenerator";
 
@@ -72,15 +75,16 @@ const NloChart = memo(() => {
   const chartID = "nlo-chart";
 
   useEffect(() => {
-    queryc.qValues = [municipals, barangays];
+    queryc_nlo.qValues = [municipals, barangays];
+    queryc_nlo.qExpression = `${nloStatusField} >= 1`;
     queryDefinitionExpression({
-      queryExpression: queryc.queryExpression(),
+      queryExpression: queryc_nlo.queryExpression(),
       featureLayer: [nloLayer],
     });
 
     //--- chart data
     pieChartStatusData({
-      qChart: queryc.queryExpression(),
+      qChart: queryc_nlo.queryExpression(),
       layer: nloLayer,
       statusList: nloStatusQuery,
       statusColor: nloStatusColor,
@@ -146,15 +150,13 @@ const NloChart = memo(() => {
     legendRef.current = legend;
     legend.data.setAll(pieSeries.dataItems);
 
-    queryc3.qValues = [municipals, barangays];
-
     // Render chart
     chartRenderer({
       chart: chart,
       pieSeries: pieSeries,
       legend: legend,
       root: root,
-      qChart: queryc3,
+      qChart: queryc_nlo,
       status_field: nloStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

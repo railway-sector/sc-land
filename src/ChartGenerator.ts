@@ -43,39 +43,39 @@ export async function pieChartStatusData({
 
   //--- Query features using statistics definitions
   let total_count = 0;
-  return layer?.queryFeatures(query).then(async (response: any) => {
-    const stats = response.features;
-    const data = stats.map((result: any) => {
-      const attributes = result.attributes;
-      total_count += attributes.statsCollect;
-      const statusName = attributes[statusField];
 
-      //--- Check if attributes[statusField] is numeric or string
-      //--- This correctly accounts for a case where status in the attribute table is not number,
-      const isStringOrNumber = typeof statusName === "number";
+  const response = await layer?.queryFeatures(query);
+  const data = response.features.map((result: any) => {
+    const attributes = result.attributes;
+    total_count += attributes.statsCollect;
+    const statusName = attributes[statusField];
 
-      return Object.assign({
-        category: isStringOrNumber
-          ? statusList.find((item: any) => item.value === statusName).category
-          : statusName,
-        value: attributes.statsCollect,
-      });
+    //--- Check if attributes[statusField] is numeric or string
+    //--- This correctly accounts for a case where status in the attribute table is not number,
+    const isStringOrNumber = typeof statusName === "number";
+
+    return Object.assign({
+      category: isStringOrNumber
+        ? statusList.find((item: any) => item.value === statusName).category
+        : statusName,
+      value: attributes.statsCollect,
     });
-
-    //--- Account for zero count
-    const data0 = statusList.map((status: any, index: any) => {
-      const find = data.find((emp: any) => emp.category === status.category);
-      const value = find === undefined ? 0 : find?.value;
-      return Object.assign({
-        category: status.category,
-        value: value,
-        sliceSettings: {
-          fill: am5.color(statusColor[index]),
-        },
-      });
-    });
-    return [data0, total_count];
   });
+
+  //--- Account for zero count
+  const data0 = statusList.map((status: any, index: any) => {
+    const find = data.find((emp: any) => emp.category === status.category);
+    const value = find === undefined ? 0 : find?.value;
+    return Object.assign({
+      category: status.category,
+      value: value,
+      sliceSettings: {
+        fill: am5.color(statusColor[index]),
+      },
+    });
+  });
+
+  return [data0, total_count];
 }
 
 export async function fieldStatistic({

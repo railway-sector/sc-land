@@ -16,9 +16,42 @@ import {
   cpField,
 } from "./uniqueValues";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
-//-----------------------------------------------------------
-// Change symbology of lot layer
+//---------------------------------------------------------//
+//    Definition Expression using queryExpression          //
+//---------------------------------------------------------//
+interface queryDefinitionExpressionType {
+  queryExpression?: string;
+  featureLayer?:
+    | [FeatureLayer, FeatureLayer?, FeatureLayer?, FeatureLayer?, FeatureLayer?]
+    | any;
+}
+
+export function queryDefinitionExpression({
+  queryExpression,
+  featureLayer,
+}: queryDefinitionExpressionType) {
+  if (queryExpression) {
+    if (featureLayer) {
+      if (Array.isArray(featureLayer)) {
+        featureLayer.forEach((layer) => {
+          if (layer) {
+            layer.definitionExpression = queryExpression;
+            // layer.visible = true;
+          }
+        });
+      } else {
+        featureLayer.definitionExpression = queryExpression;
+        // featureLayer.visible = true;
+      }
+    }
+  }
+}
+
+//--------------------------------------------//
+//  Change symbology of lot layer             //
+//--------------------------------------------//
 export function updateLotSymbology(new_date_field: any) {
   try {
     const lotLayerRenderer = new UniqueValueRenderer({
@@ -43,7 +76,9 @@ export function lastDateOfMonth(date: Date) {
   return final_date;
 }
 
-// Updat date
+//--------------------------------------------//
+//                   Update dates             //
+//--------------------------------------------//
 export async function dateUpdate(category: any) {
   const query = dateTable.createQuery();
   const queryExpression =

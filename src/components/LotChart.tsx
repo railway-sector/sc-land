@@ -2,16 +2,20 @@ import { use, useEffect, useRef, useState } from "react";
 import {
   handedOverLotLayer,
   lotLayer,
-  queryc,
-  queryc2,
-  queryc3,
-  queryc4,
+  queryc_lot2,
+  queryc_lot,
+  queryc_lot3,
 } from "../layers";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
-import { dateUpdate, thousands_separators, zoomToLayer } from "../Query";
+import {
+  queryDefinitionExpression,
+  dateUpdate,
+  thousands_separators,
+  zoomToLayer,
+} from "../Query";
 
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
@@ -34,7 +38,6 @@ import {
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
 import { MyContext } from "../contexts/MyContext";
-import { queryDefinitionExpression } from "../QueryExpression";
 import { affectedAreaValue, chartRenderer } from "../ChartRenderer";
 import { pieChartStatusData, fieldStatistic } from "../ChartGenerator";
 
@@ -132,15 +135,15 @@ const LotChart = () => {
 
   useEffect(() => {
     if (statusdatefield) {
-      queryc.qValues = [municipals, barangays];
+      queryc_lot.qValues = [municipals, barangays];
       queryDefinitionExpression({
-        queryExpression: queryc.queryExpression(),
+        queryExpression: queryc_lot.queryExpression(),
         featureLayer: [lotLayer, handedOverLotLayer],
       });
 
       //--- chart data
       pieChartStatusData({
-        qChart: queryc.queryExpression(),
+        qChart: queryc_lot.queryExpression(),
         layer: lotLayer,
         statusList: lotStatusQuery,
         statusColor: lotStatusColor,
@@ -153,7 +156,7 @@ const LotChart = () => {
 
       //--- total number of lots (public + private)
       fieldStatistic({
-        qChart: queryc.queryExpression(),
+        qChart: queryc_lot.queryExpression(),
         layer: lotLayer,
         statisticField: lotIdField,
         statisticType: "count",
@@ -163,7 +166,7 @@ const LotChart = () => {
 
       //-- Total affected area
       fieldStatistic({
-        qChart: queryc.queryExpression(),
+        qChart: queryc_lot.queryExpression(),
         layer: lotLayer,
         statisticField: timesliderstate
           ? newAffectedAreafield
@@ -175,7 +178,7 @@ const LotChart = () => {
 
       //--- Total handed-over area
       fieldStatistic({
-        qChart: queryc.queryExpression(),
+        qChart: queryc_lot.queryExpression(),
         layer: lotLayer,
         statisticField: timesliderstate
           ? newHandedoverAreafield
@@ -186,11 +189,11 @@ const LotChart = () => {
       });
 
       //--- Total handed-over lots
-      queryc2.qValues = [municipals, barangays];
-      queryc2.qExpression = `${lotStatusField} <> 8`;
+      queryc_lot2.qValues = [municipals, barangays];
+      queryc_lot2.qExpression = `${timesliderstate ? statusdatefield : lotStatusField} <> 8`;
 
       fieldStatistic({
-        qChart: queryc2.queryExpression(),
+        qChart: queryc_lot2.queryExpression(),
         layer: lotLayer,
         statisticField: timesliderstate
           ? newHandedOverfield
@@ -201,11 +204,11 @@ const LotChart = () => {
       });
 
       //--- Affected area for each status
-      queryc4.qValues = [municipals, barangays];
-      queryc4.qExpression = `${statusdatefield} >= 1`;
+      queryc_lot3.qValues = [municipals, barangays];
+      queryc_lot3.qExpression = `${timesliderstate ? statusdatefield : lotStatusField} >= 1`;
 
       pieChartStatusData({
-        qChart: queryc4.queryExpression(),
+        qChart: queryc_lot3.queryExpression(),
         layer: lotLayer,
         statusList: lotStatusQuery,
         statusColor: lotStatusColor,
@@ -281,15 +284,13 @@ const LotChart = () => {
     legendRef.current = legend;
     legend.data.setAll(pieSeries.dataItems);
 
-    queryc3.qValues = [municipals, barangays];
-
     // Render chart
     chartRenderer({
       chart: chart,
       pieSeries: pieSeries,
       legend: legend,
       root: root,
-      qChart: queryc3,
+      qChart: queryc_lot,
       status_field: timesliderstate ? statusdatefield : lotStatusField,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: updateChartPanelwidth,

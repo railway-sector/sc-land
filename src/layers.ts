@@ -50,7 +50,7 @@ import {
 } from "./uniqueValues";
 import QueryExpressionLayers from "query-layers-expression";
 
-export const queryc = new QueryExpressionLayers(
+export const queryc_lot = new QueryExpressionLayers(
   [undefined, undefined],
   [municipalityField, barangayField],
   undefined,
@@ -61,7 +61,7 @@ export const queryc = new QueryExpressionLayers(
   undefined,
 );
 
-export const queryc2 = new QueryExpressionLayers(
+export const queryc_lot2 = new QueryExpressionLayers(
   [undefined, undefined],
   [municipalityField, barangayField],
   undefined,
@@ -72,7 +72,7 @@ export const queryc2 = new QueryExpressionLayers(
   undefined,
 );
 
-export const queryc3 = new QueryExpressionLayers(
+export const queryc_lot3 = new QueryExpressionLayers(
   [undefined, undefined],
   [municipalityField, barangayField],
   undefined,
@@ -83,7 +83,18 @@ export const queryc3 = new QueryExpressionLayers(
   undefined,
 );
 
-export const queryc4 = new QueryExpressionLayers(
+export const queryc_struc = new QueryExpressionLayers(
+  [undefined, undefined],
+  [municipalityField, barangayField],
+  undefined,
+  undefined,
+  "string",
+  0,
+  undefined,
+  undefined,
+);
+
+export const queryc_nlo = new QueryExpressionLayers(
   [undefined, undefined],
   [municipalityField, barangayField],
   undefined,
