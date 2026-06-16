@@ -341,7 +341,6 @@ export async function defineActions(event: any) {
   item.title === "SC Alignment 7.1.6" ||
   item.title === "SC Alignment 3.9.3" ||
   item.title === "Substation" ||
-  item.title === "Future Track" ||
   item.title === "Households Ownership (Structure)" ||
   item.title === "Super Urgent Lot" ||
   item.title === "Handed-Over (public + private)" ||
@@ -357,6 +356,10 @@ export async function defineActions(event: any) {
   item.title === "Proposed/Recorded NGCP Lines" ||
   item.title === "Proposed Pole Relocation" ||
   item.title === "Proposed East Service Road" ||
+  item.title === "Temporary Fencing" ||
+  item.title === "Permanent Fencing" ||
+  item.title === "Drainage" ||
+  item.title === "Provision for Freight Line" ||
   item.title === "Maintenance Road" ||
   item.title === "Handed-Over Area"
     ? (item.visible = false)

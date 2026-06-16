@@ -31,14 +31,6 @@ async function resultClickHandler(event: any) {
       // speedFactor: 2,
       zoom: 17,
     });
-  // lotLayer.queryExtent(queryExtent).then((result: any) => {
-  //   result.extent &&
-  //     arcgisScene?.goTo({
-  //       target: result.extent,
-  //       // speedFactor: 2,
-  //       zoom: 17,
-  //     });
-  // });
 
   const layerView = await arcgisScene?.whenLayerView(lotLayer);
   highlightSelect && highlightSelect.remove();
@@ -47,16 +39,6 @@ async function resultClickHandler(event: any) {
     layerView.filter = null;
     highlightSelect.remove();
   });
-
-  // arcgisScene?.whenLayerView(lotLayer).then((layerView: any) => {
-  //   highlightSelect && highlightSelect.remove();
-  //   highlightSelect = layerView.highlight([event.target.value]);
-
-  //   arcgisScene?.view.on("click", () => {
-  //     layerView.filter = null;
-  //     highlightSelect.remove();
-  //   });
-  // });
 }
 
 const ExpropriationList = () => {

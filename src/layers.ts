@@ -422,6 +422,121 @@ export const meralco_site1_prowLayer = new FeatureLayer({
   renderer: prowRenderer,
 });
 
+/* Temporary Fencing */
+var temporaryFencingRenderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#FFEBBE",
+    width: "2px",
+  }),
+});
+
+export const temporaryFencingLayer = new FeatureLayer({
+  portalItem: {
+    id: "e37f3dab086c4063ba28c7e4d4075d60",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 1,
+  title: "Temporary Fencing",
+  renderer: temporaryFencingRenderer,
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
+/* Permanent Fencing */
+const permanentFencingRenderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#FFA77F",
+    width: "2px",
+  }),
+});
+
+export const permanentFencingLayer = new FeatureLayer({
+  portalItem: {
+    id: "e37f3dab086c4063ba28c7e4d4075d60",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 2,
+  title: "Permanent Fencing",
+  renderer: permanentFencingRenderer,
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
+/* Maintenance Road */
+const maintenanceRoadRenderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#98E600",
+    width: "2px",
+  }),
+});
+
+export const maintenanceRoadLayer = new FeatureLayer({
+  portalItem: {
+    id: "e37f3dab086c4063ba28c7e4d4075d60",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 3,
+  title: "Maintenance Road",
+  renderer: maintenanceRoadRenderer,
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
+/* Drainage */
+const drainageRenderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#0070FF",
+    width: "2px",
+  }),
+});
+
+export const drainageLayer = new FeatureLayer({
+  portalItem: {
+    id: "e37f3dab086c4063ba28c7e4d4075d60",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 4,
+  title: "Drainage",
+  renderer: drainageRenderer,
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
+/* Future Track */
+const provisionForFreightLineRenderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#00FFC5",
+    width: "2px",
+  }),
+});
+
+export const provisionForFreightLineLayer = new FeatureLayer({
+  portalItem: {
+    id: "e37f3dab086c4063ba28c7e4d4075d60",
+    portal: {
+      url: "https://gis.railway-sector.com/portal",
+    },
+  },
+  layerId: 5,
+  title: "Provision for Freight Line",
+  renderer: provisionForFreightLineRenderer,
+  elevationInfo: {
+    mode: "on-the-ground",
+  },
+});
+
 /*------- NGCP Layers ---------- */
 /* NGCP Working Area */
 const ngcpPoleWARenderer = new SimpleRenderer({
@@ -755,27 +870,6 @@ export const stationLayer = new FeatureLayer({
   },
 });
 stationLayer.listMode = "hide";
-
-const maintenanceRoadRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#98E600",
-    width: "2px",
-  }),
-});
-
-export const maintenanceRoadLayer = new FeatureLayer({
-  portalItem: {
-    id: "e37f3dab086c4063ba28c7e4d4075d60",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  renderer: maintenanceRoadRenderer,
-  title: "Maintenance Road",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
 
 /* Proposed East Service Road */
 const proposedEastServiceRoadRenderer = new SimpleRenderer({
@@ -1723,32 +1817,6 @@ export const substationLayer = new FeatureLayer({
   },
 });
 
-/* For SC Future Track */
-const scFutureTrack = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#C2C7FC",
-    width: "3px",
-    style: "solid",
-  }),
-});
-
-export const scFutureTrackLayer = new FeatureLayer({
-  portalItem: {
-    id: "a0ec0ab1c19c4927b0934b524e398a6a",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 64,
-  renderer: scFutureTrack,
-  popupEnabled: false,
-  labelsVisible: false,
-  title: "Future Track",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
 // Group layers //
 export const alignmentGroupLayer = new GroupLayer({
   title: "Alignment",
@@ -1757,15 +1825,19 @@ export const alignmentGroupLayer = new GroupLayer({
   layers: [
     stationBoxLayer,
     chainageLayer,
-    prow_tunnelLayer,
     cp_break_lines,
     pierHeadColumnLayer,
     substationLayer,
-    scFutureTrackLayer,
     meralco_site1_prowLayer,
+    provisionForFreightLineLayer,
+    drainageLayer,
+    maintenanceRoadLayer,
+    permanentFencingLayer,
+    temporaryFencingLayer,
     prowLayerold,
     prowLayerold2,
     prowLayer,
+    prow_tunnelLayer,
     maintenanceRoadLayer,
     proposedEastServiceRoadLayer,
   ],
