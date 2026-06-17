@@ -3,16 +3,14 @@ import "@esri/calcite-components/components/calcite-list-item";
 import "@esri/calcite-components/components/calcite-shell-panel";
 import "@esri/calcite-components/components/calcite-action";
 import "@esri/calcite-components/components/calcite-action-bar";
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import "@arcgis/map-components/components/arcgis-basemap-gallery";
 import "@arcgis/map-components/components/arcgis-layer-list";
 import "@arcgis/map-components/components/arcgis-legend";
 import "@arcgis/map-components/components/arcgis-direct-line-measurement-3d";
 import "@arcgis/map-components/components/arcgis-area-measurement-3d";
 import { defineActions } from "../uniqueValues";
-
 import HandedOverAreaChart from "./HandedOverAreaChart";
-import { MyContext } from "../contexts/MyContext";
 import { updateLotSymbology } from "../Query";
 import Timeslider from "./Timeslider";
 import {
@@ -22,15 +20,22 @@ import {
   ngcp_pole7,
   ngcp_working_area6,
 } from "../layers";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  datefieldKeys,
+  dateDisplayKeys,
+  timesliderKeys,
+  latestDateKeys,
+} from "../interfaceKeys";
+import type {
+  DateFieldsType,
+  DisplayDates,
+  TimeSliderState,
+  LatestDateType,
+} from "../interfaceKeys";
 
 function ActionPanel() {
-  const {
-    updateStatusdatefield,
-    updateTimesliderstate,
-    latestasofdate,
-    updateAsofdate,
-    datefields,
-  } = use(MyContext);
+  const queryClient = useQueryClient();
   const [activeWidget, setActiveWidget] = useState(null);
   const [nextWidget, setNextWidget] = useState(null);
   const arcgisScene = document.querySelector("arcgis-scene");
@@ -41,6 +46,22 @@ function ActionPanel() {
   const timeSlider = document.querySelector("arcgis-time-slider");
   const shellPanel: any = document.getElementById("left-shell-panel");
 
+  //--- Read date fields
+  const { data: datefields } = useQuery<DateFieldsType | any>({
+    queryKey: datefieldKeys.selected,
+    queryFn: async () => ({}),
+    staleTime: Infinity,
+  });
+  const date_fields = datefields?.dateFields;
+
+  //--- Read latest date
+  const { data: latestDate } = useQuery<LatestDateType | any>({
+    queryKey: latestDateKeys.selected,
+    queryFn: async () => ({}),
+    staleTime: Infinity,
+  });
+  const latestasofdate = latestDate?.latestasofdate;
+
   useEffect(() => {
     if (activeWidget) {
       const actionActiveWidget: any = document.querySelector(
@@ -49,14 +70,11 @@ function ActionPanel() {
       actionActiveWidget.hidden = true;
       shellPanel.collapsed = true;
 
-      directLineMeasure
-        ? directLineMeasure.clear()
-        : console.log("Line measure is cleared");
+      //-- Reset line and area measurement
+      directLineMeasure && directLineMeasure.clear();
+      areaMeasure && areaMeasure.clear();
 
-      areaMeasure
-        ? areaMeasure.clear()
-        : console.log("Area measure is cleared");
-
+      //--- Reset timeslider to default state
       if (timeSlider) {
         timeSlider.timeExtent = null;
         shellPanel.collapsed = true;
@@ -65,12 +83,19 @@ function ActionPanel() {
         const month = latestasofdate.toLocaleString("en-US", {
           month: "long",
         });
-
         const day = latestasofdate.getDate();
-        updateAsofdate(`${month} ${day}, ${year}`);
-        updateStatusdatefield(datefields[datefields.length - 1]);
-        updateLotSymbology(datefields[datefields.length - 1]);
-        updateTimesliderstate(false);
+
+        //-- Update As of date
+        queryClient.setQueryData<DisplayDates | any>(dateDisplayKeys.selected, {
+          asOfDate: `${month} ${day}, ${year}`,
+        });
+
+        //--- Update timeslider state
+        queryClient.setQueryData<TimeSliderState>(timesliderKeys.selected, {
+          timesliderstate: false,
+        });
+
+        updateLotSymbology(date_fields[date_fields.length - 1]);
       }
     }
 
@@ -83,9 +108,16 @@ function ActionPanel() {
 
       // Timeslider and handedOver charts do not appear in shell-panel so
       // need to collapse shell-panel manually
-      if (nextWidget === "timeslider" || nextWidget === "handedover-charts") {
+      if (nextWidget === "timeslider") {
         shellPanel.collapsed = true;
-        updateTimesliderstate(true);
+        //--- Update timeslider state
+        queryClient.setQueryData<TimeSliderState>(timesliderKeys.selected, {
+          timesliderstate: true,
+        });
+      }
+
+      if (nextWidget === "handedover-charts") {
+        shellPanel.collapsed = true;
       }
     }
   });

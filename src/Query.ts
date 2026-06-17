@@ -14,9 +14,44 @@ import {
   handedOverLotField,
   affectedAreaField,
   cpField,
+  cutoff_days,
 } from "./uniqueValues";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import { useQuery } from "@tanstack/react-query";
+import { dateDisplayKeys } from "./interfaceKeys";
+import type { DisplayDates } from "./interfaceKeys";
+
+//---------------------------------------------------------//
+//                Get Initial Dates                        //
+//---------------------------------------------------------//
+export async function getSortDates(layer: any) {
+  const all_fields: string[] = [];
+  layer?.fields.map((field: any) => {
+    all_fields.push(field.name);
+  });
+
+  const date_fields = all_fields.filter(
+    (field: any) => field.startsWith("x") && !isNaN(field.slice(1)),
+  );
+
+  // Re-order date fields in ascending order
+  date_fields.sort((a: any, b: any) => {
+    const a_date: any = new Date(
+      Number(a.slice(1, 5)),
+      Number(a.slice(5, 7)) - 1,
+      Number(a.slice(7, 9)),
+    );
+    const b_date: any = new Date(
+      Number(b.slice(1, 5)),
+      Number(b.slice(5, 7)) - 1,
+      Number(b.slice(7, 9)),
+    );
+    return a_date - b_date;
+  });
+
+  return date_fields;
+}
 
 //---------------------------------------------------------//
 //    Definition Expression using queryExpression          //
@@ -49,6 +84,42 @@ export function queryDefinitionExpression({
   }
 }
 
+//---------------------------------------------//
+//           Lot (handed over area)            //
+//---------------------------------------------//
+export async function generateHandedOverAreaData() {
+  const total_affected_area = new StatisticDefinition({
+    onStatisticField: affectedAreaField,
+    outStatisticFieldName: "total_affected_area",
+    statisticType: "sum",
+  });
+
+  const total_handedover_area = new StatisticDefinition({
+    onStatisticField: lotHandedOverAreaField,
+    outStatisticFieldName: "total_handedover_area",
+    statisticType: "sum",
+  });
+
+  const query = lotLayer.createQuery();
+  query.where = `${cpField} IS NOT NULL`;
+  query.outStatistics = [total_affected_area, total_handedover_area];
+  query.orderByFields = [cpField];
+  query.groupByFieldsForStatistics = [cpField];
+
+  const response = await lotLayer.queryFeatures(query);
+  const stats = response.features;
+  const data = stats.map((result: any) => {
+    const attributes = result.attributes;
+    const affected = attributes.total_affected_area;
+    const handedOver = attributes.total_handedover_area;
+    return Object.assign({
+      category: attributes.CP,
+      value: ((handedOver / affected) * 100).toFixed(0),
+    });
+  });
+  return data;
+}
+
 //--------------------------------------------//
 //  Change symbology of lot layer             //
 //--------------------------------------------//
@@ -65,6 +136,9 @@ export function updateLotSymbology(new_date_field: any) {
   }
 }
 
+//----------------------------------------//
+//------        Date and Month       -----//
+//----------------------------------------//
 // get last date of month
 export function lastDateOfMonth(date: Date) {
   const old_date = new Date(date.getFullYear(), date.getMonth() + 1, 0);
@@ -76,9 +150,6 @@ export function lastDateOfMonth(date: Date) {
   return final_date;
 }
 
-//--------------------------------------------//
-//                   Update dates             //
-//--------------------------------------------//
 export async function dateUpdate(category: any) {
   const query = dateTable.createQuery();
   const queryExpression =
@@ -108,48 +179,6 @@ export async function dateUpdate(category: any) {
   });
 }
 
-export async function generateHandedOverAreaData() {
-  const total_affected_area = new StatisticDefinition({
-    onStatisticField: affectedAreaField,
-    outStatisticFieldName: "total_affected_area",
-    statisticType: "sum",
-  });
-
-  const total_handedover_area = new StatisticDefinition({
-    onStatisticField: lotHandedOverAreaField,
-    outStatisticFieldName: "total_handedover_area",
-    statisticType: "sum",
-  });
-
-  const query = lotLayer.createQuery();
-  query.where = `${cpField} IS NOT NULL`;
-  query.outStatistics = [total_affected_area, total_handedover_area];
-  query.orderByFields = [cpField];
-  query.groupByFieldsForStatistics = [cpField];
-
-  return lotLayer.queryFeatures(query).then((response: any) => {
-    const stats = response.features;
-    const data = stats.map((result: any) => {
-      const attributes = result.attributes;
-      const affected = attributes.total_affected_area;
-      const handedOver = attributes.total_handedover_area;
-      const cp = attributes.CP;
-
-      const percent = ((handedOver / affected) * 100).toFixed(0);
-
-      return Object.assign(
-        {},
-        {
-          category: cp,
-          value: percent,
-        },
-      );
-    });
-
-    return data;
-  });
-}
-
 export const dateFormat = (inputDate: any, format: any) => {
   //parse the input date
   const date = new Date(inputDate);
@@ -174,6 +203,31 @@ export const dateFormat = (inputDate: any, format: any) => {
 
   return format;
 };
+
+//--- Updated date function
+export const fetchDateInfo = async (categoryName: string) => {
+  const response = await dateUpdate(categoryName);
+  return response;
+};
+
+// Component Implementation
+export function updatedDisplayDates(category: any) {
+  const { data: up_dates } = useQuery<DisplayDates | any>({
+    queryKey: [dateDisplayKeys.selected, category],
+    queryFn: () => fetchDateInfo(category),
+    select: (response) => {
+      // Derive your processed data directly from the response
+      const row = response[0];
+      const isDaysPass = row[1] >= cutoff_days;
+      return {
+        asOfDate: row[0],
+        daysPass: isDaysPass,
+      };
+    },
+    staleTime: Infinity,
+  });
+  return up_dates;
+}
 
 // Thousand separators function
 export function thousands_separators(num: any) {
