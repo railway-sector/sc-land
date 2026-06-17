@@ -410,7 +410,7 @@ const LotChart = () => {
           marginTop: "5px",
         }}
       >
-        {!newAsOfDate?.asofdate ? "" : "As of " + newAsOfDate?.asofdate}
+        {!newAsOfDate?.asOfDate ? "" : "As of " + newAsOfDate?.asOfDate}
       </div>
 
       {/* Lot Chart */}
