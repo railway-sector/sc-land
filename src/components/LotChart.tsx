@@ -14,7 +14,6 @@ import {
   queryDefinitionExpression,
   thousands_separators,
   zoomToLayer,
-  updatedDisplayDates,
 } from "../Query";
 
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
@@ -30,14 +29,13 @@ import {
   lotStatusLabel,
   lotStatusQuery,
   primaryLabelColor,
-  updatedDateCategoryNames,
   valueLabelColor,
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
 import { affectedAreaValue, chartRenderer } from "../ChartRenderer";
 import { pieChartStatusData, fieldStatistic } from "../ChartGenerator";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   timesliderFieldKeys,
   locationKeys,
@@ -65,7 +63,6 @@ function maybeDisposeRoot(divId: any) {
 //              Chart Component                //
 //--------------------------------------------//
 const LotChart = () => {
-  const queryClient = useQueryClient();
   const arcgisScene = document.querySelector("arcgis-scene");
 
   //--- Declare useState
@@ -73,12 +70,6 @@ const LotChart = () => {
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
 
   //--- 0. As of date
-  //--- Updated dates: asofDate and dayspass
-  queryClient.setQueryData<DisplayDates>(
-    dateDisplayKeys.selected,
-    updatedDisplayDates(updatedDateCategoryNames[0]),
-  );
-
   const { data: newAsOfDate } = useQuery<DisplayDates | any>({
     queryKey: dateDisplayKeys.selected,
     queryFn: async () => ({}),
