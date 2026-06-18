@@ -24,7 +24,7 @@ export default function DropdownData() {
       return await dropdownData.dropDownQuery();
     },
     staleTime: Infinity, // never refetch in the backround on its own.
-    gcTime: Infinity, //
+    // gcTime: Infinity, //
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
