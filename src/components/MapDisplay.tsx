@@ -143,8 +143,8 @@ export default function MapDisplay() {
         basemap="dark-gray-vector"
         ground="world-elevation"
         viewingMode="local"
-        center="120.5793, 15.18"
-        zoom={10}
+        center="121.05, 14.4"
+        zoom={12}
       >
         <arcgis-compass slot="top-right"></arcgis-compass>
         <arcgis-expand close-on-esc slot="top-right" mode="floating">

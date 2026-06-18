@@ -23,6 +23,11 @@ export default function DropdownData() {
       );
       return await dropdownData.dropDownQuery();
     },
+    staleTime: Infinity, // never refetch in the backround on its own.
+    gcTime: Infinity, //
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   // this instantly updates the global cache
