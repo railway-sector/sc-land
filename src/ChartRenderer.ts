@@ -59,13 +59,6 @@ export function affectedAreaValue(
 ) {
   legend.valueLabels.template.adapters.add("text", (text: any, target: any) => {
     const category = target.dataItem?.dataContext?.category;
-    // if (target.dataItem && target.dataItem.get('valuePercentTotal') < 5) {
-    //   return category === 'Paid'
-    //     ? // eslint-disable-next-line no-useless-concat
-    //       "{valuePercentTotal.formatNumber('#.')}% ({value})" + ' (' + testValue + ' sqm)'
-    //     : "{valuePercentTotal.formatNumber('#.')}% ({value})";
-    // }
-    // "[#C9CC3F; fontSize: 12px;][bold]{valuePercentTotal.formatNumber('#.')}% ({value})[/]"
     if (target.dataItem) {
       return category === statusLotLabel[0]
         ? affected_area_label(affectAreaPie, category)
@@ -89,47 +82,6 @@ export function affectedAreaValue(
     return text;
   });
 }
-
-type layerViewQueryProps = {
-  layer?: any;
-  qExpression?: any;
-  view: any;
-  qChart?: any;
-};
-
-export const highlightFilterLayerView = async ({
-  layer,
-  // qExpression,
-  view,
-  qChart,
-}: layerViewQueryProps) => {
-  const query = layer.createQuery();
-  query.where = qChart.queryExpression();
-  let highlightSelect: any;
-
-  const layerView = await view?.whenLayerView(layer);
-  const results = await layer?.queryObjectIds(query);
-
-  const queryExt = new Query({ objectIds: results });
-  const qExtResult = await layer?.queryExtent(queryExt);
-  if (qExtResult?.extent) {
-    view?.goTo(qExtResult.extent);
-  }
-
-  highlightSelect && highlightSelect.remove();
-  highlightSelect = layerView.highlight(results);
-
-  layerView.filter = new FeatureFilter({ where: qChart.queryExpression() });
-  view?.on("click", () => {
-    layerView.filter = new FeatureFilter({
-      where: undefined,
-    });
-    //-- Reset q/q2Expression; else, statusLA is not cleared.
-    qChart.qExpression = undefined;
-    qChart.q2Expression = undefined;
-    highlightSelect && highlightSelect.remove();
-  });
-};
 
 interface chartType {
   chart: any;
@@ -282,3 +234,44 @@ export function chartRenderer({
 
   pieSeries.appear(1000, 100);
 }
+
+type layerViewQueryProps = {
+  layer?: any;
+  qExpression?: any;
+  view: any;
+  qChart?: any;
+};
+
+export const highlightFilterLayerView = async ({
+  layer,
+  // qExpression,
+  view,
+  qChart,
+}: layerViewQueryProps) => {
+  const query = layer.createQuery();
+  query.where = qChart.queryExpression();
+  let highlightSelect: any;
+
+  const layerView = await view?.whenLayerView(layer);
+  const results = await layer?.queryObjectIds(query);
+
+  const queryExt = new Query({ objectIds: results });
+  const qExtResult = await layer?.queryExtent(queryExt);
+  if (qExtResult?.extent) {
+    view?.goTo(qExtResult.extent);
+  }
+
+  highlightSelect && highlightSelect.remove();
+  highlightSelect = layerView.highlight(results);
+
+  layerView.filter = new FeatureFilter({ where: qChart.queryExpression() });
+  view?.on("click", () => {
+    layerView.filter = new FeatureFilter({
+      where: undefined,
+    });
+    //-- Reset q/q2Expression; else, statusLA is not cleared.
+    qChart.qExpression = undefined;
+    qChart.q2Expression = undefined;
+    highlightSelect && highlightSelect.remove();
+  });
+};
