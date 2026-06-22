@@ -205,9 +205,7 @@ const LotChart = () => {
         handedOverPercent: handedover_percent,
       };
     },
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: Infinity,
     // staleTime: Infinity,
     // Code below will stop rendering a chart during an initial loading.
     // This simply means enabling this useQuery when either municipality or barangay is true.
