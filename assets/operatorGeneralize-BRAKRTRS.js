@@ -1,1 +1,0 @@
-import{ce as o}from"./index-B__xy0i8.js";import{P as c}from"./OperatorGeneralize-DTxvnaYC.js";const e=new c;function i(n,r,t){return e.execute(n,r,t,null)}function m(n,r,t){const u=e.executeMany(new o(n),r,t,null);return Array.from(u)}function p(){return e.supportsCurves()}export{m as o,i as t,p as u};
