@@ -111,9 +111,7 @@ const LotChart = () => {
       barangay,
       status_field,
       lotStatusField,
-      ho_field,
-      hoa_field,
-      aa_field,
+      lotLayer,
       timesliderstate, // Add dependecies so when these layers are changed, re-fetching happens.
     ],
     queryFn: async () => {
@@ -207,7 +205,9 @@ const LotChart = () => {
         handedOverPercent: handedover_percent,
       };
     },
-    structuralSharing: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     // staleTime: Infinity,
     // Code below will stop rendering a chart during an initial loading.
     // This simply means enabling this useQuery when either municipality or barangay is true.

@@ -83,7 +83,7 @@ const StructureChart = () => {
 
   //--- 2. Streamlined Data Fetching with useQuery
   const { data } = useQuery<ChartResponse | any>({
-    queryKey: [municipality, barangay, structureStatusField],
+    queryKey: [municipality, barangay, structureStatusField, structureLayer],
     queryFn: async () => {
       queryc_struc.qValues = [municipality, barangay];
       queryc_struc.qExpression = `${structureStatusField} >= 1`;
@@ -109,7 +109,9 @@ const StructureChart = () => {
         totalNumber: chartData[1],
       };
     },
-    structuralSharing: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   //--- Call chart data
@@ -250,10 +252,10 @@ const StructureChart = () => {
       <div
         id={chartID}
         style={{
-          height: "57vh",
+          height: "60vh",
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
-          marginBottom: "5%",
+          marginTop: "10%",
         }}
       ></div>
     </>
