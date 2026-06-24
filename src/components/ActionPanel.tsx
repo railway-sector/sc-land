@@ -11,7 +11,7 @@ import "@arcgis/map-components/components/arcgis-direct-line-measurement-3d";
 import "@arcgis/map-components/components/arcgis-area-measurement-3d";
 import { defineActions } from "../uniqueValues";
 import HandedOverAreaChart from "./HandedOverAreaChart";
-import { updateLotSymbology, updateDisplayDates } from "../Query";
+import { updateLotSymbology, updateDisplayDates } from "../query";
 import Timeslider from "./Timeslider";
 import {
   ngcp_line6,

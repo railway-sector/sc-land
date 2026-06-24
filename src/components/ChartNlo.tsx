@@ -1,14 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useRef, useState, useEffect, memo } from "react";
-import * as am5 from "@amcharts/amcharts5";
-import * as am5percent from "@amcharts/amcharts5/percent";
-import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
 import {
   dateUpdate,
   queryDefinitionExpression,
   thousands_separators,
-} from "../Query";
+} from "../query";
 import {
   nloStatusField,
   primaryLabelColor,
@@ -19,8 +15,8 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { nloLayer, queryc_nlo } from "../layers";
-import { chartRenderer } from "../ChartRenderer";
-import { pieChartStatusData } from "../ChartGenerator";
+import { chartRenderer } from "../chartRenderer";
+import { pieChartStatusData } from "../chartGenerator";
 import { useQuery } from "@tanstack/react-query";
 import { locationKeys, dateDisplayKeys } from "../interfaceKeys";
 import type {
@@ -28,20 +24,18 @@ import type {
   ChartResponse,
   DisplayDates,
 } from "../interfaceKeys";
-
-// Dispose function
-function maybeDisposeRoot(divId: any) {
-  am5.array.each(am5.registry.rootElements, function (root) {
-    if (root.dom.id === divId) {
-      root.dispose();
-    }
-  });
-}
+import {
+  chartSetter,
+  legendSetter,
+  maybeDisposeRoot,
+  rootSetter,
+  seriesSetter,
+} from "../chartSetter";
 
 //--------------------------------------------//
 //              Chart Component                //
 //--------------------------------------------//
-const NloChart = memo(() => {
+const ChartNlo = memo(() => {
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
 
@@ -117,55 +111,30 @@ const NloChart = memo(() => {
   const totalNumber = data?.totalNumber || 0;
 
   useEffect(() => {
-    // Dispose previously created root element
-
     maybeDisposeRoot(chartID);
-
-    const root = am5.Root.new(chartID);
-    root.container.children.clear();
-    root._logo?.dispose();
-
-    // Set themesf
-    // https://www.amcharts.com/docs/v5/concepts/themes/
-    root.setThemes([
-      am5themes_Animated.new(root),
-      am5themes_Responsive.new(root),
-    ]);
-
-    // Create chart
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/
-    const chart = root.container.children.push(
-      am5percent.PieChart.new(root, {
-        layout: root.verticalLayout,
-        paddingBottom: 40,
-      }),
-    );
+    const root = rootSetter({ chartID: chartID });
+    const chart = chartSetter({ root: root, y: -10 });
     chartRef.current = chart;
 
-    // Create series
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Series
-    const pieSeries = chart.series.push(
-      am5percent.PieSeries.new(root, {
-        name: "Series",
-        categoryField: "category",
-        valueField: "value",
-        //legendLabelText: "[{fill}]{category}[/]",
-        legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
-        radius: am5.percent(45), // outer radius
-        innerRadius: am5.percent(28),
-      }),
-    );
+    const pieSeries = seriesSetter({
+      chart: chart,
+      root: root,
+      categoryField: "category",
+      valueField: "value",
+      legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
+      radius: 45,
+      innerRadius: 28,
+      // scale: 1.7,
+    });
     pieSeriesRef.current = pieSeries;
     chart.series.push(pieSeries);
 
-    // Legend
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/legend-percent-series/
-    const legend = chart.children.push(
-      am5.Legend.new(root, {
-        centerX: am5.percent(50),
-        x: am5.percent(50),
-      }),
-    );
+    const legend = legendSetter({
+      chart: chart,
+      root: root,
+      centerX: 50,
+      x: 50,
+    });
     legendRef.current = legend;
     legend.data.setAll(pieSeries.dataItems);
 
@@ -262,4 +231,4 @@ const NloChart = memo(() => {
   );
 }); // End of lotChartgs
 
-export default NloChart;
+export default ChartNlo;
