@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect, memo } from "react";
 import {
   dateUpdate,
+  pieChartData,
   queryDefinitionExpression,
   thousands_separators,
 } from "../query";
@@ -13,9 +14,8 @@ import {
   valueLabelColor,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
-import { nloLayer, queryc_nlo } from "../layers";
+import { nloLayer, piechart_nlo, queryc_nlo } from "../layers";
 import { chartRenderer } from "../chartRenderer";
-import { pieChartStatusData } from "../chartGenerator";
 import { useQuery } from "@tanstack/react-query";
 import { locationKeys, dateDisplayKeys } from "../interfaceKeys";
 import type {
@@ -87,8 +87,9 @@ const ChartNlo = memo(() => {
       });
 
       //--- Pie chart data
-      const chartData = await pieChartStatusData({
-        qChart: queryc_nlo.queryExpression(),
+      const chartData = await pieChartData({
+        piechart: piechart_nlo,
+        qChart: queryc_nlo,
         layer: nloLayer,
         statusList: nloStatusQuery,
         statusField: nloStatusField,

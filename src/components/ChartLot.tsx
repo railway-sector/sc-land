@@ -5,8 +5,12 @@ import {
   queryc_lot2,
   queryc_lot,
   queryc_lot3,
+  piechart,
+  piechartaa,
 } from "../layers";
 import {
+  fieldStatistic,
+  pieChartData,
   queryDefinitionExpression,
   thousands_separators,
   zoomToLayer,
@@ -29,7 +33,6 @@ import {
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
 import { affectedAreaValue, chartRenderer } from "../chartRenderer";
-import { pieChartStatusData, fieldStatistic } from "../chartGenerator";
 import { useQuery } from "@tanstack/react-query";
 import {
   timesliderFieldKeys,
@@ -96,6 +99,9 @@ const ChartLot = () => {
   });
   const timesliderstate = time?.timesliderstate;
 
+  //--- New status field by timeslider state
+  const stats_field = timesliderstate ? status_field : lotStatusField;
+
   //--- 2. Streamlined Data Fetching with useQuery
   const { data } = useQuery<ChartResponse | any>({
     queryKey: [
@@ -115,12 +121,13 @@ const ChartLot = () => {
       });
 
       //--- Pie chart data
-      const chartData = await pieChartStatusData({
-        qChart: queryc_lot.queryExpression(),
+      const chartData = await pieChartData({
+        piechart: piechart,
+        qChart: queryc_lot,
         layer: lotLayer,
         statusList: lotStatusQuery,
-        statusField: timesliderstate ? status_field : lotStatusField,
-        statisticField: timesliderstate ? status_field : lotStatusField,
+        statusField: stats_field,
+        statisticField: stats_field,
         statisticType: "count",
       });
 
@@ -167,11 +174,12 @@ const ChartLot = () => {
         ? `${status_field} >= 1`
         : `${lotStatusField} >= 1`;
 
-      const affected_area_pie = await pieChartStatusData({
-        qChart: queryc_lot3.queryExpression(),
+      const affected_area_pie = await pieChartData({
+        piechart: piechartaa,
+        qChart: queryc_lot3,
         layer: lotLayer,
         statusList: lotStatusQuery,
-        statusField: timesliderstate ? status_field : lotStatusField,
+        statusField: stats_field,
         statisticField: timesliderstate ? aa_field : affectedAreaField,
         statisticType: "sum",
       });
@@ -231,7 +239,7 @@ const ChartLot = () => {
 
   useEffect(() => {
     const root = rootSetter({ chartID: chartID });
-    const chart = chartSetter({ root: root, y: 25 });
+    const chart = chartSetter({ root: root, y: 10 });
     chartRef.current = chart;
 
     const pieSeries = seriesSetter({
@@ -252,9 +260,10 @@ const ChartLot = () => {
       root: root,
       centerX: 50,
       x: 50,
-      scale: 1.03,
+      scale: 1.0,
     });
     legendRef.current = legend;
+    legend.setAll({ marginBottom: 10 });
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
@@ -264,7 +273,7 @@ const ChartLot = () => {
       legend: legend,
       root: root,
       qChart: queryc_lot,
-      status_field: timesliderstate ? status_field : lotStatusField,
+      status_field: stats_field,
       arcgisScene: arcgisScene,
       updateChartPanelwidth: setChartPanelwidth,
       data: chartData,
@@ -378,8 +387,8 @@ const ChartLot = () => {
           height: "57vh",
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
-          marginBottom: "1%",
-          marginTop: "5%",
+          marginBottom: "3%",
+          marginTop: "2%",
         }}
       ></div>
 

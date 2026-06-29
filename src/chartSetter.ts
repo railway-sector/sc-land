@@ -57,6 +57,7 @@ interface seriesSetterType {
   innerRadius: number;
   scale?: number;
   marginTop?: number;
+  marginBottom?: number;
 }
 export function seriesSetter({
   chart,
@@ -68,6 +69,7 @@ export function seriesSetter({
   innerRadius,
   scale,
   marginTop,
+  marginBottom,
 }: seriesSetterType) {
   const pieSeries = chart.series.push(
     am5percent.PieSeries.new(root, {
@@ -79,6 +81,7 @@ export function seriesSetter({
       innerRadius: am5.percent(innerRadius),
       scale: scale ? scale : 1,
       marginTop: marginTop ? marginTop : 0,
+      marginBottom: marginBottom ? marginBottom : 0,
     }),
   );
 
