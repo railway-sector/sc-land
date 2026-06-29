@@ -11,7 +11,6 @@ import {
   nloStatusQuery,
   updatedDateCategoryNames,
   valueLabelColor,
-  nloStatusColor,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { nloLayer, queryc_nlo } from "../layers";
@@ -92,7 +91,6 @@ const ChartNlo = memo(() => {
         qChart: queryc_nlo.queryExpression(),
         layer: nloLayer,
         statusList: nloStatusQuery,
-        statusColor: nloStatusColor,
         statusField: nloStatusField,
         statisticField: nloStatusField,
         statisticType: "count",

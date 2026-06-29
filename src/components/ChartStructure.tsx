@@ -11,7 +11,6 @@ import {
   structureStatusField,
   updatedDateCategoryNames,
   valueLabelColor,
-  structureStatusColorHex,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { occupancyLayer, queryc_struc, structureLayer } from "../layers";
@@ -92,7 +91,6 @@ const ChartStructure = () => {
         qChart: queryc_struc.queryExpression(),
         layer: structureLayer,
         statusList: structureStatusQuery,
-        statusColor: structureStatusColorHex,
         statusField: structureStatusField,
         statisticField: structureStatusField,
         statisticType: "count",
