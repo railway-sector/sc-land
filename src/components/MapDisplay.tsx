@@ -20,6 +20,7 @@ import {
   somco_fense_layer,
   handedOverLotLayer,
   pierAccessLayer,
+  sources,
   // maintenanceRoadLayer,
 } from "../layers";
 import type { ArcgisSearch } from "@arcgis/map-components/components/arcgis-search";
@@ -29,7 +30,7 @@ import {
   datefieldKeys,
   dateDisplayKeys,
 } from "../interfaceKeys";
-import { dateUpdate, getSortDates } from "../query";
+import { dateUpdate, getSortDates, addLayersToMap } from "../query";
 import { updatedDateCategoryNames } from "../uniqueValues";
 import type {
   TimesliderFieldsTypes,
@@ -87,49 +88,20 @@ export default function MapDisplay() {
   queryClient.setQueryData<DateFieldsType>(datefieldKeys.selected, dateField);
 
   arcgisScene?.viewOnReady(() => {
-    arcgisScene?.map?.add(pierAccessLayer);
-    arcgisScene?.map?.add(lotGroupLayer);
-    arcgisScene?.map?.add(ngcp7_groupLayer);
-    arcgisScene?.map?.add(ngcp6_groupLayer);
-    arcgisScene?.map?.add(structureLayer);
-    arcgisScene?.map?.add(nloLoOccupancyGroupLayer);
-    arcgisScene?.map?.add(alignmentGroupLayer);
-    arcgisScene?.map?.add(stationLayer);
-    arcgisScene?.map?.add(somco_fense_layer);
-    arcgisScene?.map?.add(handedOverLotLayer);
-    // arcgisScene?.map?.add(maintenanceRoadLayer);
+    addLayersToMap(arcgisScene?.map, [
+      pierAccessLayer,
+      lotGroupLayer,
+      ngcp7_groupLayer,
+      ngcp6_groupLayer,
+      structureLayer,
+      nloLoOccupancyGroupLayer,
+      alignmentGroupLayer,
+      stationLayer,
+      somco_fense_layer,
+      handedOverLotLayer,
+    ]);
 
-    // Search components
-    const sources: any = [
-      {
-        layer: lotLayer,
-        searchFields: ["LotID"],
-        displayField: "LotID",
-        exactMatch: false,
-        outFields: ["LotID"],
-        name: "Lot ID",
-        placeholder: "example: 10083",
-      },
-      {
-        layer: structureLayer,
-        searchFields: ["StrucID"],
-        displayField: "StrucID",
-        exactMatch: false,
-        outFields: ["StrucID"],
-        name: "Structure ID",
-        placeholder: "example: NSRP-01-02-ML007",
-      },
-      {
-        layer: pierAccessLayer,
-        searchFields: ["PierNumber"],
-        displayField: "PierNumber",
-        exactMatch: false,
-        outFields: ["PierNumber"],
-        name: "Pier No",
-        zoomScale: 1000,
-        placeholder: "example: P-288",
-      },
-    ];
+    // arcgisScene?.map?.add(maintenanceRoadLayer);
 
     arcgisSearch.allPlaceholder = "LotID, StructureID, Chainage";
     arcgisSearch.includeDefaultSourcesDisabled = true;
