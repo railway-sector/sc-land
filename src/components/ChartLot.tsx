@@ -247,7 +247,8 @@ const ChartLot = () => {
       root: root,
       categoryField: "category",
       valueField: "value",
-      legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
+      legendLabelText:
+        '{category}[/] ([#C9CC3F; bold]{valuePercentTotal.formatNumber("#.")}%[/]) ',
       radius: 45,
       innerRadius: 28,
 
