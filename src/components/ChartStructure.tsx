@@ -80,7 +80,7 @@ const ChartStructure = () => {
   const chartID = "structure-chart";
 
   //--- 2. Streamlined Data Fetching with useQuery
-  const { data } = useQuery<ChartResponse | any>({
+  const { data, isLoading } = useQuery<ChartResponse | any>({
     queryKey: [municipality, barangay, structureStatusField, structureLayer],
     queryFn: async () => {
       queryc_struc.qValues = [municipality, barangay];
@@ -123,6 +123,7 @@ const ChartStructure = () => {
       root: root,
       categoryField: "category",
       valueField: "value",
+      legendLabelText: "{category}",
       legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
       radius: 40,
       innerRadius: 28,
@@ -204,6 +205,7 @@ const ChartStructure = () => {
               fontFamily: "calibri",
               lineHeight: "1.2",
               margin: "auto",
+              opacity: isLoading ? 0 : 1,
             }}
           >
             {thousands_separators(totalNumber)}
@@ -230,6 +232,7 @@ const ChartStructure = () => {
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
           marginTop: "10%",
+          opacity: isLoading ? 0 : 1,
         }}
       ></div>
     </>

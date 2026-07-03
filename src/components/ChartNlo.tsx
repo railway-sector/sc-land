@@ -75,7 +75,7 @@ const ChartNlo = memo(() => {
   const chartID = "nlo-chart";
 
   //--- 2. Streamlined Data Fetching with useQuery
-  const { data } = useQuery<ChartResponse | any>({
+  const { data, isLoading } = useQuery<ChartResponse | any>({
     queryKey: [municipality, barangay, nloStatusField, nloLayer],
     queryFn: async () => {
       queryc_nlo.qValues = [municipality, barangay];
@@ -120,6 +120,7 @@ const ChartNlo = memo(() => {
       root: root,
       categoryField: "category",
       valueField: "value",
+      legendLabelText: "{category}",
       legendValueText: "{valuePercentTotal.formatNumber('#.')}% ({value})",
       radius: 45,
       innerRadius: 28,
@@ -202,6 +203,7 @@ const ChartNlo = memo(() => {
               fontFamily: "calibri",
               lineHeight: "1.2",
               margin: "auto",
+              opacity: isLoading ? 0 : 1,
             }}
           >
             {thousands_separators(totalNumber)}
@@ -224,6 +226,7 @@ const ChartNlo = memo(() => {
           height: "70vh",
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
+          opacity: isLoading ? 0 : 1,
         }}
       ></div>
     </>

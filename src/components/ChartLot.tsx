@@ -103,7 +103,7 @@ const ChartLot = () => {
   const stats_field = timesliderstate ? status_field : lotStatusField;
 
   //--- 2. Streamlined Data Fetching with useQuery
-  const { data } = useQuery<ChartResponse | any>({
+  const { data, isLoading } = useQuery<ChartResponse | any>({
     queryKey: [
       municipality,
       barangay,
@@ -332,6 +332,7 @@ const ChartLot = () => {
               fontFamily: "calibri",
               lineHeight: "1.2",
               margin: "auto",
+              opacity: isLoading ? 0 : 1,
             }}
           >
             {thousands_separators(lotNumber)}
@@ -352,6 +353,7 @@ const ChartLot = () => {
               lineHeight: "1.2",
               margin: "auto",
               fontWeight: "bold",
+              opacity: isLoading ? 0 : 1,
             }}
           >
             {totalAffectedArea &&
@@ -391,6 +393,7 @@ const ChartLot = () => {
           color: "white",
           marginBottom: "3%",
           marginTop: "2%",
+          opacity: isLoading ? 0 : 1,
         }}
       ></div>
 
