@@ -4,6 +4,9 @@ import ActionButton from "@arcgis/core/support/actions/ActionButton";
 export type statisticsType = "count" | "sum";
 export type TypeFieldType = "number" | "string";
 
+//--- cp list
+export const cp_list = ["N-01", "N-02", "N-03", "N-04", "N-05"];
+
 // month
 export const months = [
   "January",

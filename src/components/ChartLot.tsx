@@ -32,7 +32,7 @@ import {
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
-import { affectedAreaValue, chartRenderer } from "../chartRenderer";
+import { chartRenderer } from "../chartRenderer";
 import { useQuery } from "@tanstack/react-query";
 import {
   timesliderFieldKeys,
@@ -48,6 +48,7 @@ import type {
   TimeSliderState,
 } from "../interfaceKeys";
 import {
+  affectedAreaValue,
   chartSetter,
   legendSetter,
   rootSetter,
@@ -276,13 +277,13 @@ const ChartLot = () => {
       root: root,
       qChart: queryc_lot,
       status_field: stats_field,
-      arcgisScene: arcgisScene,
+      view: arcgisScene?.view,
       updateChartPanelwidth: setChartPanelwidth,
       data: chartData,
-      pieSeriesScale: new_pieSeriesScale,
-      pieInnerLabel: "PRIVATE LOTS",
-      pieInnerLabelFontSize: new_pieInnerLabelFontSize,
-      pieInnerValueFontSize: new_pieInnerValueFontSize,
+      seriesScale: new_pieSeriesScale,
+      innerLabel: "PRIVATE LOTS",
+      innerLabelFontSize: new_pieInnerLabelFontSize,
+      innerValueFontSize: new_pieInnerValueFontSize,
       layer: lotLayer,
       statusArray: lotStatusQuery,
     });
@@ -312,7 +313,7 @@ const ChartLot = () => {
         }}
       >
         <img
-          src="https://EijiGorilla.github.io/Symbols/Land_logo.png"
+          src="https://eijigorilla.github.io/Symbols/Land_Acquisition/Land_Logo2.png"
           alt="Land Logo"
           height={`${new_imageSize}%`}
           width={`${new_imageSize}%`}
@@ -438,6 +439,7 @@ const ChartLot = () => {
               fontFamily: "calibri",
               lineHeight: "1.2",
               margin: "auto",
+              opacity: isLoading ? 0 : 1,
             }}
           >
             {totalHandedOverPercent}% ({thousands_separators(totalHandedOver)})
@@ -458,6 +460,7 @@ const ChartLot = () => {
               lineHeight: "1.2",
               margin: "auto",
               fontWeight: "bold",
+              opacity: isLoading ? 0 : 1,
             }}
           >
             {totalHandedOverArea &&
