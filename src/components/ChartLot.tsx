@@ -15,7 +15,6 @@ import {
   thousands_separators,
   zoomToLayer,
 } from "../query";
-
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
 import "@esri/calcite-components/dist/components/calcite-segmented-control-item";
 import "@esri/calcite-components/dist/components/calcite-checkbox";
@@ -32,7 +31,6 @@ import {
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
-import { chartRenderer } from "../chartRenderer";
 import { useQuery } from "@tanstack/react-query";
 import {
   timesliderFieldKeys,
@@ -54,6 +52,7 @@ import {
   rootSetter,
   seriesSetter,
 } from "../chartSetter";
+import ChartPieSeriesRender from "chart-pie-series-render";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -231,7 +230,6 @@ const ChartLot = () => {
 
   const pieSeriesRef = useRef<any>(null);
   const legendRef = useRef<any>(null);
-  const chartRef = useRef<any>(null);
   const chartID = "pie-two";
 
   useEffect(() => {
@@ -241,7 +239,6 @@ const ChartLot = () => {
   useEffect(() => {
     const root = rootSetter({ chartID: chartID });
     const chart = chartSetter({ root: root, y: 10 });
-    chartRef.current = chart;
 
     const pieSeries = seriesSetter({
       chart: chart,
@@ -270,23 +267,25 @@ const ChartLot = () => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    chartRenderer({
-      chart: chart,
-      pieSeries: pieSeries,
-      legend: legend,
-      root: root,
-      qChart: queryc_lot,
-      status_field: stats_field,
-      view: arcgisScene?.view,
-      updateChartPanelwidth: setChartPanelwidth,
-      data: chartData,
-      seriesScale: new_pieSeriesScale,
-      innerLabel: "PRIVATE LOTS",
-      innerLabelFontSize: new_pieInnerLabelFontSize,
-      innerValueFontSize: new_pieInnerValueFontSize,
-      layer: lotLayer,
-      statusArray: lotStatusQuery,
-    });
+    const crender = new ChartPieSeriesRender(
+      chart,
+      pieSeries,
+      legend,
+      root,
+      queryc_lot,
+      undefined,
+      stats_field,
+      arcgisScene?.view,
+      setChartPanelwidth,
+      chartData,
+      new_pieSeriesScale,
+      "PRIVATE LOTS",
+      new_pieInnerLabelFontSize,
+      new_pieInnerValueFontSize,
+      lotLayer,
+      lotStatusQuery,
+    );
+    crender.chartDataRenderer();
     affectedAreaValue(legend, affectedAreaStatus, lotStatusLabel);
 
     // Dispose root

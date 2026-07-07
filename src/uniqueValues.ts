@@ -5,7 +5,16 @@ export type statisticsType = "count" | "sum";
 export type TypeFieldType = "number" | "string";
 
 //--- cp list
-export const cp_list = ["N-01", "N-02", "N-03", "N-04", "N-05"];
+export const cp_list = [
+  "S-01",
+  "S-02",
+  "S-03a",
+  "S-03b",
+  "S-03c",
+  "S-04",
+  "S-05",
+  "S-06",
+];
 
 // month
 export const months = [

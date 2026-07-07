@@ -15,7 +15,6 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { nloLayer, piechart_nlo, queryc_nlo } from "../layers";
-import { chartRenderer } from "../chartRenderer";
 import { useQuery } from "@tanstack/react-query";
 import { locationKeys, dateDisplayKeys } from "../interfaceKeys";
 import type {
@@ -30,6 +29,7 @@ import {
   rootSetter,
   seriesSetter,
 } from "../chartSetter";
+import ChartPieSeriesRender from "chart-pie-series-render";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -71,7 +71,6 @@ const ChartNlo = memo(() => {
 
   const pieSeriesRef = useRef<unknown | any | undefined>({});
   const legendRef = useRef<unknown | any | undefined>({});
-  const chartRef = useRef<unknown | any | undefined>({});
   const chartID = "nlo-chart";
 
   //--- 2. Streamlined Data Fetching with useQuery
@@ -113,7 +112,6 @@ const ChartNlo = memo(() => {
     maybeDisposeRoot(chartID);
     const root = rootSetter({ chartID: chartID });
     const chart = chartSetter({ root: root, y: -10 });
-    chartRef.current = chart;
 
     const pieSeries = seriesSetter({
       chart: chart,
@@ -139,23 +137,25 @@ const ChartNlo = memo(() => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    chartRenderer({
-      chart: chart,
-      pieSeries: pieSeries,
-      legend: legend,
-      root: root,
-      qChart: queryc_nlo,
-      status_field: nloStatusField,
-      view: arcgisScene?.view,
-      updateChartPanelwidth: setChartPanelwidth,
-      data: chartData,
-      seriesScale: new_pieSeriesScale,
-      innerLabel: "HOUSEHOLDS",
-      innerLabelFontSize: new_pieInnerLabelFontSize,
-      innerValueFontSize: new_pieInnerValueFontSize,
-      layer: nloLayer,
-      statusArray: nloStatusQuery,
-    });
+    const crender = new ChartPieSeriesRender(
+      chart,
+      pieSeries,
+      legend,
+      root,
+      queryc_nlo,
+      undefined,
+      nloStatusField,
+      arcgisScene?.view,
+      setChartPanelwidth,
+      chartData,
+      new_pieSeriesScale,
+      "HOUSEHOLDS",
+      new_pieInnerLabelFontSize,
+      new_pieInnerValueFontSize,
+      nloLayer,
+      nloStatusQuery,
+    );
+    crender.chartDataRenderer();
 
     return () => {
       root.dispose();

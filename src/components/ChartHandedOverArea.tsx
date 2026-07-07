@@ -1,4 +1,4 @@
-import { useRef, useEffect, memo } from "react";
+import { useEffect, memo } from "react";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import { handedOverAreaByContractp } from "../query";
@@ -12,7 +12,6 @@ import {
 import { rootSetter } from "../chartSetter";
 
 const HandedOverAreaChart = memo(() => {
-  const chartRef = useRef<unknown | any | undefined>({});
   const chartID = "lot-handedover";
 
   const { data, isLoading } = useQuery<any>({
@@ -46,7 +45,6 @@ const HandedOverAreaChart = memo(() => {
         layout: root.verticalLayout,
       }),
     );
-    chartRef.current = chart;
 
     chart.children.unshift(
       am5.Label.new(root, {
@@ -154,7 +152,7 @@ const HandedOverAreaChart = memo(() => {
     return () => {
       root.dispose();
     };
-  }, []);
+  }, [isLoading]);
 
   return (
     <>
