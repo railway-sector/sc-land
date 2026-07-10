@@ -56,6 +56,7 @@ import ChartPieSeries from "chart-pie-series";
 //--------------------------------------------//
 //              Chart Component                //
 //--------------------------------------------//
+
 const ChartLot = () => {
   const arcgisScene = document.querySelector("arcgis-scene");
 
@@ -119,69 +120,71 @@ const ChartLot = () => {
         featureLayer: [lotLayer, handedOverLotLayer],
       });
 
-      //--- Pie chart data
-      const piechart0 = new ChartPieSeries(
-        queryc_lot.queryExpression(),
-        lotLayer,
-        lotStatusQuery,
-        stats_field,
-        stats_field,
-        "count",
-      );
-      const chartData = await piechart0.chartDataPieSeries();
-
-      //--- total number of lots (public + private)
-      const totaln = await fieldStatistic({
-        qChart: queryc_lot.queryExpression(),
-        layer: lotLayer,
-        statisticField: lotIdField,
-        statisticType: "count",
-      });
-
-      //-- Total affected area
-      const total_affected_area = await fieldStatistic({
-        qChart: queryc_lot.queryExpression(),
-        layer: lotLayer,
-        statisticField: timesliderstate ? aa_field : affectedAreaField,
-        statisticType: "sum",
-      });
-
-      //--- Total handed-over area
-      const total_ho_area = await fieldStatistic({
-        qChart: queryc_lot.queryExpression(),
-        layer: lotLayer,
-        statisticField: timesliderstate ? hoa_field : lotHandedOverAreaField,
-        statisticType: "sum",
-      });
-
-      //--- Total handed-over lots
       queryc_lot2.qValues = [municipality, barangay];
       queryc_lot2.qExpression = timesliderstate
         ? `${status_field} <> 8`
         : `${lotStatusField} <> 8`;
 
-      const total_ho_lot = await fieldStatistic({
-        qChart: queryc_lot2.queryExpression(),
-        layer: lotLayer,
-        statisticField: timesliderstate ? ho_field : lotHandedOverField,
-        statisticType: "sum",
-      });
-
-      //--- Affected area for each status
       queryc_lot3.qValues = [municipality, barangay];
       queryc_lot3.qExpression = timesliderstate
         ? `${status_field} >= 1`
         : `${lotStatusField} >= 1`;
 
-      const piechart1 = new ChartPieSeries(
-        queryc_lot3.queryExpression(),
-        lotLayer,
-        lotStatusQuery,
-        stats_field,
-        timesliderstate ? aa_field : affectedAreaField,
-        "sum",
-      );
-      const affected_area_pie = await piechart1.chartDataPieSeries();
+      //--- Independent queries: run in parallel instead of sequentially
+      const [
+        chartData,
+        totaln,
+        total_affected_area,
+        total_ho_area,
+        total_ho_lot,
+        affected_area_pie,
+      ] = await Promise.all([
+        new ChartPieSeries(
+          queryc_lot.queryExpression(),
+          lotLayer,
+          lotStatusQuery,
+          stats_field,
+          stats_field,
+          "count",
+        ).chartDataPieSeries(),
+
+        fieldStatistic({
+          qChart: queryc_lot.queryExpression(),
+          layer: lotLayer,
+          statisticField: lotIdField,
+          statisticType: "count",
+        }),
+
+        fieldStatistic({
+          qChart: queryc_lot.queryExpression(),
+          layer: lotLayer,
+          statisticField: timesliderstate ? aa_field : affectedAreaField,
+          statisticType: "sum",
+        }),
+
+        fieldStatistic({
+          qChart: queryc_lot.queryExpression(),
+          layer: lotLayer,
+          statisticField: timesliderstate ? hoa_field : lotHandedOverAreaField,
+          statisticType: "sum",
+        }),
+
+        fieldStatistic({
+          qChart: queryc_lot2.queryExpression(),
+          layer: lotLayer,
+          statisticField: timesliderstate ? ho_field : lotHandedOverField,
+          statisticType: "sum",
+        }),
+
+        new ChartPieSeries(
+          queryc_lot3.queryExpression(),
+          lotLayer,
+          lotStatusQuery,
+          stats_field,
+          timesliderstate ? aa_field : affectedAreaField,
+          "sum",
+        ).chartDataPieSeries(),
+      ]);
 
       //--- Handed-Over percent
       const handedover_percent = Number(
