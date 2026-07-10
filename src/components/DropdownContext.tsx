@@ -92,6 +92,12 @@ export default function DropdownData() {
     [municipalSelected],
   );
 
+  //--- For demo
+  // const barangayList = useMemo(
+  //   () => (console.log("Recomputed"), municipalSelected?.field2 ?? []),
+  //   [municipalSelected],
+  // );
+
   //--- Function to instantly update the global cache
   function setSelectedLocation(patch: Partial<SelectedLocation>) {
     queryClient.setQueryData<SelectedLocation>(

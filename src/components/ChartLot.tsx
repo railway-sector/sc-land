@@ -5,12 +5,10 @@ import {
   queryc_lot2,
   queryc_lot,
   queryc_lot3,
-  piechart,
-  piechartaa,
 } from "../layers";
 import {
   fieldStatistic,
-  pieChartData,
+  // pieChartData,
   queryDefinitionExpression,
   thousands_separators,
   zoomToLayer,
@@ -53,6 +51,7 @@ import {
   seriesSetter,
 } from "../chartSetter";
 import ChartPieSeriesRender from "chart-pie-series-render";
+import ChartPieSeries from "chart-pie-series";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -71,7 +70,7 @@ const ChartLot = () => {
     staleTime: Infinity,
   });
 
-  //--- 1. Location state
+  //--- 1. Location state: Municipality or Barangay
   const { data: selectedLocation } = useQuery<SelectedLocation | any>({
     queryKey: locationKeys.selected,
     queryFn: async () => ({}),
@@ -121,15 +120,15 @@ const ChartLot = () => {
       });
 
       //--- Pie chart data
-      const chartData = await pieChartData({
-        piechart: piechart,
-        qChart: queryc_lot,
-        layer: lotLayer,
-        statusList: lotStatusQuery,
-        statusField: stats_field,
-        statisticField: stats_field,
-        statisticType: "count",
-      });
+      const piechart0 = new ChartPieSeries(
+        queryc_lot.queryExpression(),
+        lotLayer,
+        lotStatusQuery,
+        stats_field,
+        stats_field,
+        "count",
+      );
+      const chartData = await piechart0.chartDataPieSeries();
 
       //--- total number of lots (public + private)
       const totaln = await fieldStatistic({
@@ -174,15 +173,15 @@ const ChartLot = () => {
         ? `${status_field} >= 1`
         : `${lotStatusField} >= 1`;
 
-      const affected_area_pie = await pieChartData({
-        piechart: piechartaa,
-        qChart: queryc_lot3,
-        layer: lotLayer,
-        statusList: lotStatusQuery,
-        statusField: stats_field,
-        statisticField: timesliderstate ? aa_field : affectedAreaField,
-        statisticType: "sum",
-      });
+      const piechart1 = new ChartPieSeries(
+        queryc_lot3.queryExpression(),
+        lotLayer,
+        lotStatusQuery,
+        stats_field,
+        timesliderstate ? aa_field : affectedAreaField,
+        "sum",
+      );
+      const affected_area_pie = await piechart1.chartDataPieSeries();
 
       //--- Handed-Over percent
       const handedover_percent = Number(
@@ -206,11 +205,8 @@ const ChartLot = () => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    // staleTime: Infinity,
-    // Code below will stop rendering a chart during an initial loading.
-    // This simply means enabling this useQuery when either municipality or barangay is true.
-    // enabled: !!selectedLocation?.municipality || !!selectedLocation?.barangay,
   });
+
   //--- Call chart data
   const chartData = data?.chartData || [];
   const lotNumber = data?.lotNumber || 0;

@@ -51,15 +51,6 @@ import {
 import QueryExpressionLayers from "query-layers-expression";
 import ChartPieSeries from "chart-pie-series";
 
-export const piechart = new ChartPieSeries(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-);
-
 export const piechartaa = new ChartPieSeries(
   undefined,
   undefined,

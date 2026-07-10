@@ -14,6 +14,7 @@ export const cp_list = [
   "S-04",
   "S-05",
   "S-06",
+  "S-07",
 ];
 
 // month
