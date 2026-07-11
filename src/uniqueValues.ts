@@ -43,11 +43,7 @@ export const chart_width = "26vw";
 export const chart_box_width = 250;
 
 // Updated Dates
-export const updatedDateCategoryNames = [
-  "Land Acquisition",
-  "Structure",
-  "Non Land Owner",
-];
+export const monitorLists = ["Land Acquisition", "Structure", "Non Land Owner"];
 export const cutoff_days = 30;
 
 // Lot fields definitions

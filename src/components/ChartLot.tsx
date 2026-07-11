@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import {
   handedOverLotLayer,
   lotLayer,
@@ -8,9 +8,9 @@ import {
 } from "../layers";
 import {
   fieldStatistic,
-  // pieChartData,
   queryDefinitionExpression,
   thousands_separators,
+  toAsofdate,
   zoomToLayer,
 } from "../query";
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
@@ -29,20 +29,9 @@ import {
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
-import { useQuery } from "@tanstack/react-query";
-import {
-  timesliderFieldKeys,
-  locationKeys,
-  dateDisplayKeys,
-  timesliderKeys,
-} from "../interfaceKeys";
-import type {
-  SelectedLocation,
-  TimesliderFieldsTypes,
-  ChartResponse,
-  DisplayDates,
-  TimeSliderState,
-} from "../interfaceKeys";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { locationKeys } from "../interfaceKeys";
+import type { SelectedLocation, ChartResponse } from "../interfaceKeys";
 import {
   affectedAreaValue,
   chartSetter,
@@ -52,26 +41,35 @@ import {
 } from "../chartSetter";
 import ChartPieSeriesRender from "chart-pie-series-render";
 import ChartPieSeries from "chart-pie-series";
+import { MyContext } from "../contexts/MyContext";
+import { datefieldKeys } from "../interfaceKeys";
+import type { DateFieldsType } from "../interfaceKeys";
 
 //--------------------------------------------//
 //              Chart Component                //
 //--------------------------------------------//
-
 const ChartLot = () => {
+  const {
+    asofdate,
+    timesliderOn,
+    newStatusField,
+    newHoaField,
+    newAfaField,
+    newHoField,
+  } = use(MyContext);
   const arcgisScene = document.querySelector("arcgis-scene");
 
-  //--- Declare useState
+  //--- Initial date (latest date for as-of-date)
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
 
-  //--- 0. As of date
-  const { data: newAsOfDate } = useQuery<DisplayDates | any>({
-    queryKey: dateDisplayKeys.selected,
-    queryFn: async () => ({}),
-    staleTime: Infinity,
-  });
+  const queryClient = useQueryClient();
+  const dateList = queryClient.getQueryData<DateFieldsType>([
+    datefieldKeys.selected,
+  ]);
+  const latestDate = toAsofdate(dateList?.latestdate);
 
-  //--- 1. Location state: Municipality or Barangay
+  //--- Location state: Municipality or Barangay
   const { data: selectedLocation } = useQuery<SelectedLocation | any>({
     queryKey: locationKeys.selected,
     queryFn: async () => ({}),
@@ -80,37 +78,18 @@ const ChartLot = () => {
   const municipality = selectedLocation?.municipality;
   const barangay = selectedLocation?.barangay;
 
-  //--- Updated fields for timeslider
-  const { data: newStates } = useQuery<TimesliderFieldsTypes | any>({
-    queryKey: timesliderFieldKeys.selected,
-    queryFn: async () => ({}),
-    staleTime: Infinity,
-  });
-  const status_field = newStates?.statusdateField;
-  const ho_field = newStates?.newHandedOverfield;
-  const hoa_field = newStates?.newHandedoverAreafield;
-  const aa_field = newStates?.newAffectedAreafield;
-
-  //--- timeslider state
-  const { data: time } = useQuery<TimeSliderState | any>({
-    queryKey: timesliderKeys.selected,
-    queryFn: async () => ({}),
-    staleTime: Infinity,
-  });
-  const timesliderstate = time?.timesliderstate;
-
   //--- New status field by timeslider state
-  const stats_field = timesliderstate ? status_field : lotStatusField;
+  const stats_field = timesliderOn ? newStatusField : lotStatusField;
 
   //--- 2. Streamlined Data Fetching with useQuery
   const { data, isLoading } = useQuery<ChartResponse | any>({
     queryKey: [
       municipality,
       barangay,
-      status_field,
+      newStatusField,
       lotStatusField,
       lotLayer,
-      timesliderstate, // Add dependecies so when these layers are changed, re-fetching happens.
+      timesliderOn,
     ],
     queryFn: async () => {
       queryc_lot.qValues = [municipality, barangay];
@@ -121,13 +100,13 @@ const ChartLot = () => {
       });
 
       queryc_lot2.qValues = [municipality, barangay];
-      queryc_lot2.qExpression = timesliderstate
-        ? `${status_field} <> 8`
+      queryc_lot2.qExpression = timesliderOn
+        ? `${newStatusField} <> 8`
         : `${lotStatusField} <> 8`;
 
       queryc_lot3.qValues = [municipality, barangay];
-      queryc_lot3.qExpression = timesliderstate
-        ? `${status_field} >= 1`
+      queryc_lot3.qExpression = timesliderOn
+        ? `${newStatusField} >= 1`
         : `${lotStatusField} >= 1`;
 
       //--- Independent queries: run in parallel instead of sequentially
@@ -139,6 +118,7 @@ const ChartLot = () => {
         total_ho_lot,
         affected_area_pie,
       ] = await Promise.all([
+        //--- Chart data
         new ChartPieSeries(
           queryc_lot.queryExpression(),
           lotLayer,
@@ -148,6 +128,7 @@ const ChartLot = () => {
           "count",
         ).chartDataPieSeries(),
 
+        //--- Total number of lots (public + private)
         fieldStatistic({
           qChart: queryc_lot.queryExpression(),
           layer: lotLayer,
@@ -155,33 +136,37 @@ const ChartLot = () => {
           statisticType: "count",
         }),
 
+        //--- Total affected area (m2)
         fieldStatistic({
           qChart: queryc_lot.queryExpression(),
           layer: lotLayer,
-          statisticField: timesliderstate ? aa_field : affectedAreaField,
+          statisticField: timesliderOn ? newAfaField : affectedAreaField,
           statisticType: "sum",
         }),
 
+        //--- Total handed-over area (m2)
         fieldStatistic({
           qChart: queryc_lot.queryExpression(),
           layer: lotLayer,
-          statisticField: timesliderstate ? hoa_field : lotHandedOverAreaField,
+          statisticField: timesliderOn ? newHoaField : lotHandedOverAreaField,
           statisticType: "sum",
         }),
 
+        //--- Total number of handed-over
         fieldStatistic({
           qChart: queryc_lot2.queryExpression(),
           layer: lotLayer,
-          statisticField: timesliderstate ? ho_field : lotHandedOverField,
+          statisticField: timesliderOn ? newHoField : lotHandedOverField,
           statisticType: "sum",
         }),
 
+        //--- Affected are for each status
         new ChartPieSeries(
           queryc_lot3.queryExpression(),
           lotLayer,
           lotStatusQuery,
           stats_field,
-          timesliderstate ? aa_field : affectedAreaField,
+          timesliderOn ? newAfaField : affectedAreaField,
           "sum",
         ).chartDataPieSeries(),
       ]);
@@ -191,7 +176,7 @@ const ChartLot = () => {
         ((total_ho_lot / totaln) * 100).toFixed(0),
       );
 
-      if (!time?.timesliderstate) {
+      if (!timesliderOn) {
         zoomToLayer(lotLayer, arcgisScene);
       }
 
@@ -375,14 +360,14 @@ const ChartLot = () => {
 
       <div
         style={{
-          color: newAsOfDate?.daysPass === true ? "red" : "gray",
+          color: "gray",
           fontSize: `${new_asofDateSize}px`,
           float: "right",
           marginRight: "5px",
           marginTop: "5px",
         }}
       >
-        {!newAsOfDate?.asOfDate ? "" : "As of " + newAsOfDate?.asOfDate}
+        {asofdate ? `As of ${asofdate}` : `As of ${latestDate}` || ""}
       </div>
 
       {/* Lot Chart */}

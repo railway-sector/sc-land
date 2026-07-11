@@ -1,37 +1,97 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import MapDisplay from "./components/MapDisplay";
 import ActionPanel from "./components/ActionPanel";
 import Header from "./components/Header";
 import MainChart from "./components/ChartMain";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { authenticate } from "./autho";
+import { MyContext } from "./contexts/MyContext";
 
 //--- Create a client
 const queryClient = new QueryClient();
 
 export function App(): React.JSX.Element {
+  //------------------------
+  //  Authenticate viewers
+  //------------------------
   const [loggedInState, setLoggedInState] = useState<boolean>(false);
   useEffect(() => {
     authenticate(setLoggedInState, "AY0soYzKroa8akoy");
+  }, []);
+
+  //------------------------
+  //  Create Context
+  //------------------------
+  const [asofdate, setAsofdate] = useState<any>();
+  const updateAsofdate = useCallback((newAsofdate: any) => {
+    setAsofdate(newAsofdate);
+  }, []);
+
+  const [timesliderOn, setTimesliderOn] = useState<boolean>(false);
+  const updateTimesliderOn = useCallback((newState: boolean) => {
+    setTimesliderOn(newState);
+  }, []);
+
+  const [newStatusField, setNewStatusField] = useState<any>();
+  const updateNewStatusField = useCallback((newField: any) => {
+    setNewStatusField(newField);
+  }, []);
+
+  const [newHoaField, setNewHoaField] = useState<any>();
+  const updateNewHoaField = useCallback((newField: any) => {
+    setNewHoaField(newField);
+  }, []);
+
+  const [newAfaField, setNewAfaField] = useState<any>();
+  const updateNewAfaField = useCallback((newField: any) => {
+    setNewAfaField(newField);
+  }, []);
+
+  const [newHoField, setNewHoField] = useState<any>();
+  const updateNewHoField = useCallback((newField: any) => {
+    setNewHoField(newField);
+  }, []);
+
+  const [latestDate, setLatestDate] = useState<any>();
+  const updateLatestDate = useCallback((date: any) => {
+    setLatestDate(date);
   }, []);
 
   return (
     <>
       {loggedInState && (
         <calcite-shell
-          // content-behind
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "#888 #555",
             "--calcite-color-background": "#2b2b2b",
           }}
         >
-          <QueryClientProvider client={queryClient}>
-            <MainChart />
-            <ActionPanel />
-            <MapDisplay />
-            <Header />
-          </QueryClientProvider>
+          <MyContext
+            value={{
+              asofdate,
+              updateAsofdate,
+              timesliderOn,
+              updateTimesliderOn,
+              newStatusField,
+              updateNewStatusField,
+              newHoaField,
+              updateNewHoaField,
+              newAfaField,
+              updateNewAfaField,
+              newHoField,
+              updateNewHoField,
+              latestDate,
+              updateLatestDate,
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <MainChart />
+              <ActionPanel />
+              <MapDisplay />
+              <Header />
+            </QueryClientProvider>
+          </MyContext>
         </calcite-shell>
       )}
     </>

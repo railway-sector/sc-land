@@ -20,7 +20,7 @@ export const timesliderKeys = {
 //-- date fields
 export interface DateFieldsType {
   dateFields: any;
-  latestasofdate: any;
+  latestdate?: any;
 }
 
 export const datefieldKeys = {

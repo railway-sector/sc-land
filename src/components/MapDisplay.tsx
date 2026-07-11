@@ -21,63 +21,31 @@ import {
   handedOverLotLayer,
   pierAccessLayer,
   sources,
-  // maintenanceRoadLayer,
 } from "../layers";
 import type { ArcgisSearch } from "@arcgis/map-components/components/arcgis-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  timesliderFieldKeys,
-  datefieldKeys,
-  dateDisplayKeys,
-} from "../interfaceKeys";
-import { dateUpdate, getSortDates, addLayersToMap } from "../query";
-import { updatedDateCategoryNames } from "../uniqueValues";
-import type {
-  TimesliderFieldsTypes,
-  DateFieldsType,
-  DisplayDates,
-} from "../interfaceKeys";
+import { datefieldKeys } from "../interfaceKeys";
+import { getSortDates, addLayersToMap, xDateFieldsToDate } from "../query";
+import type { DateFieldsType } from "../interfaceKeys";
+import { useState } from "react";
 
 export default function MapDisplay() {
   const queryClient = useQueryClient();
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const arcgisSearch = document.querySelector("arcgis-search") as ArcgisSearch;
+  const [_mapView, setMapView] = useState<any>();
 
-  //--- As of Date and days Passed
-  const { data: newAsOfDate } = useQuery<DisplayDates | any>({
-    queryKey: [dateDisplayKeys.selected, updatedDateCategoryNames[0]],
-    queryFn: () => dateUpdate(updatedDateCategoryNames[0]),
-    select: (response) => {
-      return {
-        asOfDate: response[0][0],
-        daysPass: response[0][1],
-      };
-    },
-    staleTime: Infinity,
-  });
-  queryClient.setQueryData<DisplayDates>(dateDisplayKeys.selected, newAsOfDate);
-
-  //--- Declare only in preparation for timeslider
-  const { data: dateList } = useQuery<TimesliderFieldsTypes | any>({
-    queryKey: [timesliderFieldKeys.selected], // lotLayer is a dependency
+  //---------------------------------
+  // Dates used in time slider
+  // - Also get lastest as-of-date
+  //---------------------------------
+  const { data: dateList } = useQuery<DateFieldsType | any>({
+    queryKey: [datefieldKeys.selected], // lotLayer is a dependency
     queryFn: async () => {
-      return {};
-    },
-    staleTime: Infinity,
-  });
-  queryClient.setQueryData<TimesliderFieldsTypes>(
-    timesliderFieldKeys.selected,
-    dateList,
-  );
-
-  //--- Dates array for time slider
-  const { data: dateField } = useQuery<DateFieldsType | any>({
-    queryKey: [datefieldKeys.selected, lotLayer], // lotLayer is a dependency
-    queryFn: async () => {
-      const response = await dateUpdate(updatedDateCategoryNames[0]);
+      const response = await getSortDates(lotLayer);
       return {
-        dateFields: await getSortDates(lotLayer),
-        latestasofdate: response[0][2],
+        dateFields: response, // await getSortDates(lotLayer),
+        latestdate: xDateFieldsToDate(response.at(-1)),
       };
     },
     staleTime: Infinity,
@@ -85,8 +53,12 @@ export default function MapDisplay() {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
-  queryClient.setQueryData<DateFieldsType>(datefieldKeys.selected, dateField);
 
+  queryClient.setQueryData<DateFieldsType>(datefieldKeys.selected, dateList);
+
+  //---------------------------------
+  //       Add layers
+  //---------------------------------
   arcgisScene?.viewOnReady(() => {
     addLayersToMap(arcgisScene?.map, [
       pierAccessLayer,
@@ -100,8 +72,6 @@ export default function MapDisplay() {
       somco_fense_layer,
       handedOverLotLayer,
     ]);
-
-    // arcgisScene?.map?.add(maintenanceRoadLayer);
 
     arcgisSearch.allPlaceholder = "LotID, StructureID, Chainage";
     arcgisSearch.includeDefaultSourcesDisabled = true;
@@ -123,6 +93,9 @@ export default function MapDisplay() {
         viewingMode="local"
         center="121.05, 14.4"
         zoom={12}
+        onarcgisViewReadyChange={(event: any) => {
+          setMapView(event.target);
+        }}
       >
         <arcgis-compass slot="top-right"></arcgis-compass>
         <arcgis-expand close-on-esc slot="top-right" mode="floating">

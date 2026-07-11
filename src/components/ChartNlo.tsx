@@ -10,8 +10,8 @@ import {
   nloStatusField,
   primaryLabelColor,
   nloStatusQuery,
-  updatedDateCategoryNames,
   valueLabelColor,
+  monitorLists,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { nloLayer, piechart_nlo, queryc_nlo } from "../layers";
@@ -34,14 +34,17 @@ import ChartPieSeriesRender from "chart-pie-series-render";
 //--------------------------------------------//
 //              Chart Component                //
 //--------------------------------------------//
+
+//--- memo prevents re-rendering the Component when the parent Component
+//--- (ChartMain) is rendered.
 const ChartNlo = memo(() => {
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
 
   //--- 0. As of date
   const { data: newAsOfDate } = useQuery<DisplayDates | any>({
-    queryKey: [dateDisplayKeys.selected, updatedDateCategoryNames[0]],
-    queryFn: () => dateUpdate(updatedDateCategoryNames[2]),
+    queryKey: [dateDisplayKeys.selected],
+    queryFn: () => dateUpdate(monitorLists[2]),
     select: (response) => {
       return {
         asOfDate: response[0][0],

@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable no-unsafe-optional-chaining */
-
 import {
   dateTable,
   lotLayer,
@@ -11,8 +7,6 @@ import {
 import { handedOverLotField, cpField, lotStatusField } from "./uniqueValues";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
-import type { QueryClient } from "@tanstack/react-query";
-import { dateDisplayKeys, type DisplayDates } from "./interfaceKeys";
 import type { statisticsType } from "./uniqueValues";
 import StatisticDefinition from "@arcgis/core/rest/support/StatisticDefinition";
 import Query from "@arcgis/core/rest/support/Query";
@@ -24,52 +18,6 @@ export function addLayersToMap(map: any, layersList: any[]) {
   layersList.forEach((layer: any) => {
     map.add(layer);
   });
-}
-
-//--- Update asOfDate and/or daysPass
-// This only updates either 'asOfDate' or 'daysPass'
-export function updateDisplayDates(
-  queryClient: QueryClient,
-  fieldToUpdate: "asOfDate" | "daysPass",
-  value: string,
-) {
-  queryClient.setQueryData<DisplayDates>(
-    dateDisplayKeys.selected,
-    (oldData: any) => ({
-      ...oldData, // Retains whichever field is NOT being updated
-      [fieldToUpdate]: value,
-    }),
-  );
-}
-//---------------------------------------------------------//
-//                Get Initial Dates                        //
-//---------------------------------------------------------//
-export async function getSortDates(layer: any) {
-  const all_fields: string[] = [];
-  layer?.fields.map((field: any) => {
-    all_fields.push(field.name);
-  });
-
-  const date_fields = all_fields.filter(
-    (field: any) => field.startsWith("x") && !isNaN(field.slice(1)),
-  );
-
-  // Re-order date fields in ascending order
-  date_fields.sort((a: any, b: any) => {
-    const a_date: any = new Date(
-      Number(a.slice(1, 5)),
-      Number(a.slice(5, 7)) - 1,
-      Number(a.slice(7, 9)),
-    );
-    const b_date: any = new Date(
-      Number(b.slice(1, 5)),
-      Number(b.slice(5, 7)) - 1,
-      Number(b.slice(7, 9)),
-    );
-    return a_date - b_date;
-  });
-
-  return date_fields;
 }
 
 //---------------------------------------------------------//
@@ -92,12 +40,10 @@ export function queryDefinitionExpression({
         featureLayer.forEach((layer) => {
           if (layer) {
             layer.definitionExpression = queryExpression;
-            // layer.visible = true;
           }
         });
       } else {
         featureLayer.definitionExpression = queryExpression;
-        // featureLayer.visible = true;
       }
     }
   }
@@ -225,39 +171,81 @@ export function updateLotSymbology(new_date_field: any) {
   }
 }
 
-//----------------------------------------//
-//------        Date and Month       -----//
-//----------------------------------------//
+//---------------------------------------------------------//
+//                Get & Sort date fields                   //
+//---------------------------------------------------------//
+function parseDateField(field: string): Date {
+  return new Date(
+    Number(field.slice(1, 5)),
+    Number(field.slice(5, 7)) - 1,
+    Number(field.slice(7, 9)),
+  );
+}
+
+export async function getSortDates(layer: any) {
+  //--- Get raw date fields (x202402013,.....)
+  const xdates = (layer?.fields ?? [])
+    .map((field: any) => field.name)
+    .filter(
+      (name: string) => name.startsWith("x") && !isNaN(Number(name.slice(1))),
+    )
+    .sort(
+      (a: string, b: string) =>
+        parseDateField(a).getTime() - parseDateField(b).getTime(),
+    );
+  return xdates;
+}
+
+export function toDateList(xdates: any) {
+  const dateList: Date[] =
+    xdates.map((date: string) => {
+      const yyyy = Number(date.slice(1, 5));
+      const mm = Number(date.slice(5, 7)) - 1;
+      const dd = Number(date.slice(7, 9));
+      return new Date(yyyy, mm, dd);
+    }) ?? [];
+
+  return dateList;
+}
+
+//---------------------------------------------------------//
+//                Get as-of-date                           //
+//---------------------------------------------------------//
 export function yearMonthDay(date: Date) {
   return {
-    year: date.getFullYear(),
-    month: date.getMonth() + 1,
-    day: date.getDate(),
+    year: date?.getFullYear() ?? 0,
+    month: date?.getMonth() + 1,
+    day: date?.getDate(),
   };
 }
 
-export async function dateUpdate(category: any) {
+export function toAsofdate(date: Date) {
+  const { year, day } = yearMonthDay(date);
+  const cmonth = date?.toLocaleString("en-US", { month: "long" });
+  return `${cmonth} ${day}, ${year}`;
+}
+
+export async function dateUpdate(category: string) {
   const query = dateTable.createQuery();
   query.where = `project = 'N2' AND category = '${category}'`;
 
-  const response = await dateTable.queryFeatures(query);
-  const dates = response.features.map((result: any) => {
-    const today = new Date();
-    const date = new Date(result.attributes.date);
+  const { features } = await dateTable.queryFeatures(query);
+  return features.map(({ attributes }: any) => {
+    const date = new Date(attributes.date);
+    const asofdate = toAsofdate(date);
 
-    //-- Calculate the number of days passed since the last update
-    const time_passed = today.getTime() - date.getTime();
-    const days_passed = Math.round(time_passed / (1000 * 3600 * 24));
-
-    const year = yearMonthDay(date).year;
-    const month = date.toLocaleString("en-US", {
-      month: "long",
-    });
-    const day = yearMonthDay(date).day;
-    const as_of_date = year < 1990 ? "" : `${month} ${day}, ${year}`;
-    return [as_of_date, days_passed, date];
+    return asofdate;
   });
-  return dates;
+}
+
+export function xDateFieldsToDate(xdate: any) {
+  const yyyy = Number(xdate.slice(1, 5));
+  const desired_mm = Number(xdate.slice(5, 7));
+  const dd = Number(xdate.slice(7, 9));
+  const mm = desired_mm - 1;
+  const final = new Date(yyyy, mm, dd);
+
+  return final;
 }
 
 //----------------------------------------------//
