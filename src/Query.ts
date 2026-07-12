@@ -10,6 +10,9 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type { statisticsType } from "./uniqueValues";
 import StatisticDefinition from "@arcgis/core/rest/support/StatisticDefinition";
 import Query from "@arcgis/core/rest/support/Query";
+import { useQuery } from "@tanstack/react-query";
+import { datefieldKeys } from "./interfaceKeys";
+import type { DateFieldsType } from "./interfaceKeys";
 
 //---------------------------------------------------------//
 //                 Add Layers to Map                      //
@@ -197,6 +200,7 @@ export async function getSortDates(layer: any) {
 }
 
 export function toDateList(xdates: any) {
+  //--- Conver xdates to a list of dates in date format
   const dateList: Date[] =
     xdates.map((date: string) => {
       const yyyy = Number(date.slice(1, 5));
@@ -220,12 +224,14 @@ export function yearMonthDay(date: Date) {
 }
 
 export function toAsofdate(date: Date) {
+  //--- Return displayed date: (as of date)
   const { year, day } = yearMonthDay(date);
   const cmonth = date?.toLocaleString("en-US", { month: "long" });
   return `${cmonth} ${day}, ${year}`;
 }
 
 export async function dateUpdate(category: string) {
+  //--- Only executed during an initial render
   const query = dateTable.createQuery();
   query.where = `project = 'N2' AND category = '${category}'`;
 
@@ -239,6 +245,7 @@ export async function dateUpdate(category: string) {
 }
 
 export function xDateFieldsToDate(xdate: any) {
+  //--- Convert a single xDate to a date in date format
   const yyyy = Number(xdate.slice(1, 5));
   const desired_mm = Number(xdate.slice(5, 7));
   const dd = Number(xdate.slice(7, 9));
@@ -246,6 +253,21 @@ export function xDateFieldsToDate(xdate: any) {
   const final = new Date(yyyy, mm, dd);
 
   return final;
+}
+
+//--- UseQuery to get a list of time-slider dates & latest date
+export function useDateFields(lotLayer: any) {
+  return useQuery<DateFieldsType>({
+    queryKey: [datefieldKeys.selected, lotLayer],
+    queryFn: async () => {
+      const response = await getSortDates(lotLayer);
+      return {
+        dateFields: response,
+        latestdate: xDateFieldsToDate(response.at(-1)),
+      };
+    },
+    staleTime: Infinity,
+  });
 }
 
 //----------------------------------------------//

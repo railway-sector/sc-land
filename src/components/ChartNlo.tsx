@@ -1,27 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { useRef, useState, useEffect, memo } from "react";
+import { useRef, useState, useEffect, memo, use } from "react";
 import {
-  dateUpdate,
   pieChartData,
   queryDefinitionExpression,
   thousands_separators,
+  toAsofdate,
+  useDateFields,
 } from "../query";
 import {
   nloStatusField,
   primaryLabelColor,
   nloStatusQuery,
   valueLabelColor,
-  monitorLists,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
-import { nloLayer, piechart_nlo, queryc_nlo } from "../layers";
+import { lotLayer, nloLayer, piechart_nlo, queryc_nlo } from "../layers";
 import { useQuery } from "@tanstack/react-query";
-import { locationKeys, dateDisplayKeys } from "../interfaceKeys";
-import type {
-  SelectedLocation,
-  ChartResponse,
-  DisplayDates,
-} from "../interfaceKeys";
+import type { ChartResponse } from "../interfaceKeys";
 import {
   chartSetter,
   legendSetter,
@@ -30,6 +25,7 @@ import {
   seriesSetter,
 } from "../chartSetter";
 import ChartPieSeriesRender from "chart-pie-series-render";
+import { MyContext } from "../contexts/MyContext";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -38,30 +34,15 @@ import ChartPieSeriesRender from "chart-pie-series-render";
 //--- memo prevents re-rendering the Component when the parent Component
 //--- (ChartMain) is rendered.
 const ChartNlo = memo(() => {
+  const { municipality, barangay } = use(MyContext);
+
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
 
-  //--- 0. As of date
-  const { data: newAsOfDate } = useQuery<DisplayDates | any>({
-    queryKey: [dateDisplayKeys.selected],
-    queryFn: () => dateUpdate(monitorLists[2]),
-    select: (response) => {
-      return {
-        asOfDate: response[0][0],
-        daysPass: response[0][1],
-      };
-    },
-    staleTime: Infinity,
-  });
-
-  //--- 1. Location state
-  const { data: selectedLocation } = useQuery<SelectedLocation | any>({
-    queryKey: locationKeys.selected,
-    queryFn: async () => ({}),
-    staleTime: Infinity,
-  });
-  const municipality = selectedLocation?.municipality;
-  const barangay = selectedLocation?.barangay;
+  //--- As of date
+  //--- Initial date to display
+  const { data: dateList } = useDateFields(lotLayer);
+  const latestDate = toAsofdate(dateList?.latestdate);
 
   //--- Chart parameters
   const new_fontSize = chartPanelwidth / 22.3;
@@ -215,13 +196,13 @@ const ChartNlo = memo(() => {
       </div>
       <div
         style={{
-          color: newAsOfDate?.daysPass === true ? "red" : "gray",
+          color: "gray",
           fontSize: `${new_asofDateSize}px`,
           float: "right",
           marginRight: "5px",
         }}
       >
-        {!newAsOfDate?.asOfDate ? "" : "As of " + newAsOfDate?.asOfDate}
+        {latestDate ? `As of ${latestDate}` : `As of `}
       </div>
       <div
         id={chartID}

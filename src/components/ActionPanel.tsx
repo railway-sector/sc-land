@@ -11,18 +11,16 @@ import "@arcgis/map-components/components/arcgis-direct-line-measurement-3d";
 import "@arcgis/map-components/components/arcgis-area-measurement-3d";
 import { defineActions } from "../uniqueValues";
 import HandedOverAreaChart from "./ChartHandedOverArea";
-import { toAsofdate, updateLotSymbology } from "../query";
+import { toAsofdate, updateLotSymbology, useDateFields } from "../query";
 import Timeslider from "./Timeslider";
 import {
+  lotLayer,
   ngcp_line6,
   ngcp_line7,
   ngcp_pole6,
   ngcp_pole7,
   ngcp_working_area6,
 } from "../layers";
-import { useQueryClient } from "@tanstack/react-query";
-import { datefieldKeys } from "../interfaceKeys";
-import type { DateFieldsType } from "../interfaceKeys";
 import { MyContext } from "../contexts/MyContext";
 
 function ActionPanel() {
@@ -46,12 +44,9 @@ function ActionPanel() {
   const timeSlider = document.querySelector("arcgis-time-slider");
 
   //---------------------------------------------
-  //  Get cached dateList & latest date
+  //  Call date list for the time slider
   //---------------------------------------------
-  const queryClient = useQueryClient();
-  const data = queryClient.getQueryData<DateFieldsType>([
-    datefieldKeys.selected,
-  ]);
+  const { data } = useDateFields(lotLayer);
 
   useEffect(() => {
     if (activeWidget) {
@@ -72,6 +67,7 @@ function ActionPanel() {
         timeSlider.timeExtent = null;
         shellPanel.collapsed = true;
 
+        if (!data) return; // wait until the query has resolved.
         //-- Update As of date
         updateAsofdate(toAsofdate(data?.latestdate));
 

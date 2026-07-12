@@ -52,9 +52,14 @@ export function App(): React.JSX.Element {
     setNewHoField(newField);
   }, []);
 
-  const [latestDate, setLatestDate] = useState<any>();
-  const updateLatestDate = useCallback((date: any) => {
-    setLatestDate(date);
+  const [municipality, setMunicipality] = useState<any>();
+  const updateMunicipality = useCallback((newC: any) => {
+    setMunicipality(newC);
+  }, []);
+
+  const [barangay, setBarangay] = useState<any>();
+  const updateBarangay = useCallback((newB: any) => {
+    setBarangay(newB);
   }, []);
 
   return (
@@ -81,8 +86,10 @@ export function App(): React.JSX.Element {
               updateNewAfaField,
               newHoField,
               updateNewHoField,
-              latestDate,
-              updateLatestDate,
+              municipality,
+              updateMunicipality,
+              barangay,
+              updateBarangay,
             }}
           >
             <QueryClientProvider client={queryClient}>

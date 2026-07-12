@@ -1,11 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, use } from "react";
 import Select from "react-select";
 import "../index.css";
 import GenerateDropdownData from "dropdown-pkg-arcgis";
 import { lotLayer } from "../layers";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { locationKeys } from "../interfaceKeys";
-import type { SelectedLocation } from "../interfaceKeys";
+import { useQuery } from "@tanstack/react-query";
+import { MyContext } from "../contexts/MyContext";
 
 const theme = {
   bg: "#2b2b2b",
@@ -66,11 +65,12 @@ const customStyles = {
 };
 
 export default function DropdownData() {
-  const queryClient = useQueryClient();
+  const { updateMunicipality, updateBarangay } = use(MyContext);
 
-  const [municipalSelected, setMunicipalSelected] = useState<any | null>(null);
-  const [barangaySelected, setBarangaySelected] = useState<any | null>(null);
+  const [mSelected, setMselected] = useState<any | null>(null);
+  const [bSelected, setBselected] = useState<any | null>(null);
 
+  //--- Initial object array of municipality & Barangay
   const { data: municipalList } = useQuery<any>({
     queryKey: ["dropdownData"], // Do not add lotLayer as a dependency. The dropdown list will not be updated properly.
     queryFn: async () => {
@@ -87,40 +87,20 @@ export default function DropdownData() {
 
   //--- Without useMemo, the code above returns and collects [] in memory every time
   //--- the component renders => waster of memory.
-  const barangayList = useMemo(
-    () => municipalSelected?.field2 ?? [],
-    [municipalSelected],
-  );
-
-  //--- For demo
-  // const barangayList = useMemo(
-  //   () => (console.log("Recomputed"), municipalSelected?.field2 ?? []),
-  //   [municipalSelected],
-  // );
-
-  //--- Function to instantly update the global cache
-  function setSelectedLocation(patch: Partial<SelectedLocation>) {
-    queryClient.setQueryData<SelectedLocation>(
-      locationKeys.selected,
-      (prev) => ({
-        municipality: prev?.municipality ?? null,
-        barangay: prev?.barangay ?? null,
-        ...patch,
-      }),
-    );
-  }
+  const barangayList = useMemo(() => mSelected?.field2 ?? [], [mSelected]);
 
   //--- Update Municipalicty
   const handleMunicipalityChange = (obj: any) => {
-    setSelectedLocation({ municipality: obj?.field1 ?? null, barangay: null });
-    setMunicipalSelected(obj);
-    setBarangaySelected(null);
+    updateMunicipality(obj?.field1 ?? null);
+    updateBarangay(null);
+    setMselected(obj);
+    setBselected(null);
   };
 
-  // handle change event of the barangay dropdownff
+  //--- Update Barangay
   const handleBarangayChange = (obj: any) => {
-    setSelectedLocation({ barangay: obj?.name ?? null });
-    setBarangaySelected(obj);
+    updateBarangay(obj?.name ?? null);
+    setBselected(obj);
   };
 
   return (
@@ -134,7 +114,7 @@ export default function DropdownData() {
     >
       <Select
         placeholder="Select Municipality"
-        value={municipalSelected}
+        value={mSelected}
         options={municipalList && municipalList}
         onChange={handleMunicipalityChange}
         getOptionLabel={(x: any) => x.field1}
@@ -144,7 +124,7 @@ export default function DropdownData() {
       <br />
       <Select
         placeholder="Select Barangay"
-        value={barangaySelected}
+        value={bSelected}
         options={barangayList}
         onChange={handleBarangayChange}
         getOptionLabel={(x: any) => x.name}

@@ -3,14 +3,13 @@ import {
   toAsofdate,
   toDateList,
   updateLotSymbology,
+  useDateFields,
   yearMonthDay,
 } from "../query";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
-import { useQueryClient } from "@tanstack/react-query";
-import { datefieldKeys } from "../interfaceKeys";
-import type { DateFieldsType } from "../interfaceKeys";
 import { MyContext } from "../contexts/MyContext";
 import { use } from "react";
+import { lotLayer } from "../layers";
 
 export default function Timeslider() {
   const {
@@ -27,10 +26,7 @@ export default function Timeslider() {
   //---------------------------------------------
   //  Call date list for the time slider
   //---------------------------------------------
-  const queryClient = useQueryClient();
-  const dateList = queryClient.getQueryData<DateFieldsType>([
-    datefieldKeys.selected,
-  ]);
+  const { data: dateList } = useDateFields(lotLayer);
 
   //------------------------------------
   //     Activate time slider
@@ -38,7 +34,8 @@ export default function Timeslider() {
   arcgisScene?.viewOnReady(() => {
     const timeSlider: any = document.querySelector("arcgis-time-slider");
 
-    const datesObj = toDateList(dateList?.dateFields);
+    if (!dateList) return; // wait until the query has resolved (another option is useEffect)
+    const datesObj: any = dateList && toDateList(dateList?.dateFields);
 
     //--- Define start and end dates of time-slider
     timeSlider.fullTimeExtent = {

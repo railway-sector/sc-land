@@ -1,9 +1,10 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, use, useEffect, useRef, useState } from "react";
 import {
   pieChartData,
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
+  useDateFields,
 } from "../query";
 import "../index.css";
 import {
@@ -14,24 +15,22 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import {
+  lotLayer,
   occupancyLayer,
   piechart_struc,
   queryc_struc,
   structureLayer,
 } from "../layers";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { locationKeys } from "../interfaceKeys";
-import type { SelectedLocation, ChartResponse } from "../interfaceKeys";
+import { useQuery } from "@tanstack/react-query";
+import type { ChartResponse } from "../interfaceKeys";
 import {
   chartSetter,
   legendSetter,
-  // maybeDisposeRoot,
   rootSetter,
   seriesSetter,
 } from "../chartSetter";
 import ChartPieSeriesRender from "chart-pie-series-render";
-import { datefieldKeys } from "../interfaceKeys";
-import type { DateFieldsType } from "../interfaceKeys";
+import { MyContext } from "../contexts/MyContext";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -40,24 +39,14 @@ import type { DateFieldsType } from "../interfaceKeys";
 //--- memo prevents re-rendering the Component when the parent Component
 //--- (ChartMain) is rendered.
 const ChartStructure = memo(() => {
+  const { municipality, barangay } = use(MyContext);
+
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
 
-  //--- As of date
-  const queryClient = useQueryClient();
-  const dateList = queryClient.getQueryData<DateFieldsType>([
-    datefieldKeys.selected,
-  ]);
+  //--- Initial date to display
+  const { data: dateList } = useDateFields(lotLayer);
   const latestDate = toAsofdate(dateList?.latestdate);
-
-  //--- 1. Location state
-  const { data: selectedLocation } = useQuery<SelectedLocation | any>({
-    queryKey: locationKeys.selected,
-    queryFn: async () => ({}),
-    staleTime: Infinity,
-  });
-  const municipality = selectedLocation?.municipality;
-  const barangay = selectedLocation?.barangay;
 
   //--- Chart parameters
   const new_fontSize = chartPanelwidth / 22.3;

@@ -13,8 +13,10 @@ type MyDropdownContextType = {
   updateNewAfaField: any;
   newHoField: any;
   updateNewHoField: any;
-  latestDate: any;
-  updateLatestDate: any;
+  municipality: any;
+  updateMunicipality: any;
+  barangay: any;
+  updateBarangay: any;
 };
 
 const initialState = {
@@ -30,8 +32,10 @@ const initialState = {
   updateNewAfaField: undefined,
   newHoField: undefined,
   updateNewHoField: undefined,
-  latestDate: undefined,
-  updateLatestDate: undefined,
+  municipality: undefined,
+  updateMunicipality: undefined,
+  barangay: undefined,
+  updateBarangay: undefined,
 };
 
 export const MyContext = createContext<MyDropdownContextType>({

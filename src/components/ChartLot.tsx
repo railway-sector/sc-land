@@ -11,6 +11,7 @@ import {
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
+  useDateFields,
   zoomToLayer,
 } from "../query";
 import "@esri/calcite-components/dist/components/calcite-segmented-control";
@@ -29,9 +30,8 @@ import {
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { locationKeys } from "../interfaceKeys";
-import type { SelectedLocation, ChartResponse } from "../interfaceKeys";
+import { useQuery } from "@tanstack/react-query";
+import type { ChartResponse } from "../interfaceKeys";
 import {
   affectedAreaValue,
   chartSetter,
@@ -42,8 +42,6 @@ import {
 import ChartPieSeriesRender from "chart-pie-series-render";
 import ChartPieSeries from "chart-pie-series";
 import { MyContext } from "../contexts/MyContext";
-import { datefieldKeys } from "../interfaceKeys";
-import type { DateFieldsType } from "../interfaceKeys";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -56,6 +54,8 @@ const ChartLot = () => {
     newHoaField,
     newAfaField,
     newHoField,
+    municipality,
+    barangay,
   } = use(MyContext);
   const arcgisScene = document.querySelector("arcgis-scene");
 
@@ -63,20 +63,9 @@ const ChartLot = () => {
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
 
-  const queryClient = useQueryClient();
-  const dateList = queryClient.getQueryData<DateFieldsType>([
-    datefieldKeys.selected,
-  ]);
+  //--- Initial date to display
+  const { data: dateList } = useDateFields(lotLayer);
   const latestDate = toAsofdate(dateList?.latestdate);
-
-  //--- Location state: Municipality or Barangay
-  const { data: selectedLocation } = useQuery<SelectedLocation | any>({
-    queryKey: locationKeys.selected,
-    queryFn: async () => ({}),
-    staleTime: Infinity,
-  });
-  const municipality = selectedLocation?.municipality;
-  const barangay = selectedLocation?.barangay;
 
   //--- New status field by timeslider state
   const stats_field = timesliderOn ? newStatusField : lotStatusField;

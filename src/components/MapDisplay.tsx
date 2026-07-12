@@ -14,7 +14,6 @@ import {
   alignmentGroupLayer,
   nloLoOccupancyGroupLayer,
   lotGroupLayer,
-  lotLayer,
   ngcp7_groupLayer,
   ngcp6_groupLayer,
   somco_fense_layer,
@@ -23,38 +22,14 @@ import {
   sources,
 } from "../layers";
 import type { ArcgisSearch } from "@arcgis/map-components/components/arcgis-search";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { datefieldKeys } from "../interfaceKeys";
-import { getSortDates, addLayersToMap, xDateFieldsToDate } from "../query";
-import type { DateFieldsType } from "../interfaceKeys";
+import { addLayersToMap } from "../query";
 import { useState } from "react";
 
 export default function MapDisplay() {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const arcgisSearch = document.querySelector("arcgis-search") as ArcgisSearch;
   const [_mapView, setMapView] = useState<any>();
-
-  //---------------------------------
-  // Dates used in time slider
-  // - Also get lastest as-of-date
-  //---------------------------------
-  const { data: dateList } = useQuery<DateFieldsType | any>({
-    queryKey: [datefieldKeys.selected], // lotLayer is a dependency
-    queryFn: async () => {
-      const response = await getSortDates(lotLayer);
-      return {
-        dateFields: response, // await getSortDates(lotLayer),
-        latestdate: xDateFieldsToDate(response.at(-1)),
-      };
-    },
-    staleTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
-
-  queryClient.setQueryData<DateFieldsType>(datefieldKeys.selected, dateList);
 
   //---------------------------------
   //       Add layers
