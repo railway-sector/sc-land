@@ -10,12 +10,12 @@ import {
   useDateFields,
 } from "../query";
 import {
-  nloStatusField,
+  nlo_status_f,
   primaryLabelColor,
-  nloStatusQuery,
+  nlo_status_q,
   valueLabelColor,
-  municipalityField,
-  barangayField,
+  municipality_f,
+  barangay_f,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { lotLayer, nloLayer } from "../layers";
@@ -64,11 +64,11 @@ const ChartNlo = memo(() => {
 
   //--- Generat Chart Data
   const qV = [municipality, barangay];
-  const qF = [municipalityField, barangayField];
-  const queryc_nlo = makeQuery(qV, qF, `${nloStatusField} >= 1`);
+  const qF = [municipality_f, barangay_f];
+  const queryc_nlo = makeQuery(qV, qF, `${nlo_status_f} >= 1`);
 
   const { data, isLoading } = useQuery<ChartResponse | any>({
-    queryKey: [municipality, barangay, nloStatusField, nloLayer],
+    queryKey: [municipality, barangay, nlo_status_f, nloLayer],
     queryFn: async () => {
       queryDefinitionExpression({
         queryExpression: queryc_nlo.queryExpression(),
@@ -80,9 +80,9 @@ const ChartNlo = memo(() => {
         piechart: new ChartPieSeries(),
         qChart: queryc_nlo,
         layer: nloLayer,
-        statusList: nloStatusQuery,
-        statusField: nloStatusField,
-        statisticField: nloStatusField,
+        statusList: nlo_status_q,
+        statusField: nlo_status_f,
+        statisticField: nlo_status_f,
         statisticType: "count",
       });
 
@@ -135,7 +135,7 @@ const ChartNlo = memo(() => {
       root,
       qChart: queryc_nlo,
       q2Expression: undefined,
-      status_field: nloStatusField,
+      status_field: nlo_status_f,
       view: arcgisScene?.view,
       updateChartPanelwidth: setChartPanelwidth,
       data: chartData,
@@ -144,7 +144,7 @@ const ChartNlo = memo(() => {
       innerLabelFontSize: new_pieInnerLabelFontSize,
       innerValueFontSize: new_pieInnerValueFontSize,
       layer: nloLayer,
-      statusArray: nloStatusQuery,
+      statusArray: nlo_status_q,
       bkg_color_switch: false,
       seriesFillHash: undefined,
     });

@@ -1,3 +1,6 @@
+export type statisticsType = "count" | "sum";
+export type TypeFieldType = "number" | "string";
+
 //--- Dropdown
 export interface SelectedLocation {
   municipality: string | any;

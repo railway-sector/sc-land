@@ -12,11 +12,11 @@ import "@esri/calcite-components/components/calcite-chip-group";
 import "@esri/calcite-components/components/calcite-avatar";
 import "@esri/calcite-components/components/calcite-action-bar";
 import {
-  barangayField,
+  barangay_f,
   chart_width,
-  lotStatusField,
-  lotStatusQuery,
-  municipalityField,
+  lot_status_f,
+  lot_status_q,
+  municipality_f,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import "../index.css";
@@ -69,18 +69,18 @@ const ExpropriationList = () => {
   const { municipality, barangay } = use(MyContext);
 
   //--- Status value for Expro
-  const exproV = lotStatusQuery.filter((e: any) =>
+  const exproV = lot_status_q.filter((e: any) =>
     e.category.includes("Expropriation"),
   )[0]?.value;
 
   //--- Make query expression
   const qV = [municipality, barangay];
-  const qF = [municipalityField, barangayField];
-  const querycExpro = makeQuery(qV, qF, `${lotStatusField} = ${exproV}`);
+  const qF = [municipality_f, barangay_f];
+  const querycExpro = makeQuery(qV, qF, `${lot_status_f} = ${exproV}`);
 
   //--- Obtain queried Features
   const { data } = useQuery<any>({
-    queryKey: [municipality, barangay, lotStatusField],
+    queryKey: [municipality, barangay, lot_status_f],
     queryFn: () =>
       queryFeatures({
         layer: lotLayer,

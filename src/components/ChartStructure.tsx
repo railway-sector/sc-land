@@ -11,11 +11,11 @@ import {
 import "../index.css";
 import {
   primaryLabelColor,
-  structureStatusQuery,
-  structureStatusField,
+  str_status_q,
+  str_status_f,
   valueLabelColor,
-  municipalityField,
-  barangayField,
+  municipality_f,
+  barangay_f,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { lotLayer, occupancyLayer, structureLayer } from "../layers";
@@ -62,11 +62,11 @@ const ChartStructure = memo(() => {
 
   //--- Generate Chart data
   const qV = [municipality, barangay];
-  const qF = [municipalityField, barangayField];
-  const queryc_struc = makeQuery(qV, qF, `${structureStatusField} >= 1`);
+  const qF = [municipality_f, barangay_f];
+  const queryc_struc = makeQuery(qV, qF, `${str_status_f} >= 1`);
 
   const { data, isLoading } = useQuery<ChartResponse | any>({
-    queryKey: [municipality, barangay, structureStatusField, structureLayer],
+    queryKey: [municipality, barangay, str_status_f, structureLayer],
     queryFn: async () => {
       queryDefinitionExpression({
         queryExpression: queryc_struc.queryExpression(),
@@ -77,9 +77,9 @@ const ChartStructure = memo(() => {
         piechart: new ChartPieSeries(),
         qChart: queryc_struc,
         layer: structureLayer,
-        statusList: structureStatusQuery,
-        statusField: structureStatusField,
-        statisticField: structureStatusField,
+        statusList: str_status_q,
+        statusField: str_status_f,
+        statisticField: str_status_f,
         statisticType: "count",
       });
 
@@ -131,7 +131,7 @@ const ChartStructure = memo(() => {
       root,
       qChart: queryc_struc,
       q2Expression: undefined,
-      status_field: structureStatusField,
+      status_field: str_status_f,
       view: arcgisScene?.view,
       updateChartPanelwidth: setChartPanelwidth,
       data: chartData,
@@ -140,7 +140,7 @@ const ChartStructure = memo(() => {
       innerLabelFontSize: new_pieInnerLabelFontSize,
       innerValueFontSize: new_pieInnerValueFontSize,
       layer: structureLayer,
-      statusArray: structureStatusQuery,
+      statusArray: str_status_q,
       bkg_color_switch: false,
       seriesFillHash: undefined,
     });

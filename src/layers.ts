@@ -10,43 +10,31 @@ import SolidEdges3D from "@arcgis/core/symbols/edges/SolidEdges3D";
 import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
 import PolygonSymbol3D from "@arcgis/core/symbols/PolygonSymbol3D";
 import ExtrudeSymbol3DLayer from "@arcgis/core/symbols/ExtrudeSymbol3DLayer";
-import PointSymbol3D from "@arcgis/core/symbols/PointSymbol3D";
-import IconSymbol3DLayer from "@arcgis/core/symbols/IconSymbol3DLayer";
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
-import CustomContent from "@arcgis/core/popup/content/CustomContent";
-import PopupTemplate from "@arcgis/core/PopupTemplate";
 import LineSymbol3D from "@arcgis/core/symbols/LineSymbol3D.js";
 import PathSymbol3DLayer from "@arcgis/core/symbols/PathSymbol3DLayer.js";
 
 import {
-  barangayField,
-  cpField,
-  endorsedField,
-  endorsedStatus,
-  landOwnerField,
-  landUseField,
-  lotHandedOverDateField,
-  lotHandedOverField,
-  lotStatusColor,
-  lotStatusField,
-  lotStatusLabel,
-  lotUseArray,
-  municipalityField,
-  nloStatusField,
-  nloStatusLabel,
-  nloStatusSymbolRef,
-  percentHandedOverField,
-  structureOccupancyRef,
-  structureOccupancyStatusField,
-  structureOccupancyStatusLabel,
-  structureOwnershipColor,
-  structureOwnershipStatusField,
-  structureOwnershipStatusLabel,
-  structureStatusColorRgb,
-  structureStatusField,
-  structureStatusLabel,
-  tunnelAffectLotField,
+  lot_label,
+  lot_popup,
+  lot_renderer,
+  lot_ho_f,
+  lot_status_f,
+  portalItem_url,
   valueLabelColor,
+  lot_tunnel_f,
+  str_renderer,
+  str_popup,
+  lot_opt_renderer,
+  lot_studied_renderer,
+  lot_ho_renderer,
+  lot_tunnel_renderer,
+  lot_access_renderer,
+  str_owner_renderer,
+  nlo_renderer,
+  nlo_popup,
+  str_occup_renderer,
+  str_occup_popup,
 } from "./uniqueValues";
 
 /* Standalone table for Dates */
@@ -754,670 +742,139 @@ export const proposedEastServiceRoadLayer = new FeatureLayer({
 //                Lot, Structure, NLO            //
 //-----------------------------------------------//
 
-/* The colors used for the each transit line */
-const lotIdLabel = new LabelClass({
-  labelExpressionInfo: { expression: "$feature.LotID" },
-  symbol: {
-    type: "text",
-    color: "black",
-    haloColor: "white",
-    haloSize: 0.5,
-    font: {
-      size: 11,
-      weight: "bold",
-    },
-  },
-});
-
-export const lotDefaultSymbol = new SimpleFillSymbol({
-  color: [0, 0, 0, 0],
-  style: "solid",
-  outline: {
-    // autocasts as new SimpleLineSymbol()
-    color: [110, 110, 110],
-    width: 0.7,
-  },
-});
-
-export const uniqueValueInfosLotStatus = lotStatusLabel.map(
-  (status: any, index: any) => {
-    return Object.assign({
-      value: index + 1,
-      label: status,
-      symbol: new SimpleFillSymbol({
-        color: lotStatusColor[index],
-      }),
-    });
-  },
-);
-const lotLayerRenderer = new UniqueValueRenderer({
-  field: lotStatusField,
-  defaultSymbol: lotDefaultSymbol, // autocasts as new SimpleFillSymbol()
-  uniqueValueInfos: uniqueValueInfosLotStatus,
-});
-
-// Custom popup for lot layer
-const customContentLot = new CustomContent({
-  outFields: ["*"],
-  creator: (event: any) => {
-    // Extract AsscessDate of clicked pierAccessLayer
-    const handedOverDate = event.graphic.attributes[lotHandedOverDateField];
-    const handOverArea = event.graphic.attributes[percentHandedOverField];
-    const statusLot = event.graphic.attributes[lotStatusField];
-    const landUse = event.graphic.attributes[landUseField];
-    const municipal = event.graphic.attributes[municipalityField];
-    const barangay = event.graphic.attributes[barangayField];
-    const landOwner = event.graphic.attributes[landOwnerField];
-    const cpNo = event.graphic.attributes[cpField];
-    const endorse = event.graphic.attributes[endorsedField];
-    const endorsed = endorsedStatus[endorse];
-
-    let daten: any;
-    let date: any;
-    if (handedOverDate) {
-      daten = new Date(handedOverDate);
-      const year = daten.getFullYear();
-      const month = daten.getMonth() + 1;
-      const day = daten.getDate();
-      date = `${year}-${month}-${day}`;
-    } else {
-      date = "Undefined";
-    }
-    // Convert numeric to date format 0
-    //const daten = new Date(handedOverDate);
-    //const date = dateFormat(daten, 'MM-dd-yyyy');
-    //<li>Hand-Over Date: <b>${date}</b></li><br>
-
-    return `
-    <div style='color: #eaeaea'>
-    <ul><li>Handed-Over Area:  <span style="color: #d9dc00ff; font-weight: bold">${handOverArea} %</span></li>
-    <li>Handed-Over Date:  <span style="color: #d9dc00ff; font-weight: bold">${date}</span></li>
-              <li>Status:            <span style="color: #d9dc00ff; font-weight: bold">${
-                statusLot >= 0 ? lotStatusLabel[statusLot - 1] : ""
-              }</span></li>
-              <li>Land Use:          <span style="color: #d9dc00ff; font-weight: bold">${
-                landUse >= 1 ? lotUseArray[landUse - 1] : ""
-              }</span></li>
-              <li>Municipality:     <span style="color: #d9dc00ff; font-weight: bold">${municipal}</span></li>
-              <li>Barangay:          <span style="color: #d9dc00ff; font-weight: bold">${barangay}</span></li>
-              <li>Land Owner:        <span style="color: #d9dc00ff; font-weight: bold">${landOwner}</span></li>
-              <li>CP:                <span style="color: #d9dc00ff; font-weight: bold">${cpNo}</span></li>
-              <li>Endorsed:          <span style="color: #d9dc00ff; font-weight: bold">${endorsed}</span></li></ul>
-              </div>
-              `;
-  },
-});
-
-const templateLot = new PopupTemplate({
-  title: "<div style='color: #eaeaea'>Lot No.: <b>{LotID}</b></div>",
-  lastEditInfoEnabled: false,
-  content: [customContentLot],
-});
-
+//--- LOT LAYER ---//
 export const lotLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
   layerId: 1,
-  labelingInfo: [lotIdLabel],
-  renderer: lotLayerRenderer,
-  popupTemplate: templateLot,
+  labelingInfo: [lot_label],
+  renderer: lot_renderer,
+  popupTemplate: lot_popup,
   title: "Land Acquisition",
   minScale: 30000,
   maxScale: 0,
-  //labelsVisible: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  elevationInfo: { mode: "on-the-ground" },
 });
 
-/* Optmized lots for NSCR-Ex Passenger Line */
-const optimizedLotRenderer = new SimpleRenderer({
-  symbol: new SimpleFillSymbol({
-    color: "#bbbbbb",
-    style: "diagonal-cross",
-    outline: {
-      // autocasts as new SimpleLineSymbol()
-      color: "#FF5733", // [0, 255, 255, 1],
-      width: "6px",
-    },
-  }),
-});
-
+//--- OPTIMIZED LOT FOR PASSENGER LINE ---//
 export const optimizedLots_passengerLineLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
   layerId: 1,
   definitionExpression: "OptLotsIIA_NoT = 1",
-  labelingInfo: [lotIdLabel],
-  renderer: optimizedLotRenderer,
-  popupTemplate: templateLot,
+  labelingInfo: [lot_label],
+  renderer: lot_opt_renderer,
+  popupTemplate: lot_popup,
   title: "Optimized Lots with Issued Notice of Taking",
   minScale: 150000,
   maxScale: 0,
-  //labelsVisible: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  elevationInfo: { mode: "on-the-ground" },
 });
 
-/* Studied Lots of NSCR-Ex Freight Line for Optimization */
-const studiedLotRenderer = new SimpleRenderer({
-  symbol: new SimpleFillSymbol({
-    color: "#808080",
-    style: "horizontal",
-    outline: {
-      // autocasts as new SimpleLineSymbol()
-      color: "#808080", //#DF73FF,
-      width: "6px",
-    },
-  }),
-});
-
+//--- STUDIED LOTS: PASSENGER & FREIGHT LINE FOR OPTIMIZATION ---//
 export const studiedLots_optimizationLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
   layerId: 1,
   definitionExpression: "OptLotsIIB = 1",
-  labelingInfo: [lotIdLabel],
-  renderer: studiedLotRenderer,
-  popupTemplate: templateLot,
+  labelingInfo: [lot_label],
+  renderer: lot_studied_renderer,
+  popupTemplate: lot_popup,
   title: "Candidate Lots of NSCR-Ex Passenger & Freight Line for Optimization",
   minScale: 150000,
   maxScale: 0,
-  //labelsVisible: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  elevationInfo: { mode: "on-the-ground" },
 });
 
-/* Handed-Over Lot (public + private) */
-const handedOverLotRenderer = new UniqueValueRenderer({
-  valueExpression:
-    "When($feature.HandedOver == 1 && $feature.StatusLA != 8, 'Handed-Over', 'others')",
-  uniqueValueInfos: [
-    {
-      value: "Handed-Over",
-      label: "Handed-Over",
-      symbol: new SimpleFillSymbol({
-        color: [0, 255, 255, 0.3],
-        outline: new SimpleLineSymbol({
-          color: "#00ffff",
-          width: "4px",
-        }),
-      }),
-    },
-  ],
-});
-
-// uniqueValueInfos: [
-//   {
-//     value: "Handed-Over",
-//     label: "Handed-Over",
-//     symbol: new SimpleFillSymbol({
-//   })
-//   })
-
-// const handedOverLotRenderer = new UniqueValueRenderer({
-//   field: "HandedOver",
-
-//   uniqueValueInfos: [
-//     {
-//       value: 1,
-//       label: "Handed-Over",
-//       symbol: new SimpleFillSymbol({
-//         color: [0, 255, 255, 0.3], //[0, 255, 255, 0.1], #00ffff
-//         outline: new SimpleLineSymbol({
-//           color: "#00ffff",
-//           width: "4px",
-//         }),
-//       }),
-//     },
-//   ],
-// });
-
+//--- HANDED-OVER LOTS (PUBLIC + PRIATE LOTS) ---//
 export const handedOverLotLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
   layerId: 1,
-  definitionExpression: `${lotHandedOverField} = 1 AND ${lotStatusField} <> 8`,
-  renderer: handedOverLotRenderer,
+  definitionExpression: `${lot_ho_f} = 1 AND ${lot_status_f} <> 8`,
+  renderer: lot_ho_renderer,
   popupEnabled: false,
   labelsVisible: false,
   title: "Handed-Over (public + private)",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-// handedOverLotLayer.listMode = "hide";
-
-const tunnelAffectedLotRenderer = new UniqueValueRenderer({
-  field: tunnelAffectLotField,
-  uniqueValueInfos: [
-    {
-      value: 1,
-      label: "Tunnel Affected",
-      symbol: new SimpleFillSymbol({
-        color: [255, 0, 0, 0],
-        outline: {
-          color: "#00c5ff",
-          width: 0.3,
-        },
-      }),
-    },
-  ],
+  elevationInfo: { mode: "on-the-ground" },
 });
 
+//--- TUNNEL AFFECTED LOTS ---//
 export const tunnelAffectedLotLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
   layerId: 1,
-  definitionExpression: `${tunnelAffectLotField} = 1`,
-  renderer: tunnelAffectedLotRenderer,
+  definitionExpression: `${lot_tunnel_f} = 1`,
+  renderer: lot_tunnel_renderer,
   popupEnabled: false,
   labelsVisible: false,
   title: "Tunnel Affected",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  elevationInfo: { mode: "on-the-ground" },
 });
 
-/* Endorsed Lot Layer */
-// Endorsed lot layer
-// let endorsedLayerRenderer = new UniqueValueRenderer({
-//   field: 'Endorsed',
-//   defaultSymbol: lotDefaultSymbol,
-//   uniqueValueInfos: [
-//     {
-//       value: 0,
-//       label: 'Not Endorsed',
-//       symbol: new SimpleFillSymbol({
-//         color: colorLotReqs[5],
-//       }),
-//     },
-//     {
-//       value: 1,
-//       label: 'Endorsed',
-//       symbol: new SimpleFillSymbol({
-//         color: colorLotReqs[2],
-//       }),
-//     },
-//     {
-//       value: 2,
-//       label: 'NA',
-//       symbol: new SimpleFillSymbol({
-//         color: [211, 211, 211, 0.7],
-//       }),
-//     },
-//   ],
-// });
-
-// export const endorsedLotLayer = new FeatureLayer({
-//   portalItem: {
-//     id: 'dca1d785da0f458b8f87638a76918496',
-//     portal: {
-//       url: 'https://gis.railway-sector.com/portal',
-//     },
-//   },
-//   layerId: 7,
-//   renderer: endorsedLayerRenderer,
-//   labelingInfo: [lotIdLabel],
-//
-//   title: 'Land Acquisition (Endorsed Status)',
-//   minScale: 150000,
-//   maxScale: 0,
-//   //labelsVisible: false,
-//   elevationInfo: {
-//     mode: 'on-the-ground',
-//   },
-// });
-// endorsedLotLayer.popupTemplate = templateLot;
-
-/* Supre Urgent Lots */
-// const superUrgentLotRenderer = new UniqueValueRenderer({
-//   field: 'Urgent',
-
-//   uniqueValueInfos: [
-//     {
-//       value: 0,
-//       label: 'Super Urgent',
-//       symbol: new SimpleFillSymbol({
-//         color: [255, 0, 0, 0],
-//         outline: {
-//           color: [255, 0, 0, 1],
-//           width: 0.3,
-//         },
-//       }),
-//     },
-//   ],
-// });
-
-// export const superUrgentLotLayer = new FeatureLayer({
-//   portalItem: {
-//     id: 'dca1d785da0f458b8f87638a76918496',
-//     portal: {
-//       url: 'https://gis.railway-sector.com/portal',
-//     },
-//   },
-//   layerId: 7,
-//   definitionExpression: 'Urgent = 0',
-//   renderer: superUrgentLotRenderer,
-//   popupEnabled: false,
-//   labelsVisible: false,
-//   title: 'Super Urgent Lot',
-//   elevationInfo: {
-//     mode: 'on-the-ground',
-//   },
-// });
-
-/* contractor accessible layer */
-const accessible_renderer = new SimpleRenderer({
-  symbol: new SimpleFillSymbol({
-    color: "purple",
-    // style: 'cross',
-    style: "solid",
-
-    outline: {
-      width: 1,
-      color: "black",
-    },
-  }),
-});
+//--- ACCESSIBLE LOT AREA BY CONTRACTORS ---//
 export const accessibleLotAreaLayer = new FeatureLayer({
   portalItem: {
     id: "4692e76be5804db2b38c23df86c7eaa8",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
-
-  renderer: accessible_renderer,
-  title: "Handed-Over Area",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  renderer: lot_access_renderer,
+  title: "Handed-Over Area (Accessible by Contractors)",
+  elevationInfo: { mode: "on-the-ground" },
 });
 
-/* Structure Layer */
-const height = 5;
-const edgeSize = 0.3;
-
-const defaultStructureRenderer = new PolygonSymbol3D({
-  symbolLayers: [
-    new ExtrudeSymbol3DLayer({
-      size: 5,
-      material: {
-        color: [0, 0, 0, 0.4],
-      },
-      edges: new SolidEdges3D({
-        color: "#4E4E4E",
-        size: edgeSize,
-      }),
-    }),
-  ],
-});
-
-const uniqueValueInfosStrucStatus = structureStatusLabel.map(
-  (status: any, index: any) => {
-    return Object.assign({
-      value: index + 1,
-      symbol: new PolygonSymbol3D({
-        symbolLayers: [
-          new ExtrudeSymbol3DLayer({
-            size: height,
-            material: {
-              color: structureStatusColorRgb[index],
-            },
-            edges: new SolidEdges3D({
-              color: "#4E4E4E",
-              size: edgeSize,
-            }),
-          }),
-        ],
-      }),
-      label: status,
-    });
-  },
-);
-const structureRenderer = new UniqueValueRenderer({
-  defaultSymbol: defaultStructureRenderer,
-  defaultLabel: "Other",
-  field: structureStatusField,
-  uniqueValueInfos: uniqueValueInfosStrucStatus,
-});
-
+//--- STRUCUTURE LAYER ---//
 export const structureLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
   layerId: 2,
   title: "Structure",
-  renderer: structureRenderer,
-
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  popupTemplate: {
-    title: "<div style='color: #eaeaea'>{StrucID}</div>",
-    lastEditInfoEnabled: false,
-    returnGeometry: true,
-    content: [
-      {
-        type: "fields",
-        fieldInfos: [
-          {
-            fieldName: "StrucOwner",
-            label: "Structure Owner",
-          },
-          {
-            fieldName: "Municipality",
-          },
-          {
-            fieldName: "Barangay",
-          },
-          {
-            fieldName: "StatusStruc",
-            label: "<p>Status for Structure</p>",
-          },
-          {
-            fieldName: "Name",
-          },
-          {
-            fieldName: "Status",
-            label: "Households Ownership (structure) ",
-          },
-        ],
-      },
-    ],
-  },
+  renderer: str_renderer,
+  elevationInfo: { mode: "on-the-ground" },
+  popupTemplate: str_popup,
 });
 
-// NLO Layer
-const symbolSize = 30;
-
-const uniqueValueInfosNlo = nloStatusLabel.map((status: any, index: any) => {
-  return Object.assign({
-    value: index + 1,
-    label: status,
-    symbol: new PointSymbol3D({
-      symbolLayers: [
-        new IconSymbol3DLayer({
-          resource: {
-            href: nloStatusSymbolRef[index],
-          },
-          size: symbolSize,
-          outline: {
-            color: "white",
-            size: 2,
-          },
-        }),
-      ],
-    }),
-  });
-});
-const nloRenderer = new UniqueValueRenderer({
-  field: nloStatusField,
-  uniqueValueInfos: uniqueValueInfosNlo,
-});
-
-export const nloLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 3,
-  renderer: nloRenderer,
-
-  title: "Households",
-  elevationInfo: {
-    mode: "relative-to-scene",
-  },
-  minScale: 10000,
-  maxScale: 0,
-  popupTemplate: {
-    title: "<div style='color: #eaeaea'>{StrucID}</div>",
-    lastEditInfoEnabled: false,
-    returnGeometry: true,
-    content: [
-      {
-        type: "fields",
-        fieldInfos: [
-          {
-            fieldName: "StrucOwner",
-            label: "Structure Owner",
-          },
-          {
-            fieldName: "Municipality",
-          },
-          {
-            fieldName: "Barangay",
-          },
-          {
-            fieldName: "StatusRC",
-            label: "<p>Status for Relocation</p>",
-          },
-          {
-            fieldName: "Name",
-          },
-          {
-            fieldName: "Status",
-            label: "Households Ownership (structure) ",
-          },
-        ],
-      },
-    ],
-  },
-});
-
-/* Structure Ownership Layer */
-const uniqueValueInfosStrucOwnership = structureOwnershipStatusLabel.map(
-  (status: any, index: any) => {
-    return Object.assign({
-      value: index + 1,
-      label: status,
-      symbol: new SimpleFillSymbol({
-        style: "forward-diagonal",
-        color: structureOwnershipColor[index],
-        outline: {
-          color: "#6E6E6E",
-          width: 0.3,
-        },
-      }),
-    });
-  },
-);
-const structureOwnershipRenderer = new UniqueValueRenderer({
-  field: structureOwnershipStatusField,
-  uniqueValueInfos: uniqueValueInfosStrucOwnership,
-});
-
+//--- STRUCUTURE OWNERSHIP LAYER ---//
 export const strucOwnershipLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
+    portal: portalItem_url,
   },
-  renderer: structureOwnershipRenderer,
+  renderer: str_owner_renderer,
   layerId: 2,
   title: "Households Ownership (Structure)",
-
   popupEnabled: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  elevationInfo: { mode: "on-the-ground" },
 });
 
-/* Occupancy (Status of Relocation) */
-const verticalOffsetExistingOccupancy = {
-  screenLength: 10,
-  maxWorldLength: 10,
-  minWorldLength: 10,
-};
-const occupancyPointSize = 20;
-
-const uniqueValueInfosOccupancy = structureOccupancyStatusLabel.map(
-  (status: any, index: any) => {
-    return Object.assign({
-      value: index,
-      label: status,
-      symbol: new PointSymbol3D({
-        symbolLayers: [
-          new IconSymbol3DLayer({
-            resource: {
-              href: structureOccupancyRef[index],
-            },
-            size: occupancyPointSize,
-            outline: {
-              color: "white",
-              size: 2,
-            },
-          }),
-        ],
-        verticalOffset: verticalOffsetExistingOccupancy,
-
-        callout: {
-          type: "line", // autocasts as new LineCallout3D()
-          color: [128, 128, 128, 0.6],
-          size: 0.4,
-          border: {
-            color: "grey",
-          },
-        },
-      }),
-    });
+//--- NLO LAYER ---//
+export const nloLayer = new FeatureLayer({
+  portalItem: {
+    id: "99500faf0251426ea1df934a739faa6f",
+    portal: portalItem_url,
   },
-);
-
-const occupancyRenderer = new UniqueValueRenderer({
-  field: structureOccupancyStatusField,
-  uniqueValueInfos: uniqueValueInfosOccupancy,
+  layerId: 3,
+  renderer: nlo_renderer,
+  title: "Households",
+  elevationInfo: { mode: "relative-to-scene" },
+  minScale: 10000,
+  maxScale: 0,
+  popupTemplate: nlo_popup,
 });
 
+//--- HOUSEHOLDS OCCUPANCY (STATUS OF RELOCATION) ---//
 export const occupancyLayer = new FeatureLayer({
   portalItem: {
     id: "99500faf0251426ea1df934a739faa6f",
@@ -1426,45 +883,10 @@ export const occupancyLayer = new FeatureLayer({
     },
   },
   layerId: 4,
-
   title: "Occupancy (Structure)",
-  renderer: occupancyRenderer,
-  elevationInfo: {
-    mode: "relative-to-scene",
-  },
-  popupTemplate: {
-    title: "<div style='color: #eaeaea'>{StrucID}</div>",
-    lastEditInfoEnabled: false,
-    returnGeometry: true,
-    content: [
-      {
-        type: "fields",
-        fieldInfos: [
-          {
-            fieldName: "StrucOwner",
-            label: "Structure Owner",
-          },
-          {
-            fieldName: "Municipality",
-          },
-          {
-            fieldName: "Barangay",
-          },
-          {
-            fieldName: "Occupancy",
-            label: "<p>Status for Relocation(structure)</p>",
-          },
-          {
-            fieldName: "Name",
-          },
-          {
-            fieldName: "Status",
-            label: "Households Ownership",
-          },
-        ],
-      },
-    ],
-  },
+  renderer: str_occup_renderer,
+  elevationInfo: { mode: "relative-to-scene" },
+  popupTemplate: str_occup_popup,
 });
 
 /* Pier Head and Column */
