@@ -34,22 +34,6 @@ export const cp_list = [
   "S-07",
 ];
 
-// month
-export const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 export const monitorLists = ["Land Acquisition", "Structure", "Non Land Owner"];
 
 //----------------------------------------------//
@@ -58,6 +42,10 @@ export const monitorLists = ["Land Acquisition", "Structure", "Non Land Owner"];
 // chart width
 export const chart_width = "26vw";
 export const chart_box_width = 250;
+
+// labeling and value label color
+export const primaryLabelColor = "#9ca3af";
+export const valueLabelColor = "#d1d5db";
 
 //----------------------------------------------//
 //          Lot Layer Parameters                //
@@ -128,7 +116,7 @@ export const lot_symbol = new SimpleFillSymbol({
 export const lot_uniqueV = lot_status_q.map((item: any) => {
   return Object.assign({
     value: item.value,
-    label: item.status,
+    label: item.category,
     symbol: new SimpleFillSymbol({
       color: item.color,
     }),
@@ -642,28 +630,9 @@ export const str_occup_popup = {
   ],
 };
 
-// Pier Access layer
-export const pierAccessValue = ["empty", "accessible", "others"];
-export const pierAccessValueLabel = [
-  "Dates are missing",
-  "Accessible",
-  "Others",
-];
-export const pierAccessValueDateColor = [
-  [255, 0, 0, 0.9], // Missing
-  [0, 255, 0, 0.9], // Accessible
-  [255, 255, 255, 0.9], // Dates are missing
-];
-
-export const pierAccessStatusField = "AccessStatus";
-export const pierAccessBatchField = "BatchNo";
-
-// Handed Over Date and Handed Over Area
-export const handedOverLotField = "HandedOver";
-
-// Chart and chart label color
-export const primaryLabelColor = "#9ca3af";
-export const valueLabelColor = "#d1d5db";
+//----------------------------------------------//
+//                Other Layers                  //
+//----------------------------------------------//s
 
 // Layter list
 export async function defineActions(event: any) {

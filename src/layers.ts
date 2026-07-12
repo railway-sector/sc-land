@@ -829,7 +829,7 @@ export const accessibleLotAreaLayer = new FeatureLayer({
     portal: portalItem_url,
   },
   renderer: lot_access_renderer,
-  title: "Handed-Over Area (Accessible by Contractors)",
+  title: "Handed-Over Area",
   elevationInfo: { mode: "on-the-ground" },
 });
 
