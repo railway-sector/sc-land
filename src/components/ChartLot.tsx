@@ -1,13 +1,10 @@
 import { use, useEffect, useRef, useState } from "react";
-import {
-  handedOverLotLayer,
-  lotLayer,
-  queryc_lot2,
-  queryc_lot,
-  queryc_lot3,
-} from "../layers";
+import { handedOverLotLayer, lotLayer } from "../layers";
 import {
   fieldStatistic,
+  makeQuery,
+  pieChartData,
+  PieChartRenderType,
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
@@ -19,12 +16,14 @@ import "@esri/calcite-components/dist/components/calcite-segmented-control-item"
 import "@esri/calcite-components/dist/components/calcite-checkbox";
 import {
   affectedAreaField,
+  barangayField,
   lotHandedOverAreaField,
   lotHandedOverField,
   lotIdField,
   lotStatusField,
   lotStatusLabel,
   lotStatusQuery,
+  municipalityField,
   primaryLabelColor,
   valueLabelColor,
 } from "../uniqueValues";
@@ -58,8 +57,6 @@ const ChartLot = () => {
     barangay,
   } = use(MyContext);
   const arcgisScene = document.querySelector("arcgis-scene");
-
-  //--- Initial date (latest date for as-of-date)
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
 
@@ -70,7 +67,15 @@ const ChartLot = () => {
   //--- New status field by timeslider state
   const stats_field = timesliderOn ? newStatusField : lotStatusField;
 
-  //--- 2. Streamlined Data Fetching with useQuery
+  //--- Common qValues and qFields for QueryExpressionLayers class
+  const qV = [municipality, barangay];
+  const qF = [municipalityField, barangayField];
+
+  const queryc_lot = makeQuery(qV, qF);
+  const queryc_lot2 = makeQuery(qV, qF, `${stats_field} <> 8`);
+  const queryc_lot3 = makeQuery(qV, qF, `${stats_field} >= 1`);
+
+  //--- Generate chart data
   const { data, isLoading } = useQuery<ChartResponse | any>({
     queryKey: [
       municipality,
@@ -81,22 +86,10 @@ const ChartLot = () => {
       timesliderOn,
     ],
     queryFn: async () => {
-      queryc_lot.qValues = [municipality, barangay];
-
       queryDefinitionExpression({
         queryExpression: queryc_lot.queryExpression(),
         featureLayer: [lotLayer, handedOverLotLayer],
       });
-
-      queryc_lot2.qValues = [municipality, barangay];
-      queryc_lot2.qExpression = timesliderOn
-        ? `${newStatusField} <> 8`
-        : `${lotStatusField} <> 8`;
-
-      queryc_lot3.qValues = [municipality, barangay];
-      queryc_lot3.qExpression = timesliderOn
-        ? `${newStatusField} >= 1`
-        : `${lotStatusField} >= 1`;
 
       //--- Independent queries: run in parallel instead of sequentially
       const [
@@ -108,14 +101,15 @@ const ChartLot = () => {
         affected_area_pie,
       ] = await Promise.all([
         //--- Chart data
-        new ChartPieSeries(
-          queryc_lot.queryExpression(),
-          lotLayer,
-          lotStatusQuery,
-          stats_field,
-          stats_field,
-          "count",
-        ).chartDataPieSeries(),
+        pieChartData({
+          piechart: new ChartPieSeries(),
+          qChart: queryc_lot,
+          layer: lotLayer,
+          statusList: lotStatusQuery,
+          statusField: stats_field,
+          statisticField: stats_field,
+          statisticType: "count",
+        }),
 
         //--- Total number of lots (public + private)
         fieldStatistic({
@@ -150,14 +144,15 @@ const ChartLot = () => {
         }),
 
         //--- Affected are for each status
-        new ChartPieSeries(
-          queryc_lot3.queryExpression(),
-          lotLayer,
-          lotStatusQuery,
-          stats_field,
-          timesliderOn ? newAfaField : affectedAreaField,
-          "sum",
-        ).chartDataPieSeries(),
+        pieChartData({
+          piechart: new ChartPieSeries(),
+          qChart: queryc_lot3,
+          layer: lotLayer,
+          statusList: lotStatusQuery,
+          statusField: stats_field,
+          statisticField: timesliderOn ? newAfaField : affectedAreaField,
+          statisticType: "sum",
+        }),
       ]);
 
       //--- Handed-Over percent
@@ -243,25 +238,27 @@ const ChartLot = () => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    const crender = new ChartPieSeriesRender(
+    PieChartRenderType({
+      render: new ChartPieSeriesRender(),
       chart,
-      pieSeries,
+      pieSeries: pieSeries,
       legend,
       root,
-      queryc_lot,
-      undefined,
-      stats_field,
-      arcgisScene?.view,
-      setChartPanelwidth,
-      chartData,
-      new_pieSeriesScale,
-      "PRIVATE LOTS",
-      new_pieInnerLabelFontSize,
-      new_pieInnerValueFontSize,
-      lotLayer,
-      lotStatusQuery,
-    );
-    crender.chartDataRenderer();
+      qChart: queryc_lot,
+      q2Expression: undefined,
+      status_field: stats_field,
+      view: arcgisScene?.view,
+      updateChartPanelwidth: setChartPanelwidth,
+      data: chartData,
+      seriesScale: new_pieSeriesScale,
+      innerLabel: "PRIVATE LOTS",
+      innerLabelFontSize: new_pieInnerLabelFontSize,
+      innerValueFontSize: new_pieInnerValueFontSize,
+      layer: lotLayer,
+      statusArray: lotStatusQuery,
+      bkg_color_switch: false,
+      seriesFillHash: undefined,
+    });
     affectedAreaValue(legend, affectedAreaStatus, lotStatusLabel);
 
     // Dispose root
@@ -347,6 +344,8 @@ const ChartLot = () => {
         </dl>
       </div>
 
+      {}
+
       <div
         style={{
           color: "gray",
@@ -354,9 +353,10 @@ const ChartLot = () => {
           float: "right",
           marginRight: "5px",
           marginTop: "5px",
+          opacity: isLoading ? 0 : 1,
         }}
       >
-        {asofdate ? `As of ${asofdate}` : `As of ${latestDate}` || ""}
+        {asofdate ? `As of ${asofdate}` : `As of ${latestDate}`}
       </div>
 
       {/* Lot Chart */}

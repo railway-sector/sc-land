@@ -13,6 +13,7 @@ import Query from "@arcgis/core/rest/support/Query";
 import { useQuery } from "@tanstack/react-query";
 import { datefieldKeys } from "./interfaceKeys";
 import type { DateFieldsType } from "./interfaceKeys";
+import QueryExpressionLayers from "query-layers-expression";
 
 //---------------------------------------------------------//
 //                 Add Layers to Map                      //
@@ -55,7 +56,9 @@ export function queryDefinitionExpression({
 //---------------------------------------------//
 //           Lot Pie chart                     //
 //---------------------------------------------//
-// 'piechart' = constant declared from class ChartPieSeries in layers.ts
+
+//--- Chart Data Generation helper function
+// `pieChartData` function helps to assign parameter names to class `ChartPieSeries`
 interface pieChartDataType {
   piechart: any;
   qChart: any;
@@ -65,6 +68,7 @@ interface pieChartDataType {
   statisticField: any;
   statisticType: "sum" | "count";
 }
+
 export async function pieChartData({
   piechart,
   qChart,
@@ -84,6 +88,7 @@ export async function pieChartData({
   return await piechart.chartDataPieSeries();
 }
 
+//--- Separate calculation
 interface fieldStatisticType {
   qChart: any;
   layer: any;
@@ -112,6 +117,92 @@ export async function fieldStatistic({
     return response.features[0].attributes.statsCollect;
   });
 }
+
+//--- Chart Render helper function
+// `pieChartRender` function helps to assign parameter names to class `ChartPieSeriesRender`
+interface PieChartRenderType {
+  render: any | null; // the first instance of new ChartPieSeriesRender
+  chart: any; // amChart
+  pieSeries: any;
+  legend: any;
+  root: any;
+  qChart: any;
+  q2Expression?: any;
+  status_field: any;
+  view: any;
+  updateChartPanelwidth: any;
+  data: any;
+  seriesScale: any;
+  innerLabel?: any;
+  innerLabelFontSize?: any;
+  innerValueFontSize?: any;
+  layer: FeatureLayer | any;
+  statusArray: StatusQueryItem[];
+  bkg_color_switch?: boolean;
+  seriesFillHash?: boolean;
+}
+
+interface StatusQueryItem {
+  category: string;
+  value: number | string;
+  color: string;
+}
+
+export async function PieChartRenderType({
+  render,
+  chart,
+  pieSeries,
+  legend,
+  root,
+  qChart,
+  q2Expression,
+  status_field,
+  view,
+  updateChartPanelwidth,
+  data,
+  seriesScale,
+  innerLabel,
+  innerLabelFontSize,
+  innerValueFontSize,
+  layer,
+  statusArray,
+  bkg_color_switch,
+  seriesFillHash,
+}: PieChartRenderType) {
+  render.chart = chart;
+  render.pieSeries = pieSeries;
+  render.legend = legend;
+  render.root = root;
+  render.qChart = qChart;
+  render.q2Expression = q2Expression;
+  render.status_field = status_field;
+  render.view = view;
+  render.updateChartPanelwidth = updateChartPanelwidth;
+  render.data = data;
+  render.seriesScale = seriesScale;
+  render.innerLabel = innerLabel;
+  render.innerLabelFontSize = innerLabelFontSize;
+  render.innerValueFontSize = innerValueFontSize;
+  render.layer = layer;
+  render.statusArray = statusArray;
+  render.bkg_color_switch = bkg_color_switch;
+  render.seriesFillHash = seriesFillHash;
+
+  return await render.chartDataRenderer();
+}
+
+//--- Returns query expression
+export const makeQuery = (
+  qValues: string[],
+  qFields: string[],
+  qExpression?: string,
+) => {
+  const q = new QueryExpressionLayers();
+  q.qValues = qValues;
+  q.qFields = qFields;
+  if (qExpression) q.qExpression = qExpression;
+  return q;
+};
 
 //---------------------------------------------//
 //           Lot (handed over area)            //

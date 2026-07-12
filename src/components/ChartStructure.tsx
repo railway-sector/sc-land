@@ -1,6 +1,8 @@
 import { memo, use, useEffect, useRef, useState } from "react";
 import {
+  makeQuery,
   pieChartData,
+  PieChartRenderType,
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
@@ -12,15 +14,11 @@ import {
   structureStatusQuery,
   structureStatusField,
   valueLabelColor,
+  municipalityField,
+  barangayField,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
-import {
-  lotLayer,
-  occupancyLayer,
-  piechart_struc,
-  queryc_struc,
-  structureLayer,
-} from "../layers";
+import { lotLayer, occupancyLayer, structureLayer } from "../layers";
 import { useQuery } from "@tanstack/react-query";
 import type { ChartResponse } from "../interfaceKeys";
 import {
@@ -31,6 +29,7 @@ import {
 } from "../chartSetter";
 import ChartPieSeriesRender from "chart-pie-series-render";
 import { MyContext } from "../contexts/MyContext";
+import ChartPieSeries from "chart-pie-series";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -61,20 +60,21 @@ const ChartStructure = memo(() => {
   const legendRef = useRef<unknown | any | undefined>({});
   const chartID = "structure-chart";
 
-  //--- 2. Streamlined Data Fetching with useQuery
+  //--- Generate Chart data
+  const qV = [municipality, barangay];
+  const qF = [municipalityField, barangayField];
+  const queryc_struc = makeQuery(qV, qF, `${structureStatusField} >= 1`);
+
   const { data, isLoading } = useQuery<ChartResponse | any>({
     queryKey: [municipality, barangay, structureStatusField, structureLayer],
     queryFn: async () => {
-      queryc_struc.qValues = [municipality, barangay];
-      queryc_struc.qExpression = `${structureStatusField} >= 1`;
-
       queryDefinitionExpression({
         queryExpression: queryc_struc.queryExpression(),
         featureLayer: [structureLayer, occupancyLayer],
       });
 
       const chartData = await pieChartData({
-        piechart: piechart_struc,
+        piechart: new ChartPieSeries(),
         qChart: queryc_struc,
         layer: structureLayer,
         statusList: structureStatusQuery,
@@ -123,25 +123,27 @@ const ChartStructure = memo(() => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    const crender = new ChartPieSeriesRender(
+    PieChartRenderType({
+      render: new ChartPieSeriesRender(),
       chart,
-      pieSeries,
+      pieSeries: pieSeries,
       legend,
       root,
-      queryc_struc,
-      undefined,
-      structureStatusField,
-      arcgisScene?.view,
-      setChartPanelwidth,
-      chartData,
-      new_pieSeriesScale,
-      "STRUCTURES",
-      new_pieInnerLabelFontSize,
-      new_pieInnerValueFontSize,
-      structureLayer,
-      structureStatusQuery,
-    );
-    crender.chartDataRenderer();
+      qChart: queryc_struc,
+      q2Expression: undefined,
+      status_field: structureStatusField,
+      view: arcgisScene?.view,
+      updateChartPanelwidth: setChartPanelwidth,
+      data: chartData,
+      seriesScale: new_pieSeriesScale,
+      innerLabel: "STRUCTURES",
+      innerLabelFontSize: new_pieInnerLabelFontSize,
+      innerValueFontSize: new_pieInnerValueFontSize,
+      layer: structureLayer,
+      statusArray: structureStatusQuery,
+      bkg_color_switch: false,
+      seriesFillHash: undefined,
+    });
 
     return () => {
       root.dispose();

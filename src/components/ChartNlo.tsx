@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useRef, useState, useEffect, memo, use } from "react";
 import {
+  makeQuery,
   pieChartData,
+  PieChartRenderType,
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
@@ -12,9 +14,11 @@ import {
   primaryLabelColor,
   nloStatusQuery,
   valueLabelColor,
+  municipalityField,
+  barangayField,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
-import { lotLayer, nloLayer, piechart_nlo, queryc_nlo } from "../layers";
+import { lotLayer, nloLayer } from "../layers";
 import { useQuery } from "@tanstack/react-query";
 import type { ChartResponse } from "../interfaceKeys";
 import {
@@ -26,6 +30,7 @@ import {
 } from "../chartSetter";
 import ChartPieSeriesRender from "chart-pie-series-render";
 import { MyContext } from "../contexts/MyContext";
+import ChartPieSeries from "chart-pie-series";
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -57,13 +62,14 @@ const ChartNlo = memo(() => {
   const legendRef = useRef<unknown | any | undefined>({});
   const chartID = "nlo-chart";
 
-  //--- 2. Streamlined Data Fetching with useQuery
+  //--- Generat Chart Data
+  const qV = [municipality, barangay];
+  const qF = [municipalityField, barangayField];
+  const queryc_nlo = makeQuery(qV, qF, `${nloStatusField} >= 1`);
+
   const { data, isLoading } = useQuery<ChartResponse | any>({
     queryKey: [municipality, barangay, nloStatusField, nloLayer],
     queryFn: async () => {
-      queryc_nlo.qValues = [municipality, barangay];
-      queryc_nlo.qExpression = `${nloStatusField} >= 1`;
-
       queryDefinitionExpression({
         queryExpression: queryc_nlo.queryExpression(),
         featureLayer: [nloLayer],
@@ -71,7 +77,7 @@ const ChartNlo = memo(() => {
 
       //--- Pie chart data
       const chartData = await pieChartData({
-        piechart: piechart_nlo,
+        piechart: new ChartPieSeries(),
         qChart: queryc_nlo,
         layer: nloLayer,
         statusList: nloStatusQuery,
@@ -121,25 +127,27 @@ const ChartNlo = memo(() => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    const crender = new ChartPieSeriesRender(
+    PieChartRenderType({
+      render: new ChartPieSeriesRender(),
       chart,
-      pieSeries,
+      pieSeries: pieSeries,
       legend,
       root,
-      queryc_nlo,
-      undefined,
-      nloStatusField,
-      arcgisScene?.view,
-      setChartPanelwidth,
-      chartData,
-      new_pieSeriesScale,
-      "HOUSEHOLDS",
-      new_pieInnerLabelFontSize,
-      new_pieInnerValueFontSize,
-      nloLayer,
-      nloStatusQuery,
-    );
-    crender.chartDataRenderer();
+      qChart: queryc_nlo,
+      q2Expression: undefined,
+      status_field: nloStatusField,
+      view: arcgisScene?.view,
+      updateChartPanelwidth: setChartPanelwidth,
+      data: chartData,
+      seriesScale: new_pieSeriesScale,
+      innerLabel: "HOUSEHOLDS",
+      innerLabelFontSize: new_pieInnerLabelFontSize,
+      innerValueFontSize: new_pieInnerValueFontSize,
+      layer: nloLayer,
+      statusArray: nloStatusQuery,
+      bkg_color_switch: false,
+      seriesFillHash: undefined,
+    });
 
     return () => {
       root.dispose();

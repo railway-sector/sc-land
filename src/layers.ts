@@ -48,158 +48,7 @@ import {
   tunnelAffectLotField,
   valueLabelColor,
 } from "./uniqueValues";
-import QueryExpressionLayers from "query-layers-expression";
-import ChartPieSeries from "chart-pie-series";
 
-export const piechartaa = new ChartPieSeries(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const piechart_struc = new ChartPieSeries(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const piechart_nlo = new ChartPieSeries(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const queryc_lot = new QueryExpressionLayers(
-  [undefined, undefined],
-  [municipalityField, barangayField],
-  undefined,
-  undefined,
-  "string",
-  0,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const queryc_lot2 = new QueryExpressionLayers(
-  [undefined, undefined],
-  [municipalityField, barangayField],
-  undefined,
-  undefined,
-  "string",
-  0,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const queryc_lot3 = new QueryExpressionLayers(
-  [undefined, undefined],
-  [municipalityField, barangayField],
-  undefined,
-  undefined,
-  "string",
-  0,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const queryc_struc = new QueryExpressionLayers(
-  [undefined, undefined],
-  [municipalityField, barangayField],
-  undefined,
-  undefined,
-  "string",
-  0,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const queryc_nlo = new QueryExpressionLayers(
-  [undefined, undefined],
-  [municipalityField, barangayField],
-  undefined,
-  undefined,
-  "string",
-  0,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const querycExpro = new QueryExpressionLayers(
-  [undefined, undefined],
-  [municipalityField, barangayField],
-  undefined,
-  undefined,
-  "string",
-  0,
-  undefined,
-  undefined,
-  undefined,
-);
-
-export const drone_video_point_layer = new FeatureLayer({
-  portalItem: {
-    id: "ef71df6d19294328a5b756c4806c9c67",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 2,
-  title: "Drone Video",
-  outFields: ["*"],
-  popupEnabled: false,
-  elevationInfo: {
-    mode: "relative-to-scene",
-  },
-});
-drone_video_point_layer.listMode = "hide";
-
-export const drone_image_point_layer = new FeatureLayer({
-  portalItem: {
-    id: "ef71df6d19294328a5b756c4806c9c67",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 1,
-  title: "Drone Image",
-  outFields: ["*"],
-  popupEnabled: false,
-
-  // popupTemplate: {
-  //   content: [
-  //     {
-  //       type: "media",
-  //       mediaInfos: [
-  //         {
-  //           title: `<a href='{path}' target="_blank">Drone Image</a>`,
-  //           type: "image",
-  //           caption: "Captured image",
-  //           value: {
-  //             sourceURL: "{path}",
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
-});
-drone_image_point_layer.listMode = "hide";
-
-/////////////////////////////
 /* Standalone table for Dates */
 export const dateTable = new FeatureLayer({
   portalItem: {
@@ -209,21 +58,6 @@ export const dateTable = new FeatureLayer({
     },
   },
 });
-
-//* SOMCO Fence */
-// const line_3d = new LineSymbol3D({
-//   symbolLayers: [
-//     new LineSymbol3DLayer({
-//       size: 5,
-//       material: { color: 'yellow' },
-//       cap: 'round',
-//       join: 'round',
-//       pattern: new LineStylePattern3D({
-//         style: 'solid',
-//       }),
-//     }),
-//   ],
-// });
 
 const line_3d = new LineSymbol3D({
   symbolLayers: [
@@ -235,12 +69,6 @@ const line_3d = new LineSymbol3D({
     }),
   ],
 });
-// const somco_renderer = new SimpleRenderer({
-//   symbol: new SimpleLineSymbol({
-//     color: '#ffff00',
-//     width: '2px',
-//   }),
-// });
 
 const somco_renderer = new SimpleRenderer({
   symbol: line_3d,

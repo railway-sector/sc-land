@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable array-callback-return */
-import { lotLayer, querycExpro } from "../layers";
+import { lotLayer } from "../layers";
 import Query from "@arcgis/core/rest/support/Query";
 import "@esri/calcite-components/components/calcite-shell";
 import "@esri/calcite-components/components/calcite-list";
@@ -11,16 +11,22 @@ import "@esri/calcite-components/components/calcite-chip";
 import "@esri/calcite-components/components/calcite-chip-group";
 import "@esri/calcite-components/components/calcite-avatar";
 import "@esri/calcite-components/components/calcite-action-bar";
-import { chart_width, lotStatusField, lotStatusQuery } from "../uniqueValues";
+import {
+  barangayField,
+  chart_width,
+  lotStatusField,
+  lotStatusQuery,
+  municipalityField,
+} from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import "../index.css";
 import { useQuery } from "@tanstack/react-query";
-import { locationKeys } from "../interfaceKeys";
-import type { SelectedLocation } from "../interfaceKeys";
-import { useMemo } from "react";
+import { use, useMemo } from "react";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import { MyContext } from "../contexts/MyContext";
+import { makeQuery } from "../query";
 
-// Zoom in to selected lot from expropriation list
+//--- Highlight & zoom into clicked land
 let highlightSelect: any;
 async function resultClickHandler(event: any) {
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
@@ -44,26 +50,14 @@ async function resultClickHandler(event: any) {
   });
 }
 
-//--- queryFeatures function
+//--- Return expro lots
 interface QueryFeaturesType {
   layer: FeatureLayer;
   queryc: any;
-  municipality: string;
-  barangay: string;
-  statusV: number;
 }
 
-async function queryFeatures({
-  layer,
-  queryc,
-  municipality,
-  barangay,
-  statusV,
-}: QueryFeaturesType) {
+async function queryFeatures({ layer, queryc }: QueryFeaturesType) {
   const query = lotLayer.createQuery();
-
-  queryc.qValues = [municipality, barangay];
-  queryc.qExpression = `${lotStatusField} = ${statusV}`;
   query.where = queryc.queryExpression();
   query.outFields = ["*"];
   query.returnGeometry = true;
@@ -72,20 +66,17 @@ async function queryFeatures({
 }
 
 const ExpropriationList = () => {
-  //--- 1. Location state
-  const { data: selectedLocation } = useQuery<SelectedLocation | any>({
-    queryKey: locationKeys.selected,
-    queryFn: async () => ({}),
-    staleTime: Infinity,
-  });
-  const municipality = selectedLocation?.municipality;
-  const barangay = selectedLocation?.barangay;
+  const { municipality, barangay } = use(MyContext);
 
-  //--- Obtain Status number for 'For Expropriation'
-  const find = lotStatusQuery.filter((e: any) =>
+  //--- Status value for Expro
+  const exproV = lotStatusQuery.filter((e: any) =>
     e.category.includes("Expropriation"),
-  );
-  const statusExproValue = find[0]?.value;
+  )[0]?.value;
+
+  //--- Make query expression
+  const qV = [municipality, barangay];
+  const qF = [municipalityField, barangayField];
+  const querycExpro = makeQuery(qV, qF, `${lotStatusField} = ${exproV}`);
 
   //--- Obtain queried Features
   const { data } = useQuery<any>({
@@ -94,15 +85,13 @@ const ExpropriationList = () => {
       queryFeatures({
         layer: lotLayer,
         queryc: querycExpro,
-        municipality,
-        barangay,
-        statusV: statusExproValue,
       }),
     select: (response) => {
       return response.features;
     },
   });
 
+  //--- Compile expro lots in an object
   const exproItem =
     data &&
     data.map((feature: any, index: number) => {
@@ -117,7 +106,7 @@ const ExpropriationList = () => {
       };
     });
 
-  //--- When exproItem is not changed, do not render
+  //--- Get unique expro lots (but re-rendered only when the list is changed.)
   const uniqueExproItems = useMemo(() => {
     if (!exproItem) return [];
     const seen = new Map<any, any>();
