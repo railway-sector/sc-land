@@ -11,7 +11,12 @@ import "@arcgis/map-components/components/arcgis-direct-line-measurement-3d";
 import "@arcgis/map-components/components/arcgis-area-measurement-3d";
 import { defineActions } from "../uniqueValues";
 import HandedOverAreaChart from "./ChartHandedOverArea";
-import { toAsofdate, updateLotSymbology, useDateFields } from "../query";
+import {
+  toAsofdate,
+  updateLotSymbology,
+  useDateFields,
+  zoomToFullExtent,
+} from "../query";
 import Timeslider from "./Timeslider";
 import {
   lotLayer,
@@ -33,6 +38,13 @@ function ActionPanel() {
   //-----------------------------------------
   const [activeWidget, setActiveWidget] = useState(null);
   const [nextWidget, setNextWidget] = useState(null);
+
+  //--- Click action handler function for active & next widget
+  const handleActionClick = (event: any) => {
+    const id = event.target.id;
+    setNextWidget(id);
+    setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
+  };
 
   //--- Line & Area measurement widget
   const directLineMeasure = document.querySelector(
@@ -123,10 +135,7 @@ function ActionPanel() {
             text="layers"
             id="layers"
             //textEnabled={true}
-            onClick={(event: any) => {
-              setNextWidget(event.target.id);
-              setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
-            }}
+            onClick={handleActionClick}
           ></calcite-action>
 
           <calcite-action
@@ -134,10 +143,7 @@ function ActionPanel() {
             icon="basemap"
             text="basemaps"
             id="basemaps"
-            onClick={(event: any) => {
-              setNextWidget(event.target.id);
-              setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
-            }}
+            onClick={handleActionClick}
           ></calcite-action>
 
           <calcite-action
@@ -145,10 +151,7 @@ function ActionPanel() {
             icon="graph-bar-side-by-side"
             text="Handed-Over Area"
             id="handedover-charts"
-            onClick={(event: any) => {
-              setNextWidget(event.target.id);
-              setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
-            }}
+            onClick={handleActionClick}
           ></calcite-action>
 
           <calcite-action
@@ -156,10 +159,7 @@ function ActionPanel() {
             icon="measure-line"
             text="Line Measurement"
             id="directline-measure"
-            onClick={(event: any) => {
-              setNextWidget(event.target.id);
-              setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
-            }}
+            onClick={handleActionClick}
           ></calcite-action>
 
           <calcite-action
@@ -167,10 +167,7 @@ function ActionPanel() {
             icon="measure-area"
             text="Area Measurement"
             id="area-measure"
-            onClick={(event: any) => {
-              setNextWidget(event.target.id);
-              setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
-            }}
+            onClick={handleActionClick}
           ></calcite-action>
 
           <calcite-action
@@ -178,10 +175,7 @@ function ActionPanel() {
             icon="sliders-horizontal"
             text="Land Status Change"
             id="timeslider"
-            onClick={(event: any) => {
-              setNextWidget(event.target.id);
-              setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
-            }}
+            onClick={handleActionClick}
           ></calcite-action>
 
           <calcite-action
@@ -189,10 +183,7 @@ function ActionPanel() {
             icon="information"
             text="Information"
             id="information"
-            onClick={(event: any) => {
-              setNextWidget(event.target.id);
-              setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
-            }}
+            onClick={handleActionClick}
           ></calcite-action>
         </calcite-action-bar>
 
@@ -208,42 +199,15 @@ function ActionPanel() {
             onarcgisTriggerAction={(event) => {
               const { id } = event.detail.action;
               if (id === "full-extent-ngcpwa6") {
-                ngcp_working_area6.fullExtent &&
-                  arcgisScene
-                    ?.goTo(ngcp_working_area6.fullExtent)
-                    .catch((error) => {
-                      if (error.name !== "AbortError") {
-                        console.error(error);
-                      }
-                    });
+                zoomToFullExtent(ngcp_working_area6, arcgisScene?.view);
               } else if (id === "full-extent-ngcpline6") {
-                ngcp_line6.fullExtent &&
-                  arcgisScene?.goTo(ngcp_line6.fullExtent).catch((error) => {
-                    if (error.name !== "AbortError") {
-                      console.error(error);
-                    }
-                  });
+                zoomToFullExtent(ngcp_line6, arcgisScene?.view);
               } else if (id === "full-extent-ngcpline7") {
-                ngcp_line7.fullExtent &&
-                  arcgisScene?.goTo(ngcp_line7.fullExtent).catch((error) => {
-                    if (error.name !== "AbortError") {
-                      console.error(error);
-                    }
-                  });
+                zoomToFullExtent(ngcp_line7, arcgisScene?.view);
               } else if (id === "full-extent-ngcppolerelo6") {
-                ngcp_pole6.fullExtent &&
-                  arcgisScene?.goTo(ngcp_pole6.fullExtent).catch((error) => {
-                    if (error.name !== "AbortError") {
-                      console.error(error);
-                    }
-                  });
+                zoomToFullExtent(ngcp_pole6, arcgisScene?.view);
               } else if (id === "full-extent-ngcppolerelo7") {
-                ngcp_pole7.fullExtent &&
-                  arcgisScene?.goTo(ngcp_pole7.fullExtent).catch((error) => {
-                    if (error.name !== "AbortError") {
-                      console.error(error);
-                    }
-                  });
+                zoomToFullExtent(ngcp_pole7, arcgisScene?.view);
               }
             }}
           ></arcgis-layer-list>

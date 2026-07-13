@@ -394,6 +394,16 @@ export function zoomToLayer(layer: any, view: any) {
   });
 }
 
+//--- Zoom to fullExtet
+export function zoomToFullExtent(layer: any, view: any) {
+  layer.fullExtent &&
+    view?.goTo(layer.fullExtent).catch((error: any) => {
+      if (error.name !== "AbortError") {
+        console.error(error);
+      }
+    });
+}
+
 //--- Highlight lot
 let highlight: any;
 export async function highlightLot(layer: any, view: any) {
