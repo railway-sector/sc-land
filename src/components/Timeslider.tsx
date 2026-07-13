@@ -83,7 +83,7 @@ export default function Timeslider() {
       </span>
       <div>
         <arcgis-time-slider
-          referenceElement="arcgis-map"
+          referenceElement="arcgis-scene"
           slot="bottom"
           layout="auto"
           mode="cumulative-from-start"

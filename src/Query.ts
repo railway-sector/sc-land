@@ -197,11 +197,13 @@ export const makeQuery = (
   qValues: string[],
   qFields: string[],
   qExpression?: string,
+  q2Expression?: string,
 ) => {
   const q = new QueryExpressionLayers();
   q.qValues = qValues;
   q.qFields = qFields;
   if (qExpression) q.qExpression = qExpression;
+  if (q2Expression) q.q2Expression = q2Expression;
   return q;
 };
 

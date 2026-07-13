@@ -72,6 +72,7 @@ export const valueLabelColor = "#d1d5db";
 // pho: percent handed-over area
 // aa: affected area
 export const lot_hod_f = "HandOverDate";
+export const lot_hdod_f = "HandedOverDate";
 export const lot_id_f = "LotID";
 export const lot_pri_f = "Priority1_1";
 export const lot_status_f = "StatusLA";
@@ -149,36 +150,55 @@ const customContentLot = new CustomContent({
   outFields: ["*"],
   creator: (event: any) => {
     const attrs = event.graphic.attributes;
-
+    const hod = attrs[lot_hod_f];
+    const hdod = attrs[lot_hdod_f];
     const hoa = attrs[lot_pho_f];
     const statusV = attrs[lot_status_f];
     const lu = attrs[lot_lu_f];
     const municipal = attrs[municipality_f];
     const barangay = attrs[barangay_f];
     const lo = attrs[lot_lo_f];
-    const cpNo = attrs[cp_f];
-    const endorsed = lot_endorsed_arr[attrs[lot_endorsed_f]];
-    const { year, month, day } = yearMonthDay(attrs[lot_hod_f]);
+    const cp = attrs[cp_f];
+    const endorse = attrs[lot_endorsed_f];
+    const endorsed = lot_endorsed_arr[endorse];
+    const remarks = attrs["Remarks"];
+    const note = attrs["note"];
 
-    const status =
+    //--- Hand-Over Date
+    let hod1: any;
+    if (hod) {
+      const { year, month, day } = yearMonthDay(new Date(hod));
+      hod1 = `${year}-${month}-${day}`;
+    }
+
+    //--- Handed-Over Date
+    let hdod1: any;
+    if (hdod) {
+      const { year, month, day } = yearMonthDay(new Date(hod));
+      hdod1 = `${year}-${month}-${day}`;
+    }
+
+    //--- Status with label
+    const statusLabel =
       lot_status_q.find((f: any) => f.value === statusV)?.category ?? "";
     const lu_label = lu >= 1 ? lot_lu_arr[lu - 1] : "";
 
     return `
-      <div style="color: #eaeaea">
-        <ul>
-          <li>Handed-Over Area: ${highlight(`${hoa} %`)}</li>
-          <li>Handed-Over Date: ${highlight(`${year}-${month}-${day}`)}</li>
-          <li>Status: ${highlight(status)}</li>
-          <li>Land Use: ${highlight(lu_label)}</li>
-          <li>Municipality: ${highlight(municipal)}</li>
-          <li>Barangay: ${highlight(barangay)}</li>
-          <li>Land Owner: ${highlight(lo)}</li>
-          <li>CP: ${highlight(cpNo)}</li>
-          <li>Endorsed: ${highlight(endorsed)}</li>
-        </ul>
-      </div>
-    `;
+    <div style='color: #eaeaea'>
+    <ul><li>Handed-Over Area: ${highlight(`${hoa ?? ""} %`)}</li>
+    <li>Hand-Over Date: ${highlight(hdod1 ?? "")}</li>
+    <li>Handed-Over Date: ${highlight(hod1 ?? "")}</li>
+    <li>Status:           ${highlight(statusLabel ?? "")}</li>
+    <li>Land Use:         ${highlight(lu_label ?? "")}</li>
+    <li>Municipality:     ${highlight(municipal ?? "")}</li>
+    <li>Barangay:         ${highlight(barangay ?? "")}</li>
+    <li>Land Owner:       ${highlight(lo ?? "")}</li>
+    <li>CP:               ${highlight(cp ?? "")}</li>
+    <li>Endorsed:         ${highlight(endorsed ?? "")}</li>
+    <li>Acquisition Status: ${highlight(remarks ?? "")}</li>
+    <li>Note: ${highlight(note ?? "")}</li></ul>
+    </div>
+              `;
   },
 });
 
