@@ -1,7 +1,7 @@
 import { dateTable, lotLayer } from "./layers";
 import {
-  handedOverLotField,
   cp_f,
+  lot_ho_f,
   lot_status_f,
   lot_symbol,
   lot_uniqueV,
@@ -409,7 +409,7 @@ export async function highlightLot(layer: any, view: any) {
 //--- Highlight handed-over lot
 export async function highlightHandedOverLot(layer: any, view: any) {
   const query = layer.createQuery();
-  query.where = `${handedOverLotField} = 1 AND ${lot_status_f} <> 8`;
+  query.where = `${lot_ho_f} = 1 AND ${lot_status_f} <> 8`;
 
   const layerView = view?.whenLayerView(layer);
   const results = await layer?.queryObjectIds(query);

@@ -12,13 +12,25 @@ import PointSymbol3D from "@arcgis/core/symbols/PointSymbol3D";
 import IconSymbol3DLayer from "@arcgis/core/symbols/IconSymbol3DLayer";
 import CustomContent from "@arcgis/core/popup/content/CustomContent";
 import PopupTemplate from "@arcgis/core/PopupTemplate";
+import LineSymbol3D from "@arcgis/core/symbols/LineSymbol3D.js";
+import PathSymbol3DLayer from "@arcgis/core/symbols/PathSymbol3DLayer.js";
 import { yearMonthDay } from "./query";
+import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
+import TextSymbol3DLayer from "@arcgis/core/symbols/TextSymbol3DLayer";
+import LabelSymbol3D from "@arcgis/core/symbols/LabelSymbol3D";
 
 //----------------------------------------------//
 //              portalItem                      //
 //----------------------------------------------//
-export const portalItem_url = {
+const portalItem_url = {
   url: "https://gis.railway-sector.com/portal",
+};
+
+export const portalItems = (id: any) => {
+  return {
+    id: id,
+    portal: portalItem_url,
+  };
 };
 
 //--- cp list
@@ -631,8 +643,495 @@ export const str_occup_popup = {
 };
 
 //----------------------------------------------//
+//            Alignment Layers                  //
+//----------------------------------------------//
+//--- STATION LAYER ---//
+export const label_stationp = new LabelClass({
+  symbol: new LabelSymbol3D({
+    symbolLayers: [
+      new TextSymbol3DLayer({
+        material: {
+          color: "#d4ff33",
+        },
+        size: 15,
+        halo: {
+          color: "black",
+          size: 0.5,
+        },
+        // font: {
+        //   family: 'Ubuntu Mono',
+        //   //weight: "bold"
+        // },
+      }),
+    ],
+    verticalOffset: {
+      screenLength: 100,
+      maxWorldLength: 700,
+      minWorldLength: 80,
+    },
+
+    callout: {
+      type: "line", // autocasts as new LineCallout3D()
+      color: [128, 128, 128, 0.5],
+      size: 0.2,
+      border: {
+        color: "grey",
+      },
+    },
+  }),
+  labelPlacement: "above-center",
+  labelExpressionInfo: {
+    expression: "$feature.Station",
+    //value: "{TEXTSTRING}"
+  },
+});
+
+//--- CHAINAGE LAYER ---//
+export const label_chainage = new LabelClass({
+  labelExpressionInfo: { expression: "$feature.KmSpot" },
+  symbol: {
+    type: "text",
+    color: [85, 255, 0],
+    haloColor: "black",
+    haloSize: 0.5,
+    font: {
+      size: 15,
+      weight: "bold",
+    },
+  },
+});
+
+export const chainage_renderer = new SimpleRenderer({
+  symbol: new SimpleMarkerSymbol({
+    size: 5,
+    color: [255, 255, 255, 0.9],
+    outline: {
+      width: 0.2,
+      color: "black",
+    },
+  }),
+});
+
+//--- STATION BOX LAYER ---//
+export const stationbox_renderer = new UniqueValueRenderer({
+  field: "Layer",
+  uniqueValueInfos: [
+    {
+      value: "00_Platform",
+      label: "Platform",
+      symbol: new SimpleFillSymbol({
+        color: [160, 160, 160],
+        style: "backward-diagonal",
+        outline: {
+          width: 1,
+          color: "black",
+        },
+      }),
+    },
+    {
+      value: "00_Platform 10car",
+      label: "Platform 10car",
+      symbol: new SimpleFillSymbol({
+        color: [104, 104, 104],
+        style: "cross",
+        outline: {
+          width: 1,
+          color: "black",
+          style: "short-dash",
+        },
+      }),
+    },
+    {
+      value: "00_Station",
+      label: "Station Box",
+      symbol: new SimpleFillSymbol({
+        color: [0, 0, 0, 0],
+        outline: {
+          width: 2,
+          color: [115, 0, 0],
+        },
+      }),
+    },
+  ],
+});
+
+//--- PIER HEAD & COLUMN LAYER ---//
+const pHeight = 0;
+
+const pier_column_symbol = new PolygonSymbol3D({
+  symbolLayers: [
+    new ExtrudeSymbol3DLayer({
+      size: pHeight + 10,
+      material: {
+        color: [78, 78, 78, 0.5],
+      },
+      edges: new SolidEdges3D({
+        color: "#4E4E4E",
+        size: 0.3,
+      }),
+    }),
+  ],
+});
+
+const pilecap_symbol = new PolygonSymbol3D({
+  symbolLayers: [
+    new ExtrudeSymbol3DLayer({
+      size: pHeight + 3,
+      material: {
+        color: [200, 200, 200, 0.7],
+      },
+      edges: new SolidEdges3D({
+        color: "#4E4E4E",
+        size: 1.0,
+      }),
+    }),
+  ],
+});
+
+export const pierhead_renderer = new UniqueValueRenderer({
+  // defaultSymbol: new PolygonSymbol3D({
+  //   symbolLayers: [
+  //     {
+  //       type: "extrude",
+  //       size: 5, // in meters
+  //       material: {
+  //         color: "#E1E1E1",
+  //       },
+  //       edges: new SolidEdges3D({
+  //         color: "#4E4E4E",
+  //         size: 1.0,
+  //       }),
+  //     },
+  //   ],
+  // }),
+  // defaultLabel: "Other",
+  field: "Layer",
+  legendOptions: {
+    title: "Pile Cap/Column",
+  },
+  uniqueValueInfos: [
+    {
+      value: "Pier_Column",
+      symbol: pier_column_symbol,
+      label: "Column",
+    },
+    /*
+  {
+    value: "Pier_Head",
+    symbol: pierHead,
+    label: "Pier Head"
+  },
+  */
+    {
+      value: "Pile_Cap",
+      symbol: pilecap_symbol,
+      label: "Pile Cap",
+    },
+  ],
+});
+
+//--- PIER ACCESS POINT LAYER ---//
+export const pier_access_label = new LabelClass({
+  symbol: new LabelSymbol3D({
+    symbolLayers: [
+      new TextSymbol3DLayer({
+        material: {
+          color: valueLabelColor,
+        },
+        size: 15,
+        font: {
+          family: "Ubuntu Mono",
+          weight: "bold",
+        },
+      }),
+    ],
+    verticalOffset: {
+      screenLength: 80,
+      maxWorldLength: 500,
+      minWorldLength: 30,
+    },
+    callout: {
+      type: "line",
+      size: 0.5,
+      color: [0, 0, 0],
+      border: {
+        color: [255, 255, 255, 0.7],
+      },
+    },
+  }),
+  labelExpressionInfo: {
+    expression: "$feature.PierNumber",
+    //'DefaultValue($feature.GeoTechName, "no data")'
+    //"IIF($feature.Score >= 13, '', '')"
+    //value: "{Type}"
+  },
+  labelPlacement: "above-center",
+  // where: 'AccessDate IS NULL',
+});
+
+//--- CP BREAKLINE LAYER ---//
+export const cp_breakline_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#4ce600",
+    width: "2px",
+  }),
+});
+
+//--- SC SUBSTATION LAYER ---//
+export const substation_renderer = new SimpleRenderer({
+  symbol: new SimpleFillSymbol({
+    color: [115, 178, 255],
+    style: "backward-diagonal",
+    outline: {
+      color: "#004DA8",
+      width: 1.5,
+    },
+  }),
+});
+
+//--- PROW LAYER ---//
+// ORIGINAL (DEFAULT)
+export const prow_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#ff0000",
+    width: "2px",
+  }),
+});
+
+// VERSION 7.1.6
+export const prow716_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#DF00FF",
+    width: "2px",
+    // style: "long-dash-dot",
+  }),
+});
+
+// VERSION 3.9.3
+export const prow393_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#ffc800",
+    width: "2px",
+    // style: "long-dash-dot",
+  }),
+});
+
+// PROW (MERALCO SITE)
+// Same renderer as the original PROW Layer
+
+// ROW (SC TUNNEL ALIGNMENT)
+export const prow_tunnel_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#ff0000",
+    width: "3px",
+    style: "dash",
+  }),
+});
+
+//--- TEMPORARY FENCING LAYER ---//
+export const temp_fencing_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#FFEBBE",
+    width: "2px",
+  }),
+});
+
+//--- PERMANENT FENCING LAYER ---//
+export const permanent_fencing_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#FFA77F",
+    width: "2px",
+  }),
+});
+
+//--- MAINTENANCE ROAD LAYER ---//
+export const maintenance_road_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#98E600",
+    width: "2px",
+  }),
+});
+
+//--- DRAINAGE LAYER ---//
+export const drainage_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#0070FF",
+    width: "2px",
+  }),
+});
+
+//--- FUTURE TRACK LAYER ---//
+export const freight_line_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#00FFC5",
+    width: "2px",
+  }),
+});
+
+//--- PROPOSED EAST SERVICE ROAD ---//
+export const east_service_rd_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: "#d9dddc",
+    width: "2px",
+    style: "dash",
+  }),
+});
+
+//----------------------------------------------//
 //                Other Layers                  //
-//----------------------------------------------//s
+//----------------------------------------------//
+//--- NGCP WORKING AREA LAYER ---//
+export const ngcp_wa_renderer = new SimpleRenderer({
+  symbol: new SimpleFillSymbol({
+    color: [197, 0, 255],
+    style: "backward-diagonal",
+    outline: {
+      color: "#C500FF",
+      width: 0.7,
+    },
+  }),
+});
+
+//--- NGCP LINE LAYER ---//
+const buffer_col = ["#55FF00", "#FFFF00", "#E1E1E1"];
+export const ngcp_line_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({
+    color: buffer_col[0],
+    width: "3px",
+    style: "dash",
+  }),
+});
+
+//--- NGCP POLE SITE LAYERS ---//
+// PROPOSED POLE RELOCATION
+export const label_ngcp_pole = new LabelClass({
+  symbol: new LabelSymbol3D({
+    symbolLayers: [
+      new TextSymbol3DLayer({
+        material: {
+          color: [255, 255, 0],
+        },
+        size: 15,
+        halo: {
+          color: "black",
+          size: 0.5,
+        },
+        // font: {
+        //   family: 'Ubuntu Mono',
+        //   //weight: "bold"
+        // },
+      }),
+    ],
+    verticalOffset: {
+      screenLength: 30,
+      maxWorldLength: 20,
+      minWorldLength: 10,
+    },
+
+    callout: {
+      type: "line", // autocasts as new LineCallout3D()
+      color: [128, 128, 128, 0.5],
+      size: 0.2,
+      border: {
+        color: "grey",
+      },
+    },
+  }),
+  labelPlacement: "above-center",
+  labelExpressionInfo: {
+    expression: "$feature.POLE_ID",
+    //value: "{TEXTSTRING}"
+  },
+});
+
+export const ngcp_pole_renderer = new SimpleRenderer({
+  symbol: new SimpleFillSymbol({
+    color: [255, 255, 0],
+    style: "backward-diagonal",
+    outline: {
+      color: "#FFFF00",
+      width: 0.7,
+    },
+  }),
+});
+
+//--- SOMCO FENSE LAYER ---//
+const somco_line_3d = new LineSymbol3D({
+  symbolLayers: [
+    new PathSymbol3DLayer({
+      profile: "quad",
+      width: 0.5,
+      height: 5,
+      material: { color: "#ffff00" },
+    }),
+  ],
+});
+
+export const somco_renderer = new SimpleRenderer({
+  symbol: somco_line_3d,
+});
+
+//--- PNR ---//
+export const pnr_renderer = new UniqueValueRenderer({
+  field: "OwnershipType",
+  uniqueValueInfos: [
+    {
+      value: 1, // RP
+      label: "RP",
+      symbol: new SimpleFillSymbol({
+        color: [137, 205, 102],
+        style: "diagonal-cross",
+        outline: {
+          width: 0.5,
+          color: "black",
+        },
+      }),
+    },
+    {
+      value: 2, // PNR
+      label: "PNR",
+      symbol: new SimpleFillSymbol({
+        color: [137, 205, 102],
+        style: "diagonal-cross",
+        outline: {
+          width: 0.5,
+          color: "black",
+        },
+      }),
+    },
+  ],
+});
+
+export const pnr_popup = {
+  title: "<div style='color: #eaeaea'>{LandOwner} ({LotID})</div>",
+  lastEditInfoEnabled: false,
+  returnGeometry: true,
+  content: [
+    {
+      type: "fields",
+      fieldInfos: [
+        {
+          fieldName: "OwnershipType",
+          label: "Ownership Type",
+        },
+        {
+          fieldName: "HandOverDate",
+          label: "Hand-Over Date",
+        },
+        {
+          fieldName: "Municipality",
+        },
+        {
+          fieldName: "Barangay",
+        },
+        {
+          fieldName: "LandOwner",
+          label: "Land Owner",
+        },
+      ],
+    },
+  ],
+};
 
 // Layter list
 export async function defineActions(event: any) {

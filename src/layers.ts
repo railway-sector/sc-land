@@ -1,27 +1,11 @@
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
-import LabelClass from "@arcgis/core/layers/support/LabelClass";
-import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol";
-import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
-import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
-import TextSymbol3DLayer from "@arcgis/core/symbols/TextSymbol3DLayer";
-import LabelSymbol3D from "@arcgis/core/symbols/LabelSymbol3D";
-import SolidEdges3D from "@arcgis/core/symbols/edges/SolidEdges3D";
-import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
-import PolygonSymbol3D from "@arcgis/core/symbols/PolygonSymbol3D";
-import ExtrudeSymbol3DLayer from "@arcgis/core/symbols/ExtrudeSymbol3DLayer";
-import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
-import LineSymbol3D from "@arcgis/core/symbols/LineSymbol3D.js";
-import PathSymbol3DLayer from "@arcgis/core/symbols/PathSymbol3DLayer.js";
-
 import {
   lot_label,
   lot_popup,
   lot_renderer,
   lot_ho_f,
   lot_status_f,
-  portalItem_url,
-  valueLabelColor,
   lot_tunnel_f,
   str_renderer,
   str_popup,
@@ -35,719 +19,304 @@ import {
   nlo_popup,
   str_occup_renderer,
   str_occup_popup,
+  somco_renderer,
+  portalItems,
+  label_chainage,
+  chainage_renderer,
+  stationbox_renderer,
+  prow_renderer,
+  prow716_renderer,
+  prow393_renderer,
+  temp_fencing_renderer,
+  permanent_fencing_renderer,
+  maintenance_road_renderer,
+  drainage_renderer,
+  freight_line_renderer,
+  ngcp_wa_renderer,
+  ngcp_line_renderer,
+  ngcp_pole_renderer,
+  label_ngcp_pole,
+  prow_tunnel_renderer,
+  label_stationp,
+  east_service_rd_renderer,
+  pnr_renderer,
+  pnr_popup,
+  pierhead_renderer,
+  pier_access_label,
+  cp_breakline_renderer,
+  substation_renderer,
 } from "./uniqueValues";
 
-/* Standalone table for Dates */
-export const dateTable = new FeatureLayer({
-  portalItem: {
-    id: "b2a118b088a44fa0a7a84acbe0844cb2",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+//----------------------------------------------//
+//            Alignment Layers                  //
+//----------------------------------------------//
+//--- STATION LAYER ---//
+export const stationLayer = new FeatureLayer({
+  portalItem: portalItems("e09b9af286204939a32df019403ef438"),
+  layerId: 6,
+  title: "SC Stations",
+  labelingInfo: [label_stationp],
+  elevationInfo: { mode: "relative-to-ground" },
 });
+stationLayer.listMode = "hide";
 
-const line_3d = new LineSymbol3D({
-  symbolLayers: [
-    new PathSymbol3DLayer({
-      profile: "quad",
-      width: 0.5,
-      height: 5,
-      material: { color: "#ffff00" },
-    }),
-  ],
-});
-
-const somco_renderer = new SimpleRenderer({
-  symbol: line_3d,
-});
-
-export const somco_fense_layer = new FeatureLayer({
-  portalItem: {
-    id: "5c14f6e9e59b40ef87bb4da0f611e5e5",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  title: "SOMCO Fence",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  // labelingInfo: [labelChainage],
-  // minScale: 150000,
-  // maxScale: 0,
-  renderer: somco_renderer,
-  popupEnabled: false,
-});
-
-/* Chainage Layer  */
-const labelChainage = new LabelClass({
-  labelExpressionInfo: { expression: "$feature.KmSpot" },
-  symbol: {
-    type: "text",
-    color: [85, 255, 0],
-    haloColor: "black",
-    haloSize: 0.5,
-    font: {
-      size: 15,
-      weight: "bold",
-    },
-  },
-});
-
-const chainageRenderer = new SimpleRenderer({
-  symbol: new SimpleMarkerSymbol({
-    size: 5,
-    color: [255, 255, 255, 0.9],
-    outline: {
-      width: 0.2,
-      color: "black",
-    },
-  }),
-});
-
+//--- CHAINAGE LAYER ---//
 export const chainageLayer = new FeatureLayer({
-  portalItem: {
-    id: "e09b9af286204939a32df019403ef438",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+  portalItem: portalItems("e09b9af286204939a32df019403ef438"),
   layerId: 2,
   title: "Chainage",
-  elevationInfo: {
-    mode: "relative-to-ground",
-  },
-  labelingInfo: [labelChainage],
+  elevationInfo: { mode: "relative-to-ground" },
+  labelingInfo: [label_chainage],
   minScale: 150000,
   maxScale: 0,
-  renderer: chainageRenderer,
-
+  renderer: chainage_renderer,
   popupEnabled: false,
 });
 
-/* Station Box */
-const stationBoxRenderer = new UniqueValueRenderer({
-  field: "Layer",
-  uniqueValueInfos: [
-    {
-      value: "00_Platform",
-      label: "Platform",
-      symbol: new SimpleFillSymbol({
-        color: [160, 160, 160],
-        style: "backward-diagonal",
-        outline: {
-          width: 1,
-          color: "black",
-        },
-      }),
-    },
-    {
-      value: "00_Platform 10car",
-      label: "Platform 10car",
-      symbol: new SimpleFillSymbol({
-        color: [104, 104, 104],
-        style: "cross",
-        outline: {
-          width: 1,
-          color: "black",
-          style: "short-dash",
-        },
-      }),
-    },
-    {
-      value: "00_Station",
-      label: "Station Box",
-      symbol: new SimpleFillSymbol({
-        color: [0, 0, 0, 0],
-        outline: {
-          width: 2,
-          color: [115, 0, 0],
-        },
-      }),
-    },
-  ],
-});
-
+//--- STATION BOX LAYER ---//
 export const stationBoxLayer = new FeatureLayer({
-  portalItem: {
-    id: "e09b9af286204939a32df019403ef438",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+  portalItem: portalItems("e09b9af286204939a32df019403ef438"),
   layerId: 7,
-  renderer: stationBoxRenderer,
+  renderer: stationbox_renderer,
   minScale: 150000,
   maxScale: 0,
   title: "Station Box",
-
   popupEnabled: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  elevationInfo: { mode: "on-the-ground" },
 });
 
-/* ROW Layer */
-const prowRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#ff0000",
-    width: "2px",
-  }),
+//--- PIER HEAD & COLUMN LAYER ---//
+export const pierHeadColumnLayer = new FeatureLayer({
+  portalItem: portalItems("e09b9af286204939a32df019403ef438"),
+  layerId: 4,
+  title: "Pile Cap/Column",
+  definitionExpression: "Layer <> 'Pier_Head'",
+  minScale: 150000,
+  maxScale: 0,
+  renderer: pierhead_renderer,
+  popupEnabled: false,
+  elevationInfo: { mode: "on-the-ground" },
 });
 
+//--- PIER ACCESS POINT LAYER ---//
+export const pierAccessLayer = new FeatureLayer({
+  portalItem: portalItems("e09b9af286204939a32df019403ef438"),
+  layerId: 3,
+  labelingInfo: [pier_access_label], // [pierAccessReadyDateLabel, pierAccessNotYetLabel, pierAccessDateMissingLabel], //[pierAccessDateMissingLabel, pierAccessReadyDateLabel, pierAccessNotYetLabel],
+  title: "Pier Number", //'Pier with Access Date',
+  minScale: 150000,
+  maxScale: 0,
+  popupEnabled: false,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- CP BREAKLINE LAYER ---//
+export const cp_break_lines = new FeatureLayer({
+  portalItem: portalItems("1a2be501a0f54e048a7200e482eb0dd5"),
+  title: "CP Break Line",
+  renderer: cp_breakline_renderer,
+  popupEnabled: false,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- SC SUBSTATION LAYER ---//
+export const substationLayer = new FeatureLayer({
+  portalItem: portalItems("fd0fd77c428b4fae8f47ac46b26614ec"),
+  layerId: 61,
+  renderer: substation_renderer,
+  popupEnabled: false,
+  labelsVisible: false,
+  title: "Substation",
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- PROW LAYER ---//
 export const prowLayer = new FeatureLayer({
   url: "https://gis.railway-sector.com/server/rest/services/SC_Alignment/FeatureServer/5",
   layerId: 5,
   title: "PROW",
   popupEnabled: false,
-  renderer: prowRenderer,
-});
-// prowLayer.listMode = "hide";
-
-/* ROW Layer version 7.1.6 */
-const prowoldRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#DF00FF",
-    width: "2px",
-    // style: "long-dash-dot",
-  }),
+  renderer: prow_renderer,
 });
 
+// ROW Layer version 7.1.6
 export const prowLayerold = new FeatureLayer({
-  portalItem: {
-    id: "84ba987eed264fe9b18938000ddf702d",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+  portalItem: portalItems("84ba987eed264fe9b18938000ddf702d"),
   title: "SC Alignment 7.1.6",
   definitionExpression: "Version = 'v.7.1.6b'",
   popupEnabled: false,
-  renderer: prowoldRenderer,
+  renderer: prow716_renderer,
 });
 
-/* ROW Layer version 3.9.3 */
-const prowold2renderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#ffc800",
-    width: "2px",
-    // style: "long-dash-dot",
-  }),
-});
-
+// ROW Layer version 3.9.3
 export const prowLayerold2 = new FeatureLayer({
-  portalItem: {
-    id: "84ba987eed264fe9b18938000ddf702d",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+  portalItem: portalItems("84ba987eed264fe9b18938000ddf702d"),
   title: "SC Alignment 3.9.3",
   definitionExpression: "Version = 'v.3.9.3'",
   popupEnabled: false,
-  renderer: prowold2renderer,
+  renderer: prow393_renderer,
 });
 
-/* Meralco site 1 additioinal PROW Layer */
-
+// ROW (Meralco site 1)
 export const meralco_site1_prowLayer = new FeatureLayer({
-  portalItem: {
-    id: "87ec32eacf194b91b040ca052574234b",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+  portalItem: portalItems("87ec32eacf194b91b040ca052574234b"),
   title: "Meralco Site 1 Additional PROW",
   popupEnabled: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  renderer: prowRenderer,
+  elevationInfo: { mode: "on-the-ground" },
+  renderer: prow_renderer,
 });
 
-/* Temporary Fencing */
-var temporaryFencingRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#FFEBBE",
-    width: "2px",
-  }),
-});
-
-export const temporaryFencingLayer = new FeatureLayer({
-  portalItem: {
-    id: "e37f3dab086c4063ba28c7e4d4075d60",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 1,
-  title: "Temporary Fencing",
-  renderer: temporaryFencingRenderer,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
-/* Permanent Fencing */
-const permanentFencingRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#FFA77F",
-    width: "2px",
-  }),
-});
-
-export const permanentFencingLayer = new FeatureLayer({
-  portalItem: {
-    id: "e37f3dab086c4063ba28c7e4d4075d60",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 2,
-  title: "Permanent Fencing",
-  renderer: permanentFencingRenderer,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
-/* Maintenance Road */
-const maintenanceRoadRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#98E600",
-    width: "2px",
-  }),
-});
-
-export const maintenanceRoadLayer = new FeatureLayer({
-  portalItem: {
-    id: "e37f3dab086c4063ba28c7e4d4075d60",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 3,
-  title: "Maintenance Road",
-  renderer: maintenanceRoadRenderer,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
-/* Drainage */
-const drainageRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#0070FF",
-    width: "2px",
-  }),
-});
-
-export const drainageLayer = new FeatureLayer({
-  portalItem: {
-    id: "e37f3dab086c4063ba28c7e4d4075d60",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 4,
-  title: "Drainage",
-  renderer: drainageRenderer,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
-/* Future Track */
-const provisionForFreightLineRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#00FFC5",
-    width: "2px",
-  }),
-});
-
-export const provisionForFreightLineLayer = new FeatureLayer({
-  portalItem: {
-    id: "e37f3dab086c4063ba28c7e4d4075d60",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 5,
-  title: "Provision for Freight Line",
-  renderer: provisionForFreightLineRenderer,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
-/*------- NGCP Layers ---------- */
-/* NGCP Working Area */
-const ngcpPoleWARenderer = new SimpleRenderer({
-  symbol: new SimpleFillSymbol({
-    color: [197, 0, 255],
-    style: "backward-diagonal",
-    outline: {
-      color: "#C500FF",
-      width: 0.7,
-    },
-  }),
-});
-
-// export const ngcp_working_area7 = new FeatureLayer({
-//   portalItem: {
-//     id: "b7d01020d54c4015ba0ba9454475d1dc",
-//     portal: {
-//       url: "https://gis.railway-sector.com/portal",
-//     },
-//   },
-//   renderer: ngcpPoleWARenderer,
-//   elevationInfo: {
-//     mode: "on-the-ground",
-//   },
-//   definitionExpression: "SiteNo = '7'",
-//   layerId: 7,
-//   title: "Proposed Pole Working Areas",
-// });
-
-export const ngcp_working_area6 = new FeatureLayer({
-  portalItem: {
-    id: "b7d01020d54c4015ba0ba9454475d1dc",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  renderer: ngcpPoleWARenderer,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  definitionExpression: "SiteNo = '6'",
-  layerId: 7,
-  title: "Proposed Pole Working Areas",
-});
-
-/* NGCP Line  */
-const bufferColor = ["#55FF00", "#FFFF00", "#E1E1E1"];
-const ngcpLineRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: bufferColor[0],
-    width: "3px",
-    style: "dash",
-  }),
-});
-
-export const ngcp_line7 = new FeatureLayer({
-  portalItem: {
-    id: "b7d01020d54c4015ba0ba9454475d1dc",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  renderer: ngcpLineRenderer,
-  definitionExpression: "SiteNo = '7' AND LAYER = 2", // 2 is 'Relocation'
-  layerId: 2,
-  title: "Proposed/Recorded NGCP Lines",
-});
-
-export const ngcp_line6 = new FeatureLayer({
-  portalItem: {
-    id: "b7d01020d54c4015ba0ba9454475d1dc",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  renderer: ngcpLineRenderer,
-  definitionExpression: "SiteNo = '6' AND LAYER = 2",
-  layerId: 2,
-  title: "Proposed/Recorded NGCP Lines",
-});
-
-/* NGCP Pole site */
-const label_ngcp_pole = new LabelClass({
-  symbol: new LabelSymbol3D({
-    symbolLayers: [
-      new TextSymbol3DLayer({
-        material: {
-          color: [255, 255, 0],
-        },
-        size: 15,
-        halo: {
-          color: "black",
-          size: 0.5,
-        },
-        // font: {
-        //   family: 'Ubuntu Mono',
-        //   //weight: "bold"
-        // },
-      }),
-    ],
-    verticalOffset: {
-      screenLength: 30,
-      maxWorldLength: 20,
-      minWorldLength: 10,
-    },
-
-    callout: {
-      type: "line", // autocasts as new LineCallout3D()
-      color: [128, 128, 128, 0.5],
-      size: 0.2,
-      border: {
-        color: "grey",
-      },
-    },
-  }),
-  labelPlacement: "above-center",
-  labelExpressionInfo: {
-    expression: "$feature.POLE_ID",
-    //value: "{TEXTSTRING}"
-  },
-});
-
-const ngcpDpwhRoadRenderer = new SimpleRenderer({
-  symbol: new SimpleFillSymbol({
-    color: [255, 255, 0],
-    style: "backward-diagonal",
-    outline: {
-      color: "#FFFF00",
-      width: 0.7,
-    },
-  }),
-});
-
-export const ngcp_pole7 = new FeatureLayer({
-  portalItem: {
-    id: "d5b30a79bdae40c492771ec1e46ab0e9",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  definitionExpression: "SiteNo = '7'",
-  layerId: 3,
-  renderer: ngcpDpwhRoadRenderer,
-  labelingInfo: [label_ngcp_pole],
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  popupEnabled: true,
-  title: "Proposed Pole Relocation",
-});
-
-export const ngcp_pole6 = new FeatureLayer({
-  portalItem: {
-    id: "d5b30a79bdae40c492771ec1e46ab0e9",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  definitionExpression: "SiteNo = '6'",
-  layerId: 3,
-  renderer: ngcpDpwhRoadRenderer,
-  labelingInfo: [label_ngcp_pole],
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-  popupEnabled: true,
-  title: "Proposed Pole Relocation",
-});
-
-/* PROW for SC Tunnel Alignment */
-const prow_tunnel_renderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#ff0000",
-    width: "3px",
-    style: "dash",
-  }),
-});
-
+// ROW (SC TUNNEL ALIGNMENT)
 export const prow_tunnelLayer = new FeatureLayer({
-  portalItem: {
-    id: "63605177aec648e5b3ad232d2b181874",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  portalItem: portalItems("63605177aec648e5b3ad232d2b181874"),
+  elevationInfo: { mode: "on-the-ground" },
   renderer: prow_tunnel_renderer,
   popupEnabled: false,
   title: "PROW for Tunnel Alignment",
 });
 
-/* PNR */
-const pnrRenderer = new UniqueValueRenderer({
-  field: "OwnershipType",
-  uniqueValueInfos: [
-    {
-      value: 1, // RP
-      label: "RP",
-      symbol: new SimpleFillSymbol({
-        color: [137, 205, 102],
-        style: "diagonal-cross",
-        outline: {
-          width: 0.5,
-          color: "black",
-        },
-      }),
-    },
-    {
-      value: 2, // PNR
-      label: "PNR",
-      symbol: new SimpleFillSymbol({
-        color: [137, 205, 102],
-        style: "diagonal-cross",
-        outline: {
-          width: 0.5,
-          color: "black",
-        },
-      }),
-    },
-  ],
+//--- TEMPORARY FENCING ---//
+export const temporaryFencingLayer = new FeatureLayer({
+  portalItem: portalItems("e37f3dab086c4063ba28c7e4d4075d60"),
+  layerId: 1,
+  title: "Temporary Fencing",
+  renderer: temp_fencing_renderer,
+  elevationInfo: { mode: "on-the-ground" },
 });
 
+//--- PERMANENT FENCING ---//
+export const permanentFencingLayer = new FeatureLayer({
+  portalItem: portalItems("e37f3dab086c4063ba28c7e4d4075d60"),
+  layerId: 2,
+  title: "Permanent Fencing",
+  renderer: permanent_fencing_renderer,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- MAINTENANCE ROAD ---//
+export const maintenanceRoadLayer = new FeatureLayer({
+  portalItem: portalItems("e37f3dab086c4063ba28c7e4d4075d60"),
+  layerId: 3,
+  title: "Maintenance Road",
+  renderer: maintenance_road_renderer,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- DRAINAGE LAYER ---//
+export const drainageLayer = new FeatureLayer({
+  portalItem: portalItems("e37f3dab086c4063ba28c7e4d4075d60"),
+  layerId: 4,
+  title: "Drainage",
+  renderer: drainage_renderer,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- FUTURE TRACK LAYER ---//
+export const provisionForFreightLineLayer = new FeatureLayer({
+  portalItem: portalItems("e37f3dab086c4063ba28c7e4d4075d60"),
+  layerId: 5,
+  title: "Provision for Freight Line",
+  renderer: freight_line_renderer,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- PROPOSED EAST SERVICE ROAD ---//
+export const proposedEastServiceRoadLayer = new FeatureLayer({
+  portalItem: portalItems("3b160b3125ab42759be419be7fbf1edc"),
+  title: "Proposed East Service Road",
+  renderer: east_service_rd_renderer,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
+//----------------------------------------------//
+//                Other Layers                  //
+//----------------------------------------------//
+//--- DATES FEATURE TABLE ---//
+export const dateTable = new FeatureLayer({
+  portalItem: portalItems("b2a118b088a44fa0a7a84acbe0844cb2"),
+});
+
+//--- SOMCO FENSE ---//
+export const somco_fense_layer = new FeatureLayer({
+  portalItem: portalItems("5c14f6e9e59b40ef87bb4da0f611e5e5"),
+  title: "SOMCO Fence",
+  elevationInfo: { mode: "on-the-ground" },
+  renderer: somco_renderer,
+  popupEnabled: false,
+});
+
+//--- NGCP WORKING AREA LAYER ---//
+export const ngcp_working_area6 = new FeatureLayer({
+  portalItem: portalItems("b7d01020d54c4015ba0ba9454475d1dc"),
+  layerId: 7,
+  renderer: ngcp_wa_renderer,
+  elevationInfo: { mode: "on-the-ground" },
+  definitionExpression: "SiteNo = '6'",
+  title: "Proposed Pole Working Areas",
+});
+
+//--- NGCP LINE LAYERS ---//
+export const ngcp_line7 = new FeatureLayer({
+  portalItem: portalItems("b7d01020d54c4015ba0ba9454475d1dc"),
+  layerId: 2,
+  title: "Proposed/Recorded NGCP Lines",
+  elevationInfo: { mode: "on-the-ground" },
+  renderer: ngcp_line_renderer,
+  definitionExpression: "SiteNo = '7' AND LAYER = 2", // 2 is 'Relocation'
+});
+
+export const ngcp_line6 = new FeatureLayer({
+  portalItem: portalItems("b7d01020d54c4015ba0ba9454475d1dc"),
+  layerId: 2,
+  title: "Proposed/Recorded NGCP Lines",
+  elevationInfo: { mode: "on-the-ground" },
+  renderer: ngcp_line_renderer,
+  definitionExpression: "SiteNo = '6' AND LAYER = 2",
+});
+
+//--- NGCP POLE SITE LAYERS ---//
+// PROPOSED POLE RELOCATION (SITE 7)
+export const ngcp_pole7 = new FeatureLayer({
+  portalItem: portalItems("d5b30a79bdae40c492771ec1e46ab0e9"),
+  definitionExpression: "SiteNo = '7'",
+  layerId: 3,
+  renderer: ngcp_pole_renderer,
+  labelingInfo: [label_ngcp_pole],
+  elevationInfo: { mode: "on-the-ground" },
+  popupEnabled: true,
+  title: "Proposed Pole Relocation",
+});
+
+// PROPOSED POLE RELOCATION (SITE 6)
+export const ngcp_pole6 = new FeatureLayer({
+  portalItem: portalItems("d5b30a79bdae40c492771ec1e46ab0e9"),
+  definitionExpression: "SiteNo = '6'",
+  layerId: 3,
+  renderer: ngcp_pole_renderer,
+  labelingInfo: [label_ngcp_pole],
+  elevationInfo: { mode: "on-the-ground" },
+  popupEnabled: true,
+  title: "Proposed Pole Relocation",
+});
+
+//--- PNR ---//
 export const pnrLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 1,
   title: "Land (Excluded for Acquisition)",
   definitionExpression: "OwnershipType IN (1, 2)",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  elevationInfo: { mode: "on-the-ground" },
   labelsVisible: false,
-  renderer: pnrRenderer,
-  popupTemplate: {
-    title: "<div style='color: #eaeaea'>{LandOwner} ({LotID})</div>",
-    lastEditInfoEnabled: false,
-    returnGeometry: true,
-    content: [
-      {
-        type: "fields",
-        fieldInfos: [
-          {
-            fieldName: "OwnershipType",
-            label: "Ownership Type",
-          },
-          {
-            fieldName: "HandOverDate",
-            label: "Hand-Over Date",
-          },
-          {
-            fieldName: "Municipality",
-          },
-          {
-            fieldName: "Barangay",
-          },
-          {
-            fieldName: "LandOwner",
-            label: "Land Owner",
-          },
-        ],
-      },
-    ],
-  },
-});
-
-/* Station Layer */
-const labelClass = new LabelClass({
-  symbol: new LabelSymbol3D({
-    symbolLayers: [
-      new TextSymbol3DLayer({
-        material: {
-          color: "#d4ff33",
-        },
-        size: 15,
-        halo: {
-          color: "black",
-          size: 0.5,
-        },
-        // font: {
-        //   family: 'Ubuntu Mono',
-        //   //weight: "bold"
-        // },
-      }),
-    ],
-    verticalOffset: {
-      screenLength: 100,
-      maxWorldLength: 700,
-      minWorldLength: 80,
-    },
-
-    callout: {
-      type: "line", // autocasts as new LineCallout3D()
-      color: [128, 128, 128, 0.5],
-      size: 0.2,
-      border: {
-        color: "grey",
-      },
-    },
-  }),
-  labelPlacement: "above-center",
-  labelExpressionInfo: {
-    expression: "$feature.Station",
-    //value: "{TEXTSTRING}"
-  },
-});
-
-export const stationLayer = new FeatureLayer({
-  portalItem: {
-    id: "e09b9af286204939a32df019403ef438",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 6,
-  title: "SC Stations",
-  labelingInfo: [labelClass],
-  elevationInfo: {
-    mode: "relative-to-ground",
-  },
-});
-stationLayer.listMode = "hide";
-
-/* Proposed East Service Road */
-const proposedEastServiceRoadRenderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#d9dddc",
-    width: "2px",
-    style: "dash",
-  }),
-});
-
-export const proposedEastServiceRoadLayer = new FeatureLayer({
-  portalItem: {
-    id: "3b160b3125ab42759be419be7fbf1edc",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  title: "Proposed East Service Road",
-  renderer: proposedEastServiceRoadRenderer,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
+  renderer: pnr_renderer,
+  popupTemplate: pnr_popup,
 });
 
 //-----------------------------------------------//
 //                Lot, Structure, NLO            //
 //-----------------------------------------------//
-
 //--- LOT LAYER ---//
 export const lotLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 1,
   labelingInfo: [lot_label],
   renderer: lot_renderer,
@@ -760,10 +329,7 @@ export const lotLayer = new FeatureLayer({
 
 //--- OPTIMIZED LOT FOR PASSENGER LINE ---//
 export const optimizedLots_passengerLineLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 1,
   definitionExpression: "OptLotsIIA_NoT = 1",
   labelingInfo: [lot_label],
@@ -777,10 +343,7 @@ export const optimizedLots_passengerLineLayer = new FeatureLayer({
 
 //--- STUDIED LOTS: PASSENGER & FREIGHT LINE FOR OPTIMIZATION ---//
 export const studiedLots_optimizationLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 1,
   definitionExpression: "OptLotsIIB = 1",
   labelingInfo: [lot_label],
@@ -794,10 +357,7 @@ export const studiedLots_optimizationLayer = new FeatureLayer({
 
 //--- HANDED-OVER LOTS (PUBLIC + PRIATE LOTS) ---//
 export const handedOverLotLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 1,
   definitionExpression: `${lot_ho_f} = 1 AND ${lot_status_f} <> 8`,
   renderer: lot_ho_renderer,
@@ -809,10 +369,7 @@ export const handedOverLotLayer = new FeatureLayer({
 
 //--- TUNNEL AFFECTED LOTS ---//
 export const tunnelAffectedLotLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 1,
   definitionExpression: `${lot_tunnel_f} = 1`,
   renderer: lot_tunnel_renderer,
@@ -824,10 +381,7 @@ export const tunnelAffectedLotLayer = new FeatureLayer({
 
 //--- ACCESSIBLE LOT AREA BY CONTRACTORS ---//
 export const accessibleLotAreaLayer = new FeatureLayer({
-  portalItem: {
-    id: "4692e76be5804db2b38c23df86c7eaa8",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   renderer: lot_access_renderer,
   title: "Handed-Over Area",
   elevationInfo: { mode: "on-the-ground" },
@@ -835,10 +389,7 @@ export const accessibleLotAreaLayer = new FeatureLayer({
 
 //--- STRUCUTURE LAYER ---//
 export const structureLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 2,
   title: "Structure",
   renderer: str_renderer,
@@ -848,10 +399,7 @@ export const structureLayer = new FeatureLayer({
 
 //--- STRUCUTURE OWNERSHIP LAYER ---//
 export const strucOwnershipLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   renderer: str_owner_renderer,
   layerId: 2,
   title: "Households Ownership (Structure)",
@@ -861,10 +409,7 @@ export const strucOwnershipLayer = new FeatureLayer({
 
 //--- NLO LAYER ---//
 export const nloLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: portalItem_url,
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 3,
   renderer: nlo_renderer,
   title: "Households",
@@ -876,12 +421,7 @@ export const nloLayer = new FeatureLayer({
 
 //--- HOUSEHOLDS OCCUPANCY (STATUS OF RELOCATION) ---//
 export const occupancyLayer = new FeatureLayer({
-  portalItem: {
-    id: "99500faf0251426ea1df934a739faa6f",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
   layerId: 4,
   title: "Occupancy (Structure)",
   renderer: str_occup_renderer,
@@ -889,213 +429,10 @@ export const occupancyLayer = new FeatureLayer({
   popupTemplate: str_occup_popup,
 });
 
-/* Pier Head and Column */
-const pHeight = 0;
-
-const pierColumn = new PolygonSymbol3D({
-  symbolLayers: [
-    new ExtrudeSymbol3DLayer({
-      size: pHeight + 10,
-      material: {
-        color: [78, 78, 78, 0.5],
-      },
-      edges: new SolidEdges3D({
-        color: "#4E4E4E",
-        size: 0.3,
-      }),
-    }),
-  ],
-});
-
-const pileCap = new PolygonSymbol3D({
-  symbolLayers: [
-    new ExtrudeSymbol3DLayer({
-      size: pHeight + 3,
-      material: {
-        color: [200, 200, 200, 0.7],
-      },
-      edges: new SolidEdges3D({
-        color: "#4E4E4E",
-        size: 1.0,
-      }),
-    }),
-  ],
-});
-
-const pierHeadRenderer = new UniqueValueRenderer({
-  // defaultSymbol: new PolygonSymbol3D({
-  //   symbolLayers: [
-  //     {
-  //       type: "extrude",
-  //       size: 5, // in meters
-  //       material: {
-  //         color: "#E1E1E1",
-  //       },
-  //       edges: new SolidEdges3D({
-  //         color: "#4E4E4E",
-  //         size: 1.0,
-  //       }),
-  //     },
-  //   ],
-  // }),
-  // defaultLabel: "Other",
-  field: "Layer",
-  legendOptions: {
-    title: "Pile Cap/Column",
-  },
-  uniqueValueInfos: [
-    {
-      value: "Pier_Column",
-      symbol: pierColumn,
-      label: "Column",
-    },
-    /*
-  {
-    value: "Pier_Head",
-    symbol: pierHead,
-    label: "Pier Head"
-  },
-  */
-    {
-      value: "Pile_Cap",
-      symbol: pileCap,
-      label: "Pile Cap",
-    },
-  ],
-});
-
-export const pierHeadColumnLayer = new FeatureLayer({
-  portalItem: {
-    id: "e09b9af286204939a32df019403ef438",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 4,
-  title: "Pile Cap/Column",
-  definitionExpression: "Layer <> 'Pier_Head'",
-
-  minScale: 150000,
-  maxScale: 0,
-  renderer: pierHeadRenderer,
-  popupEnabled: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-// pierHeadColumnLayer.listMode = "hide";
-
-/* Pier Access Point  */
-const defaultPierAccessLabel = new LabelClass({
-  symbol: new LabelSymbol3D({
-    symbolLayers: [
-      new TextSymbol3DLayer({
-        material: {
-          color: valueLabelColor,
-        },
-        size: 15,
-        font: {
-          family: "Ubuntu Mono",
-          weight: "bold",
-        },
-      }),
-    ],
-    verticalOffset: {
-      screenLength: 80,
-      maxWorldLength: 500,
-      minWorldLength: 30,
-    },
-    callout: {
-      type: "line",
-      size: 0.5,
-      color: [0, 0, 0],
-      border: {
-        color: [255, 255, 255, 0.7],
-      },
-    },
-  }),
-  labelExpressionInfo: {
-    expression: "$feature.PierNumber",
-    //'DefaultValue($feature.GeoTechName, "no data")'
-    //"IIF($feature.Score >= 13, '', '')"
-    //value: "{Type}"
-  },
-  labelPlacement: "above-center",
-  // where: 'AccessDate IS NULL',
-});
-
-export const pierAccessLayer = new FeatureLayer(
-  {
-    portalItem: {
-      id: "e09b9af286204939a32df019403ef438",
-      portal: {
-        url: "https://gis.railway-sector.com/portal",
-      },
-    },
-    layerId: 3,
-    labelingInfo: [defaultPierAccessLabel], // [pierAccessReadyDateLabel, pierAccessNotYetLabel, pierAccessDateMissingLabel], //[pierAccessDateMissingLabel, pierAccessReadyDateLabel, pierAccessNotYetLabel],
-    title: "Pier Number", //'Pier with Access Date',
-    minScale: 150000,
-    maxScale: 0,
-    popupEnabled: false,
-    elevationInfo: {
-      mode: "on-the-ground",
-    },
-  },
-  //{ utcOffset: 300 },
-);
-
-const cp_break_line_renderer = new SimpleRenderer({
-  symbol: new SimpleLineSymbol({
-    color: "#4ce600",
-    width: "2px",
-  }),
-});
-export const cp_break_lines = new FeatureLayer({
-  portalItem: {
-    id: "1a2be501a0f54e048a7200e482eb0dd5",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  title: "CP Break Line",
-  renderer: cp_break_line_renderer,
-  popupEnabled: false,
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
-/* For SC Substation */
-const scSubstationRenderer = new SimpleRenderer({
-  symbol: new SimpleFillSymbol({
-    color: [115, 178, 255],
-    style: "backward-diagonal",
-    outline: {
-      color: "#004DA8",
-      width: 1.5,
-    },
-  }),
-});
-
-export const substationLayer = new FeatureLayer({
-  portalItem: {
-    id: "fd0fd77c428b4fae8f47ac46b26614ec",
-    portal: {
-      url: "https://gis.railway-sector.com/portal",
-    },
-  },
-  layerId: 61,
-  renderer: scSubstationRenderer,
-  popupEnabled: false,
-  labelsVisible: false,
-  title: "Substation",
-  elevationInfo: {
-    mode: "on-the-ground",
-  },
-});
-
-// Group layers //
+//----------------------------------------------//
+//                Group Layers                  //
+//----------------------------------------------//
+//--- ALIGNMENT LAYERS ---//
 export const alignmentGroupLayer = new GroupLayer({
   title: "Alignment",
   visible: true,
@@ -1120,6 +457,7 @@ export const alignmentGroupLayer = new GroupLayer({
   ],
 }); //map.add(alignmentGroupLayer, 0);
 
+//--- STRUCTURE/NLO/OCCUPANCY LAYERS ---//
 export const nloLoOccupancyGroupLayer = new GroupLayer({
   title: "Households Occupancy",
   visible: true,
@@ -1127,6 +465,7 @@ export const nloLoOccupancyGroupLayer = new GroupLayer({
   layers: [occupancyLayer, strucOwnershipLayer, nloLayer],
 });
 
+//--- LOT LAYERS ---//
 export const lotGroupLayer = new GroupLayer({
   title: "Land",
   visible: true,
@@ -1141,6 +480,7 @@ export const lotGroupLayer = new GroupLayer({
   ],
 });
 
+//--- NGCP LAYERS ---//
 export const ngcp6_groupLayer = new GroupLayer({
   title: "NGCP Site 6",
   visible: false,
@@ -1157,8 +497,10 @@ export const ngcp7_groupLayer = new GroupLayer({
   layers: [ngcp_line7, ngcp_pole7],
 });
 
-export // Search components
-const sources: any = [
+//----------------------------------------------//
+//                Other Parameters              //
+//----------------------------------------------//
+export const sources: any = [
   {
     layer: lotLayer,
     searchFields: ["LotID"],
