@@ -170,7 +170,7 @@ const ChartStructure = memo(() => {
           alt="Structure Logo"
           height={`${new_imageSize}%`}
           width={`${new_imageSize}%`}
-          style={{ paddingTop: "2px" }}
+          style={{ paddingTop: "2px", opacity: isLoading ? 0 : 1 }}
         />
         <dl style={{ alignItems: "center" }}>
           <dt
