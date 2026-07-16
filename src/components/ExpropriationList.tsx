@@ -34,12 +34,7 @@ async function resultClickHandler(event: any) {
     objectIds: [event.target.value],
   });
   const result = await lotLayer.queryExtent(queryExtent);
-  result.extent &&
-    arcgisScene?.goTo({
-      target: result.extent,
-      // speedFactor: 2,
-      zoom: 17,
-    });
+  result.extent && arcgisScene?.goTo({ target: result.extent, zoom: 17 });
 
   const layerView = await arcgisScene?.whenLayerView(lotLayer);
   highlightSelect && highlightSelect.remove();
