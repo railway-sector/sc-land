@@ -45,6 +45,7 @@ import {
   pier_access_label,
   cp_breakline_renderer,
   substation_renderer,
+  prow506_renderer,
 } from "./uniqueValues";
 
 //----------------------------------------------//
@@ -140,7 +141,7 @@ export const prowLayer = new FeatureLayer({
 });
 
 // ROW Layer version 7.1.6
-export const prowLayerold = new FeatureLayer({
+export const prowLaye716 = new FeatureLayer({
   portalItem: portalItems("84ba987eed264fe9b18938000ddf702d"),
   title: "SC Alignment 7.1.6",
   definitionExpression: "Version = 'v.7.1.6b'",
@@ -148,8 +149,17 @@ export const prowLayerold = new FeatureLayer({
   renderer: prow716_renderer,
 });
 
+// ROW Layer version 5.0.6
+export const prowLayer506 = new FeatureLayer({
+  portalItem: portalItems("84ba987eed264fe9b18938000ddf702d"),
+  title: "SC Alignment 5.0.6",
+  definitionExpression: "Version = 'v.5.0.6'",
+  popupEnabled: false,
+  renderer: prow506_renderer,
+});
+
 // ROW Layer version 3.9.3
-export const prowLayerold2 = new FeatureLayer({
+export const prowLayer393 = new FeatureLayer({
   portalItem: portalItems("84ba987eed264fe9b18938000ddf702d"),
   title: "SC Alignment 3.9.3",
   definitionExpression: "Version = 'v.3.9.3'",
@@ -444,8 +454,9 @@ export const alignmentGroupLayer = new GroupLayer({
     chainageLayer,
     substationLayer,
     meralco_site1_prowLayer,
-    prowLayerold,
-    prowLayerold2,
+    prowLayer393,
+    prowLayer506,
+    prowLaye716,
     prowLayer,
     prow_tunnelLayer,
     temporaryFencingLayer,

@@ -729,6 +729,11 @@ export const prow716_renderer = new SimpleRenderer({
   symbol: new SimpleLineSymbol({ color: "#DF00FF", width: "2px" }),
 });
 
+// VERSION 5.0.6
+export const prow506_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({ color: "#08f0f8", width: "2px" }),
+});
+
 // VERSION 3.9.3
 export const prow393_renderer = new SimpleRenderer({
   symbol: new SimpleLineSymbol({ color: "#ffc800", width: "2px" }),
