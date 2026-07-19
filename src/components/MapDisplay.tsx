@@ -26,7 +26,6 @@ import { addLayersToMap } from "../query";
 import { useState } from "react";
 
 export default function MapDisplay() {
-  // const queryClient = useQueryClient();
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const arcgisSearch = document.querySelector("arcgis-search") as ArcgisSearch;
   const [_mapView, setMapView] = useState<any>();

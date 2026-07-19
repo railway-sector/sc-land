@@ -39,25 +39,16 @@ export function queryDefinitionExpression({
   queryExpression,
   featureLayer,
 }: queryDefinitionExpressionType) {
-  if (queryExpression) {
-    if (featureLayer) {
-      if (Array.isArray(featureLayer)) {
-        featureLayer.forEach((layer) => {
-          if (layer) {
-            layer.definitionExpression = queryExpression;
-          }
-        });
-      } else {
-        featureLayer.definitionExpression = queryExpression;
-      }
-    }
-  }
+  if (!queryExpression || !featureLayer) return;
+  const layers = Array.isArray(featureLayer) ? featureLayer : [featureLayer];
+  layers.forEach(
+    (layer: any) => layer && (layer.definitionExpression = queryExpression),
+  );
 }
 
 //---------------------------------------------//
 //           Lot Pie chart                     //
 //---------------------------------------------//
-
 //--- Chart Data Generation helper function
 // `pieChartData` function helps to assign parameter names to class `ChartPieSeries`
 interface pieChartDataType {
@@ -79,13 +70,15 @@ export async function pieChartData({
   statisticField,
   statisticType,
 }: pieChartDataType) {
-  piechart.qChart = qChart.queryExpression();
-  piechart.layer = layer;
-  piechart.statusList = statusList;
-  piechart.statusField = statusField;
-  piechart.statisticField = statisticField;
-  piechart.statisticType = statisticType;
-
+  // piechart.layer = layer, .....
+  Object.assign(piechart, {
+    qChart: qChart.queryExpression(),
+    layer,
+    statusList,
+    statusField,
+    statisticField,
+    statisticType,
+  });
   return await piechart.chartDataPieSeries();
 }
 
@@ -103,16 +96,17 @@ export async function fieldStatistic({
   statisticField,
   statisticType,
 }: fieldStatisticType) {
-  const statsCollect = new StatisticDefinition({
-    onStatisticField: statisticField,
-    outStatisticFieldName: "statsCollect",
-    statisticType: statisticType,
-  });
-
   //--- Query
-  const query = new Query();
-  query.outStatistics = [statsCollect];
-  query.where = qChart;
+  const query = new Query({
+    where: qChart,
+    outStatistics: [
+      new StatisticDefinition({
+        onStatisticField: statisticField,
+        outStatisticFieldName: "statsCollect",
+        statisticType,
+      }),
+    ],
+  });
 
   return layer?.queryFeatures(query).then((response: any) => {
     return response.features[0].attributes.statsCollect;
@@ -149,46 +143,9 @@ interface StatusQueryItem {
   color: string;
 }
 
-export async function PieChartRenderType({
-  render,
-  chart,
-  pieSeries,
-  legend,
-  root,
-  qChart,
-  q2Expression,
-  status_field,
-  view,
-  updateChartPanelwidth,
-  data,
-  seriesScale,
-  innerLabel,
-  innerLabelFontSize,
-  innerValueFontSize,
-  layer,
-  statusArray,
-  bkg_color_switch,
-  seriesFillHash,
-}: PieChartRenderType) {
-  render.chart = chart;
-  render.pieSeries = pieSeries;
-  render.legend = legend;
-  render.root = root;
-  render.qChart = qChart;
-  render.q2Expression = q2Expression;
-  render.status_field = status_field;
-  render.view = view;
-  render.updateChartPanelwidth = updateChartPanelwidth;
-  render.data = data;
-  render.seriesScale = seriesScale;
-  render.innerLabel = innerLabel;
-  render.innerLabelFontSize = innerLabelFontSize;
-  render.innerValueFontSize = innerValueFontSize;
-  render.layer = layer;
-  render.statusArray = statusArray;
-  render.bkg_color_switch = bkg_color_switch;
-  render.seriesFillHash = seriesFillHash;
-
+export async function PieChartRender({ render, ...props }: PieChartRenderType) {
+  // render.chart = chart, render.legend = legend,....
+  Object.assign(render, props);
   return await render.chartDataRenderer();
 }
 
@@ -222,32 +179,32 @@ export async function handedOverAreaByContractp({
   cp_list,
   layer,
 }: HandedOverArea) {
-  return await Promise.all(
+  const outStatistics = [
+    new StatisticDefinition({
+      onStatisticField: aa_field,
+      outStatisticFieldName: "aa",
+      statisticType: "sum",
+    }),
+
+    new StatisticDefinition({
+      onStatisticField: hoa_field,
+      outStatisticFieldName: "hoa",
+      statisticType: "sum",
+    }),
+  ];
+
+  return Promise.all(
     cp_list.map(async (cp: any) => {
-      const aa = new StatisticDefinition({
-        onStatisticField: aa_field,
-        outStatisticFieldName: "aa",
-        statisticType: "sum",
+      const query = new Query({
+        where: `CP = '${cp}' AND ${cp_f} IS NOT NULL`,
+        outStatistics: outStatistics,
       });
-
-      const hoa = new StatisticDefinition({
-        onStatisticField: hoa_field,
-        outStatisticFieldName: "hoa",
-        statisticType: "sum",
-      });
-
-      const query = layer.createQuery();
-      query.where = `CP = '${cp}' AND ${cp_f} IS NOT NULL`;
-      query.outStatistics = [aa, hoa];
 
       const response = await layer?.queryFeatures(query);
-      const attributes = response.features[0].attributes;
-      const perc = ((attributes.hoa / attributes.aa) * 100).toFixed(0);
+      const { aa, hoa } = response.features[0].attributes;
+      const value = aa ? ((hoa / aa) * 100).toFixed(0) : 0;
 
-      return {
-        category: cp,
-        value: perc ?? 0,
-      };
+      return { category: cp, value };
     }),
   );
 }
@@ -297,10 +254,7 @@ export function toDateList(xdates: any) {
   //--- Conver xdates to a list of dates in date format
   const dateList: Date[] =
     xdates.map((date: string) => {
-      const yyyy = Number(date.slice(1, 5));
-      const mm = Number(date.slice(5, 7)) - 1;
-      const dd = Number(date.slice(7, 9));
-      return new Date(yyyy, mm, dd);
+      return parseDateField(date);
     }) ?? [];
 
   return dateList;
@@ -326,8 +280,9 @@ export function toAsofdate(date: Date) {
 
 export async function dateUpdate(category: string) {
   //--- Only executed during an initial render
-  const query = dateTable.createQuery();
-  query.where = `project = 'N2' AND category = '${category}'`;
+  const query = new Query({
+    where: `project = 'N2' AND category = '${category}'`,
+  });
 
   const { features } = await dateTable.queryFeatures(query);
   return features.map(({ attributes }: any) => {
@@ -338,17 +293,6 @@ export async function dateUpdate(category: string) {
   });
 }
 
-export function xDateFieldsToDate(xdate: any) {
-  //--- Convert a single xDate to a date in date format
-  const yyyy = Number(xdate.slice(1, 5));
-  const desired_mm = Number(xdate.slice(5, 7));
-  const dd = Number(xdate.slice(7, 9));
-  const mm = desired_mm - 1;
-  const final = new Date(yyyy, mm, dd);
-
-  return final;
-}
-
 //--- UseQuery to get a list of time-slider dates & latest date
 export function useDateFields(lotLayer: any) {
   return useQuery<DateFieldsType>({
@@ -357,7 +301,7 @@ export function useDateFields(lotLayer: any) {
       const response = await getSortDates(lotLayer);
       return {
         dateFields: response,
-        latestdate: xDateFieldsToDate(response.at(-1)),
+        latestdate: parseDateField(response.at(-1)),
       };
     },
     staleTime: Infinity,
@@ -381,16 +325,11 @@ export function thousands_separators(num: any) {
 // const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
 export function zoomToLayer(layer: any, view: any) {
   return layer.queryExtent().then((response: any) => {
-    view
-      ?.goTo(response.extent, {
-        //response.extent
-        speedFactor: 2,
-      })
-      .catch((error: any) => {
-        if (error.name !== "AbortError") {
-          console.error(error);
-        }
-      });
+    view?.goTo(response.extent, { speedFactor: 2 }).catch((error: any) => {
+      if (error.name !== "AbortError") {
+        console.error(error);
+      }
+    });
   });
 }
 
@@ -409,31 +348,26 @@ let highlight: any;
 export async function highlightLot(layer: any, view: any) {
   const query = layer.createQuery();
 
-  const layerView = await view?.whenLayerView(layer);
-  const results = await layer?.queryObjectIds(query);
+  const [layerView, results] = await Promise.all([
+    view?.whenLayerView(layer),
+    layer?.queryObjectIds(query),
+  ]);
 
-  if (highlight) {
-    highlight.remove();
-  }
+  highlight?.remove();
   highlight = layerView.highlight(results);
 }
 
 //--- Highlight handed-over lot
 export async function highlightHandedOverLot(layer: any, view: any) {
-  const query = layer.createQuery();
-  query.where = `${lot_ho_f} = 1 AND ${lot_status_f} <> 8`;
+  const query = new Query({
+    where: `${lot_ho_f} = 1 AND ${lot_status_f} <> 8`,
+  });
 
-  const layerView = view?.whenLayerView(layer);
-  const results = await layer?.queryObjectIds(query);
+  const [layerView, results] = await Promise.all([
+    view?.whenLayerView(layer),
+    layer?.queryObjectIds(query),
+  ]);
 
-  if (highlight) {
-    highlight.remove();
-  }
+  highlight?.remove();
   highlight = layerView.highlight(results);
-}
-
-export function highlightRemove() {
-  if (highlight) {
-    highlight.remove();
-  }
 }

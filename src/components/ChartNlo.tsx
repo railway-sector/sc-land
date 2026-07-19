@@ -3,7 +3,7 @@ import { useRef, useState, useEffect, memo, use } from "react";
 import {
   makeQuery,
   pieChartData,
-  PieChartRenderType,
+  PieChartRender,
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
@@ -127,7 +127,7 @@ const ChartNlo = memo(() => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    PieChartRenderType({
+    PieChartRender({
       render: new ChartPieSeriesRender(),
       chart,
       pieSeries: pieSeries,

@@ -283,6 +283,7 @@ export const rgb = [
   [255, 170, 0, 0.6],
   [255, 83, 73, 0.6],
   [178, 190, 181, 0.6],
+  [111, 0, 0, 0.6],
 ];
 
 export const str_status_q = [
@@ -317,6 +318,12 @@ export const str_status_q = [
     category: "No Need to Acquire",
     color: "#B2BEB5",
     colrgb: rgb[6],
+  },
+  {
+    value: 8,
+    category: "For Expropriation",
+    color: "#6f0000",
+    colrgb: rgb[7],
   },
 ];
 
@@ -443,7 +450,7 @@ export const nlo_status_q = [
   {
     value: 6,
     category: "For Notice of Taking",
-    color: "#FF0000",
+    color: "#6f0000",
     logo: nlo_status_symbol[5],
   },
 ];
@@ -583,7 +590,7 @@ export const label_stationp = new LabelClass({
     },
 
     callout: {
-      type: "line", // autocasts as new LineCallout3D()
+      type: "line",
       color: [128, 128, 128, 0.5],
       size: 0.2,
       border: { color: "grey" },
@@ -919,6 +926,8 @@ function zoomToAction(id: string) {
 
 export async function defineActions(event: any) {
   const { item } = event;
+
+  await item.layer.when();
 
   //--- Define IDs for zoom-to-Action in layer list
   if (item.title === "Proposed Pole Working Areas") {

@@ -21,7 +21,7 @@ import {
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import "../index.css";
 import { useQuery } from "@tanstack/react-query";
-import { use, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { MyContext } from "../contexts/MyContext";
 import { makeQuery } from "../query";
@@ -60,7 +60,7 @@ async function queryFeatures({ layer, queryc }: QueryFeaturesType) {
   return await layer?.queryFeatures(query);
 }
 
-const ExpropriationList = () => {
+const ExpropriationList = memo(() => {
   const { municipality, barangay } = use(MyContext);
 
   //--- Status value for Expro
@@ -84,6 +84,7 @@ const ExpropriationList = () => {
     select: (response) => {
       return response.features;
     },
+    staleTime: Infinity,
   });
 
   //--- Compile expro lots in an object
@@ -159,6 +160,6 @@ const ExpropriationList = () => {
       </calcite-list>
     </>
   );
-};
+});
 
 export default ExpropriationList;

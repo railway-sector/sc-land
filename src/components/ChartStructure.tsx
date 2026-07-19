@@ -2,7 +2,7 @@ import { memo, use, useEffect, useRef, useState } from "react";
 import {
   makeQuery,
   pieChartData,
-  PieChartRenderType,
+  PieChartRender,
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
@@ -123,7 +123,7 @@ const ChartStructure = memo(() => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    PieChartRenderType({
+    PieChartRender({
       render: new ChartPieSeriesRender(),
       chart,
       pieSeries: pieSeries,
