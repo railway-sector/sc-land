@@ -1,11 +1,5 @@
 import { dateTable, lotLayer } from "./layers";
-import {
-  cp_f,
-  lot_ho_f,
-  lot_status_f,
-  lot_symbol,
-  lot_uniqueV,
-} from "./uniqueValues";
+import { cp_f, lot_symbol, lot_uniqueV } from "./uniqueValues";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type { statisticsType } from "./interfaceKeys";
@@ -347,21 +341,6 @@ export function zoomToFullExtent(layer: any, view: any) {
 let highlight: any;
 export async function highlightLot(layer: any, view: any) {
   const query = layer.createQuery();
-
-  const [layerView, results] = await Promise.all([
-    view?.whenLayerView(layer),
-    layer?.queryObjectIds(query),
-  ]);
-
-  highlight?.remove();
-  highlight = layerView.highlight(results);
-}
-
-//--- Highlight handed-over lot
-export async function highlightHandedOverLot(layer: any, view: any) {
-  const query = new Query({
-    where: `${lot_ho_f} = 1 AND ${lot_status_f} <> 8`,
-  });
 
   const [layerView, results] = await Promise.all([
     view?.whenLayerView(layer),
