@@ -52,7 +52,7 @@ function ChartMain() {
           borderBottomWidth: 5,
           borderColor: "#555555",
           width: panelWidth,
-          overflowY: "auto",
+          overflow: "hidden",
           display: "block", // without adding display, background will not disappear.
           scrollbarWidth: "none",
         }}
@@ -77,7 +77,7 @@ function ChartMain() {
             <calcite-tab-title>Land</calcite-tab-title>
             <calcite-tab-title>Structure</calcite-tab-title>
             <calcite-tab-title>Households</calcite-tab-title>
-            <calcite-tab-title>ExproList</calcite-tab-title>
+            <calcite-tab-title>ExproStatus</calcite-tab-title>
           </calcite-tab-nav>
 
           {/* CalciteTab: Lot */}
@@ -95,7 +95,7 @@ function ChartMain() {
 
           {/* CalciteTab: List of Lots under Expropriation */}
           <calcite-tab>
-            {tabName === "ExproList" && <ExpropriationList />}
+            {tabName === "ExproStatus" && <ExpropriationList />}
           </calcite-tab>
         </calcite-tabs>
       </calcite-panel>

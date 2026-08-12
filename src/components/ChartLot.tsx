@@ -195,7 +195,6 @@ const ChartLot = () => {
   // ***********************************
   const new_fontSize = chartPanelwidth / 30;
   const new_valueSize = chartPanelwidth / 19;
-  const new_imageSize = chartPanelwidth * 0.03;
   const new_asofDateSize = chartPanelwidth * 0.032;
   const new_pieSeriesScale = 220;
   const new_pieInnerValueFontSize = "1.1rem";
@@ -282,23 +281,12 @@ const ChartLot = () => {
         style={{
           display: "flex",
           marginTop: "3px",
-          marginLeft: "15px",
-          marginRight: "15px",
-          justifyContent: "space-between",
+          marginLeft: "35px",
+          justifyContent: "center",
+          gap: "65px",
           marginBottom: "5px",
         }}
       >
-        <img
-          src="https://eijigorilla.github.io/Symbols/Land_Acquisition/Land_Logo2.png"
-          alt="Land Logo"
-          height={`${new_imageSize}%`}
-          width={`${new_imageSize}%`}
-          style={{
-            paddingTop: "1%",
-            paddingLeft: "1%",
-            opacity: isLoading ? 0 : 1,
-          }}
-        />
         <dl style={{ alignItems: "center" }}>
           <dt
             style={{ color: primaryLabelColor, fontSize: `${new_fontSize}px` }}

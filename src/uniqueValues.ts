@@ -267,6 +267,13 @@ export const lot_access_renderer = new SimpleRenderer({
   }),
 });
 
+//--- EXPROT STATUS ---//
+export const expro_wop_f = "WOP";
+export const expro_status_q = [
+  { category: "Other EXPRO", color: "#00734d" },
+  { category: "WOP", color: "#0070ff" },
+];
+
 //----------------------------------------------//
 //       Structure Layer Parameters             //
 //----------------------------------------------//
