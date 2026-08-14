@@ -116,6 +116,8 @@ export const cp_break_lines = new FeatureLayer({
   portalItem: portalItems("1a2be501a0f54e048a7200e482eb0dd5"),
   title: "CP Break Line",
   renderer: cp_breakline_renderer,
+  minScale: 200000,
+  maxScale: 0,
   popupEnabled: false,
   elevationInfo: { mode: "on-the-ground" },
 });
@@ -309,18 +311,6 @@ export const ngcp_pole6 = new FeatureLayer({
   title: "Proposed Pole Relocation",
 });
 
-//--- PNR ---//
-export const pnrLayer = new FeatureLayer({
-  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
-  layerId: 1,
-  title: "Land (Excluded for Acquisition)",
-  definitionExpression: "OwnershipType IN (1, 2)",
-  elevationInfo: { mode: "on-the-ground" },
-  labelsVisible: false,
-  renderer: pnr_renderer,
-  popupTemplate: pnr_popup,
-});
-
 //-----------------------------------------------//
 //                Lot, Structure, NLO            //
 //-----------------------------------------------//
@@ -332,9 +322,23 @@ export const lotLayer = new FeatureLayer({
   renderer: lot_renderer,
   popupTemplate: lot_popup,
   title: "Land Acquisition",
-  minScale: 30000,
+  minScale: 40000,
   maxScale: 0,
   elevationInfo: { mode: "on-the-ground" },
+});
+
+//--- PNR ---//
+export const pnrLayer = new FeatureLayer({
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
+  layerId: 1,
+  title: "Land (Excluded for Acquisition)",
+  definitionExpression: "OwnershipType IN (1, 2)",
+  elevationInfo: { mode: "on-the-ground" },
+  minScale: 40000,
+  maxScale: 0,
+  labelsVisible: false,
+  renderer: pnr_renderer,
+  popupTemplate: pnr_popup,
 });
 
 //--- OPTIMIZED LOT FOR PASSENGER LINE ---//

@@ -1,8 +1,6 @@
 import { memo, use, useEffect, useRef, useState } from "react";
 import {
-  makeQuery,
-  pieChartData,
-  PieChartRender,
+  fieldStatistic,
   queryDefinitionExpression,
   thousands_separators,
   toAsofdate,
@@ -30,6 +28,55 @@ import {
 import ChartPieSeriesRender from "chart-pie-series-render";
 import { MyContext } from "../contexts/MyContext";
 import ChartPieSeries from "chart-pie-series";
+import QueryExpressionLayers from "query-layers-expression";
+
+//--------------------------//
+//     useStructureData     //
+//--------------------------//
+function useStructureData(
+  municipality: string,
+  barangay: string,
+  statusField: string,
+  baseFilter: any,
+) {
+  return useQuery<ChartResponse | any>({
+    queryKey: [municipality, barangay, statusField, structureLayer],
+    queryFn: async () => {
+      const q1 = new QueryExpressionLayers({
+        ...baseFilter,
+        qExpression: `${statusField} >= 1`,
+      });
+
+      queryDefinitionExpression({
+        queryExpression: q1.queryExpression(),
+        featureLayer: [structureLayer, occupancyLayer],
+      });
+
+      const baseArgs = {
+        layer: structureLayer,
+        statisticField: "OBJECTID",
+        statisticType: "count" as const,
+      };
+
+      const [chartData, totalNumber] = await Promise.all([
+        new ChartPieSeries({
+          ...baseArgs,
+          where: q1.queryExpression(),
+          statusList: str_status_q,
+          statusField: statusField,
+        }).pieSeries(),
+
+        fieldStatistic({
+          ...baseArgs,
+          where: new QueryExpressionLayers({ ...baseFilter }).queryExpression(),
+        }),
+      ]);
+
+      return { chartData, totalNumber, q1 };
+    },
+    staleTime: Infinity,
+  });
+}
 
 //--------------------------------------------//
 //              Chart Component                //
@@ -60,36 +107,19 @@ const ChartStructure = memo(() => {
   const legendRef = useRef<unknown | any | undefined>({});
   const chartID = "structure-chart";
 
-  //--- Generate Chart data
-  const qV = [municipality, barangay];
-  const qF = [municipality_f, barangay_f];
-  const queryc_struc = makeQuery(qV, qF, `${str_status_f} >= 1`);
+  //--- Base filter
+  const baseFilter = {
+    qFields: [municipality_f, barangay_f],
+    qValues: [municipality, barangay],
+  };
 
-  const { data, isLoading } = useQuery<ChartResponse | any>({
-    queryKey: [municipality, barangay, str_status_f, structureLayer],
-    queryFn: async () => {
-      queryDefinitionExpression({
-        queryExpression: queryc_struc.queryExpression(),
-        featureLayer: [structureLayer, occupancyLayer],
-      });
-
-      const chartData = await pieChartData({
-        piechart: new ChartPieSeries(),
-        qChart: queryc_struc,
-        layer: structureLayer,
-        statusList: str_status_q,
-        statusField: str_status_f,
-        statisticField: str_status_f,
-        statisticType: "count",
-      });
-
-      return {
-        chartData: chartData[0] || [],
-        totalNumber: chartData[1],
-      };
-    },
-    staleTime: Infinity,
-  });
+  //--- Fetch data
+  const { data, isLoading } = useStructureData(
+    municipality,
+    barangay,
+    str_status_f,
+    baseFilter,
+  );
 
   //--- Call chart data
   const chartData = data?.chartData || [];
@@ -123,13 +153,12 @@ const ChartStructure = memo(() => {
     legend.data.setAll(pieSeries.dataItems);
 
     // Render chart
-    PieChartRender({
-      render: new ChartPieSeriesRender(),
+    new ChartPieSeriesRender({
       chart,
       pieSeries: pieSeries,
       legend,
       root,
-      qChart: queryc_struc,
+      qChart: data?.q1,
       q2Expression: undefined,
       status_field: str_status_f,
       view: arcgisScene?.view,
@@ -143,7 +172,7 @@ const ChartStructure = memo(() => {
       statusArray: str_status_q,
       bkg_color_switch: false,
       seriesFillHash: undefined,
-    });
+    }).chartDataRenderer();
 
     return () => {
       root.dispose();

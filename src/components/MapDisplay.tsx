@@ -66,7 +66,7 @@ export default function MapDisplay() {
         ground="world-elevation"
         viewingMode="local"
         center="121.05, 14.4"
-        zoom={12}
+        zoom={11}
         onarcgisViewReadyChange={(event: any) => {
           setMapView(event.target);
         }}

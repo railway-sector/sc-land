@@ -25,7 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 import { memo, use, useEffect, useMemo, useRef } from "react";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { MyContext } from "../contexts/MyContext";
-import { makeQuery, fieldStatistic } from "../query";
+import { fieldStatistic } from "../query";
 import * as am5 from "@amcharts/amcharts5";
 import {
   chartSetter,
@@ -33,6 +33,7 @@ import {
   rootSetter,
   seriesSetter,
 } from "../chartSetter";
+import QueryExpressionLayers from "query-layers-expression";
 
 //--- Highlight & zoom into clicked land
 let highlight: any;
@@ -56,12 +57,15 @@ async function resultClickHandler(event: any) {
 //--- Return expro lots
 interface QueryFeaturesType {
   layer: FeatureLayer;
-  queryc: any;
+  where: any;
 }
 
-async function queryFeatures({ layer, queryc }: QueryFeaturesType) {
+//--------------------------//
+//        queryFeatures     //
+//--------------------------//
+async function queryFeatures({ layer, where }: QueryFeaturesType) {
   const query = lotLayer.createQuery();
-  query.where = queryc.queryExpression();
+  query.where = where;
   query.outFields = [
     "LotID",
     "LandOwner",
@@ -76,32 +80,41 @@ async function queryFeatures({ layer, queryc }: QueryFeaturesType) {
   return await layer?.queryFeatures(query);
 }
 
-const ExpropriationList = memo(() => {
-  const { municipality, barangay } = use(MyContext);
-
-  //--- Status value for Expro
-  const exproV = lot_status_q.filter((e: any) =>
-    e.category.includes("Expropriation"),
-  )[0]?.value;
-
-  //--- Make query expression
-  const qV = [municipality, barangay];
-  const qF = [municipality_f, barangay_f];
-  const querycExpro = makeQuery(qV, qF, `${lot_status_f} = ${exproV}`);
-  const querycWop = makeQuery(qV, qF, `${expro_wop_f} = 1`);
-
-  //--- 2. Streamlined Data Fetching with useQuery
-  const { data, isLoading } = useQuery<any>({
-    queryKey: [municipality, barangay, lot_status_f],
+//--------------------------//
+//     ExpropriationList    //
+//--------------------------//
+function exproListData(
+  municipality: string,
+  barangay: string,
+  statusField: string,
+  baseFilter: any,
+) {
+  return useQuery<any>({
+    queryKey: [municipality, barangay, statusField],
     queryFn: async () => {
+      //--- Status value for Expro
+      const exproV = lot_status_q.filter((e: any) =>
+        e.category.includes("Expropriation"),
+      )[0]?.value;
+
+      const qe1 = new QueryExpressionLayers({
+        ...baseFilter,
+        qExpression: `${statusField} = ${exproV}`,
+      }).queryExpression();
+
+      const qe2 = new QueryExpressionLayers({
+        ...baseFilter,
+        qExpression: `${expro_wop_f} = 1`,
+      }).queryExpression();
+
       const [exproList, wop] = await Promise.all([
         queryFeatures({
           layer: lotLayer,
-          queryc: querycExpro,
+          where: qe1,
         }),
 
         fieldStatistic({
-          qChart: querycWop.queryExpression(),
+          where: qe2,
           layer: lotLayer,
           statisticField: "OBJECTID",
           statisticType: "count",
@@ -121,13 +134,29 @@ const ExpropriationList = memo(() => {
     },
     staleTime: Infinity,
   });
+}
+
+const ExpropriationList = memo(() => {
+  const { municipality, barangay } = use(MyContext);
+
+  //--- Base filter
+  const baseFilter = {
+    qFields: [municipality_f, barangay_f],
+    qValues: [municipality, barangay],
+  };
+
+  //--- Fetch data
+  const { data, isLoading } = exproListData(
+    municipality,
+    barangay,
+    lot_status_f,
+    baseFilter,
+  );
 
   const exproList = data?.features ?? [];
   const chartData = data?.chartData ?? [];
   const totalExpro = data?.totalExpro ?? 0;
   const totalWop = data?.wop ?? 0;
-
-  console.log(chartData);
 
   //--- 3. Compile expro lots in an object
   const exproItem = exproList.map((feature: any, index: number) => {
