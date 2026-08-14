@@ -1,5 +1,11 @@
-import { dateTable, lotLayer } from "./layers";
-import { cp_f, lot_symbol, lot_uniqueV } from "./uniqueValues";
+import { dateTable, lotLayer, structureLayer } from "./layers";
+import {
+  cp_f,
+  lot_id_f,
+  lot_symbol,
+  lot_uniqueV,
+  str_id_f,
+} from "./uniqueValues";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type { statisticsType } from "./interfaceKeys";
@@ -8,6 +14,7 @@ import Query from "@arcgis/core/rest/support/Query";
 import { useQuery } from "@tanstack/react-query";
 import { datefieldKeys } from "./interfaceKeys";
 import type { DateFieldsType } from "./interfaceKeys";
+import type Graphic from "@arcgis/core/Graphic";
 
 //---------------------------------------------------------//
 //                 Add Layers to Map                      //
@@ -211,6 +218,46 @@ export function useDateFields(lotLayer: any) {
     },
     staleTime: Infinity,
   });
+}
+
+//----------------------------------------------//
+//       Structures within Optimized Lots       //
+//----------------------------------------------//
+interface NestedStructure {
+  structure: Graphic;
+  lotObjectId: number;
+}
+
+//--- Get structure within lots ---//
+export async function getStructuresWithinLots(
+  qExpression: any,
+): Promise<NestedStructure[]> {
+  //--- 1. Get all lot polygons
+  const lotQuery = lotLayer.createQuery();
+  lotQuery.outFields = ["OBJECTID", lot_id_f];
+  lotQuery.where = qExpression;
+  lotQuery.returnGeometry = true;
+  const { features: lots } = await lotLayer.queryFeatures(lotQuery);
+
+  //--- 2. Query structures "contains" per lot, in parallel
+  const perLotResults: any = await Promise.all(
+    lots.map(async (lot) => {
+      const query = structureLayer.createQuery();
+      query.geometry = lot.geometry;
+      query.spatialRelationship = "contains";
+      query.outFields = ["OBJECTID", str_id_f];
+      query.returnGeometry = true;
+
+      const { features } = await structureLayer.queryFeatures(query);
+
+      return features.map((structure) => ({
+        optimizedLotID: lot.attributes[lot_id_f],
+        optimizedStructureID: structure.attributes[str_id_f],
+        strucObjectId: structure.attributes.OBJECTID,
+      }));
+    }),
+  );
+  return perLotResults.flat();
 }
 
 //----------------------------------------------//
