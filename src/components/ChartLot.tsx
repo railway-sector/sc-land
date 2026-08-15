@@ -179,7 +179,6 @@ const ChartLot = () => {
   const arcgisScene = document.querySelector("arcgis-scene");
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
-  const firstLoad = useRef<boolean>(true);
 
   //--- Initial date to display
   const { data: dateList } = useDateFields(lotLayer);
@@ -227,12 +226,22 @@ const ChartLot = () => {
   const legendRef = useRef<any>(null);
   const chartID = "pie-two";
 
+  //--- Signature of the filters that should trigger a re-zoom.
+  //  Set once from the true first render — NOT reset inside the
+  //  effect — so React 18 StrictMode's dev-only double effect
+  //  invoke (mount -> cleanup -> mount) sees "nothing changed"
+  //  on both passes and correctly skips the zoom both times.
+  //  A zoom only fires once one of these values genuinely
+  //  changes on a later, real render.
+  const zoomFiltersRef = useRef(`${municipality}-${barangay}-${timesliderOn}`);
+
   useEffect(() => {
-    //--- Only zoom on subsequent (non-initial) fetches
-    if (!firstLoad.current) {
+    const currentZoomFilters = `${municipality}-${barangay}-${timesliderOn}`;
+
+    if (currentZoomFilters !== zoomFiltersRef.current) {
+      zoomFiltersRef.current = currentZoomFilters;
       if (!timesliderOn) zoomToLayer(lotLayer, arcgisScene?.view);
     }
-    firstLoad.current = false;
 
     const root = rootSetter({ chartID: chartID });
     const chart = chartSetter({ root: root, y: 10 });
