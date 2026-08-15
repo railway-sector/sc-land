@@ -607,7 +607,7 @@ export const label_stationp = new LabelClass({
       border: { color: "grey" },
     },
   }),
-  labelPlacement: "above-center",
+  // labelPlacement: "above-center",
   labelExpressionInfo: { expression: "$feature.Station" },
 });
 

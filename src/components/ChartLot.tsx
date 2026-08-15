@@ -36,7 +36,8 @@ import {
 } from "../chartSetter";
 import ChartPieSeriesRender from "chart-pie-series-render";
 import ChartPieSeries from "chart-pie-series";
-import { MyContext } from "../contexts/MyContext";
+import { TimesliderContext } from "../contexts/TimesliderContext";
+import { FilterContext } from "../contexts/FilterContext";
 import QueryExpressionLayers from "query-layers-expression";
 
 //--------------------------//
@@ -70,11 +71,6 @@ function useLotData(
       const q3 = new QueryExpressionLayers({
         ...baseFilter,
         qExpression: `${statusField} >= 1`,
-      });
-
-      queryDefinitionExpression({
-        queryExpression: q1.queryExpression(),
-        featureLayer: [lotLayer, handedOverLotLayer],
       });
 
       queryDefinitionExpression({
@@ -177,13 +173,13 @@ const ChartLot = () => {
     newHoaField,
     newAfaField,
     newHoField,
-    municipality,
-    barangay,
-  } = use(MyContext);
+  } = use(TimesliderContext);
+  const { municipality, barangay } = use(FilterContext);
 
   const arcgisScene = document.querySelector("arcgis-scene");
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
   const [handedOverCheckBox, setHandedOverCheckBox] = useState<any>(false);
+  const firstLoad = useRef<boolean>(true);
 
   //--- Initial date to display
   const { data: dateList } = useDateFields(lotLayer);
@@ -205,8 +201,6 @@ const ChartLot = () => {
     timesliderOn ? newHoField : lot_ho_f,
     baseFilter,
   );
-
-  if (!timesliderOn) zoomToLayer(lotLayer, arcgisScene?.view);
 
   //--- Call chart data
   const chartData = data?.chartData || [];
@@ -234,6 +228,12 @@ const ChartLot = () => {
   const chartID = "pie-two";
 
   useEffect(() => {
+    //--- Only zoom on subsequent (non-initial) fetches
+    if (!firstLoad.current) {
+      if (!timesliderOn) zoomToLayer(lotLayer, arcgisScene?.view);
+    }
+    firstLoad.current = false;
+
     const root = rootSetter({ chartID: chartID });
     const chart = chartSetter({ root: root, y: 10 });
 

@@ -59,7 +59,7 @@ export const stationLayer = new FeatureLayer({
   title: "SC Stations",
   renderer: station_renderer,
   labelingInfo: [label_stationp],
-  elevationInfo: { mode: "relative-to-ground" },
+  elevationInfo: { mode: "on-the-ground" },
 });
 stationLayer.listMode = "hide";
 
@@ -68,7 +68,7 @@ export const chainageLayer = new FeatureLayer({
   portalItem: portalItems("e09b9af286204939a32df019403ef438"),
   layerId: 2,
   title: "Chainage",
-  elevationInfo: { mode: "relative-to-ground" },
+  elevationInfo: { mode: "on-the-ground" },
   labelingInfo: [label_chainage],
   minScale: 150000,
   maxScale: 0,
@@ -159,6 +159,7 @@ export const prowLayer506 = new FeatureLayer({
   title: "SC Alignment 5.0.6",
   definitionExpression: "Version = 'v.5.0.6'",
   popupEnabled: false,
+  minScale: 100000,
   renderer: prow506_renderer,
 });
 
@@ -186,6 +187,7 @@ export const prow_tunnelLayer = new FeatureLayer({
   elevationInfo: { mode: "on-the-ground" },
   renderer: prow_tunnel_renderer,
   popupEnabled: false,
+  minScale: 100000,
   title: "PROW for Tunnel Alignment",
 });
 

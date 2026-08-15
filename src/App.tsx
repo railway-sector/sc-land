@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import MapDisplay from "./components/MapDisplay";
 import ActionPanel from "./components/ActionPanel";
 import Header from "./components/Header";
 import ChartMain from "./components/ChartMain";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { authenticate } from "./autho";
-import { MyContext } from "./contexts/MyContext";
+import { TimesliderContext } from "./contexts/TimesliderContext";
+import { FilterContext } from "./contexts/FilterContext";
 
 //--- Create a client
 const queryClient = new QueryClient();
@@ -52,6 +53,40 @@ export function App(): React.JSX.Element {
     setNewHoField(newField);
   }, []);
 
+  const timesliderContextValue = useMemo(
+    () => ({
+      asofdate,
+      updateAsofdate,
+      timesliderOn,
+      updateTimesliderOn,
+      newStatusField,
+      updateNewStatusField,
+      newHoaField,
+      updateNewHoaField,
+      newAfaField,
+      updateNewAfaField,
+      newHoField,
+      updateNewHoField,
+    }),
+    [
+      asofdate,
+      updateAsofdate,
+      timesliderOn,
+      updateTimesliderOn,
+      newStatusField,
+      updateNewStatusField,
+      newHoaField,
+      updateNewHoaField,
+      newAfaField,
+      updateNewAfaField,
+      newHoField,
+      updateNewHoField,
+    ],
+  );
+
+  //------------------------------------
+  //  Create Filter Context state
+  //------------------------------------
   const [municipality, setMunicipality] = useState<any>();
   const updateMunicipality = useCallback((newC: any) => {
     setMunicipality(newC);
@@ -61,6 +96,16 @@ export function App(): React.JSX.Element {
   const updateBarangay = useCallback((newB: any) => {
     setBarangay(newB);
   }, []);
+
+  const filterContextValue = useMemo(
+    () => ({
+      municipality,
+      updateMunicipality,
+      barangay,
+      updateBarangay,
+    }),
+    [municipality, updateMunicipality, barangay, updateBarangay],
+  );
 
   return (
     <>
@@ -72,33 +117,16 @@ export function App(): React.JSX.Element {
             "--calcite-color-background": "#2b2b2b",
           }}
         >
-          <MyContext
-            value={{
-              asofdate,
-              updateAsofdate,
-              timesliderOn,
-              updateTimesliderOn,
-              newStatusField,
-              updateNewStatusField,
-              newHoaField,
-              updateNewHoaField,
-              newAfaField,
-              updateNewAfaField,
-              newHoField,
-              updateNewHoField,
-              municipality,
-              updateMunicipality,
-              barangay,
-              updateBarangay,
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <ChartMain />
-              <ActionPanel />
-              <MapDisplay />
-              <Header />
-            </QueryClientProvider>
-          </MyContext>
+          <FilterContext value={filterContextValue}>
+            <TimesliderContext value={timesliderContextValue}>
+              <QueryClientProvider client={queryClient}>
+                <ChartMain />
+                <ActionPanel />
+                <MapDisplay />
+                <Header />
+              </QueryClientProvider>
+            </TimesliderContext>
+          </FilterContext>
         </calcite-shell>
       )}
     </>
