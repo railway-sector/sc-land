@@ -15,7 +15,6 @@ import {
   valueLabelColor,
   municipality_f,
   barangay_f,
-  lot_status_f,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { lotLayer, occupancyLayer, structureLayer } from "../layers";
@@ -89,6 +88,7 @@ function useStructureData(
 //--- memo prevents re-rendering the Component when the parent Component
 //--- (ChartMain) is rendered.
 const ChartStructure = memo(() => {
+  console.log("ChartStructure is fired");
   const { municipality, barangay } = use(MyContext);
 
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
@@ -144,10 +144,7 @@ const ChartStructure = memo(() => {
     setChecked(ev.target.checked);
 
     if (ev.target.checked) {
-      const qe = new QueryExpressionLayers({
-        ...baseFilter,
-        qExpression: `${lot_status_f} = 8`,
-      }).queryExpression();
+      const qe = new QueryExpressionLayers({ ...baseFilter }).queryExpression();
 
       //--- Extract ObjectIds within optimized lots
       const arr: any = await getStructuresWithinLots(qe);
@@ -155,7 +152,8 @@ const ChartStructure = memo(() => {
 
       const structureIds = arr.map((f: any) => f.strucObjectId);
       exportArr.current = arr.map(
-        ({ optimizedLotID, optimizedStructureID }: any) => ({
+        ({ municipality, optimizedLotID, optimizedStructureID }: any) => ({
+          municipality,
           optimizedLotID,
           optimizedStructureID,
         }),

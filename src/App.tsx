@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import MapDisplay from "./components/MapDisplay";
 import ActionPanel from "./components/ActionPanel";
 import Header from "./components/Header";
-import MainChart from "./components/ChartMain";
+import ChartMain from "./components/ChartMain";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { authenticate } from "./autho";
 import { MyContext } from "./contexts/MyContext";
@@ -93,7 +93,7 @@ export function App(): React.JSX.Element {
             }}
           >
             <QueryClientProvider client={queryClient}>
-              <MainChart />
+              <ChartMain />
               <ActionPanel />
               <MapDisplay />
               <Header />

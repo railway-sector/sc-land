@@ -581,6 +581,10 @@ export const str_occup_popup = {
 //            Alignment Layers                  //
 //----------------------------------------------//
 //--- STATION LAYER ---//
+export const station_renderer = new SimpleRenderer({
+  symbol: new SimpleMarkerSymbol({ size: 5, color: "grey" }),
+});
+
 export const label_stationp = new LabelClass({
   symbol: new LabelSymbol3D({
     symbolLayers: [

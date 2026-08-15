@@ -46,6 +46,7 @@ import {
   cp_breakline_renderer,
   substation_renderer,
   prow506_renderer,
+  station_renderer,
 } from "./uniqueValues";
 
 //----------------------------------------------//
@@ -56,6 +57,7 @@ export const stationLayer = new FeatureLayer({
   portalItem: portalItems("e09b9af286204939a32df019403ef438"),
   layerId: 6,
   title: "SC Stations",
+  renderer: station_renderer,
   labelingInfo: [label_stationp],
   elevationInfo: { mode: "relative-to-ground" },
 });

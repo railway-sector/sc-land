@@ -2,8 +2,10 @@ import { dateTable, lotLayer, structureLayer } from "./layers";
 import {
   cp_f,
   lot_id_f,
+  lot_status_f,
   lot_symbol,
   lot_uniqueV,
+  municipality_f,
   str_id_f,
 } from "./uniqueValues";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
@@ -234,8 +236,8 @@ export async function getStructuresWithinLots(
 ): Promise<NestedStructure[]> {
   //--- 1. Get all lot polygons
   const lotQuery = lotLayer.createQuery();
-  lotQuery.outFields = ["OBJECTID", lot_id_f];
-  lotQuery.where = qExpression;
+  lotQuery.outFields = ["OBJECTID", lot_id_f, municipality_f];
+  lotQuery.where = `${qExpression} AND ${lot_status_f} = 8`;
   lotQuery.returnGeometry = true;
   const { features: lots } = await lotLayer.queryFeatures(lotQuery);
 
@@ -243,14 +245,16 @@ export async function getStructuresWithinLots(
   const perLotResults: any = await Promise.all(
     lots.map(async (lot) => {
       const query = structureLayer.createQuery();
+      query.where = qExpression;
       query.geometry = lot.geometry;
       query.spatialRelationship = "contains";
-      query.outFields = ["OBJECTID", str_id_f];
+      query.outFields = ["OBJECTID", str_id_f, municipality_f];
       query.returnGeometry = true;
 
       const { features } = await structureLayer.queryFeatures(query);
 
       return features.map((structure) => ({
+        municipality: lot.attributes[municipality_f] ?? null,
         optimizedLotID: lot.attributes[lot_id_f],
         optimizedStructureID: structure.attributes[str_id_f],
         strucObjectId: structure.attributes.OBJECTID,
