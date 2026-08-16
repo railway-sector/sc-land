@@ -201,6 +201,7 @@ const ChartStructure = memo(() => {
     highlightRef.current = null;
 
     const root = rootSetter({ chartID: chartID });
+    root.setThemes([]);
     const chart = chartSetter({ root: root });
 
     const pieSeries = seriesSetter({

@@ -22,7 +22,6 @@ import type { ChartResponse } from "../interfaceKeys";
 import {
   chartSetter,
   legendSetter,
-  maybeDisposeRoot,
   rootSetter,
   seriesSetter,
 } from "../chartSetter";
@@ -127,8 +126,8 @@ const ChartNlo = memo(() => {
   const totalNumber = data?.totalNumber || 0;
 
   useEffect(() => {
-    maybeDisposeRoot(chartID);
     const root = rootSetter({ chartID: chartID });
+    root.setThemes([]);
     const chart = chartSetter({ root: root, y: -10 });
 
     const pieSeries = seriesSetter({
