@@ -159,17 +159,23 @@ const ExpropriationList = memo(() => {
   const totalWop = data?.wop ?? 0;
 
   //--- 3. Compile expro lots in an object
-  const exproItem = exproList.map((feature: any, index: number) => {
-    const attrs = feature.attributes;
-    return {
-      id: index,
-      lotid: attrs.LotID,
-      landowner: attrs.LandOwner,
-      municipality: attrs.Municipality,
-      cp: attrs.CP,
-      objectid: attrs.OBJECTID,
-    };
-  });
+  const exproItem = exproList
+    .map((feature: any, index: number) => {
+      const attrs = feature.attributes;
+      return {
+        id: index,
+        lotid: attrs.LotID,
+        landowner: attrs.LandOwner,
+        municipality: attrs.Municipality,
+        cp: attrs.CP,
+        objectid: attrs.OBJECTID,
+      };
+    })
+    .sort((a: any, b: any) => {
+      if (a.lotid < b.lotid) return -1;
+      if (a.lotid > b.lotid) return 1;
+      return 0;
+    });
 
   //--- Get unique expro lots (but re-rendered only when the list is changed.)
   const uniqueExproItems = useMemo(() => {
