@@ -20,6 +20,7 @@ import {
   handedOverLotLayer,
   pierAccessLayer,
   sources,
+  demolishedStrucLayer,
 } from "../layers";
 import type { ArcgisSearch } from "@arcgis/map-components/components/arcgis-search";
 import { addLayersToMap } from "../query";
@@ -45,6 +46,7 @@ export default function MapDisplay() {
       stationLayer,
       somco_fense_layer,
       handedOverLotLayer,
+      demolishedStrucLayer,
     ]);
 
     arcgisSearch.allPlaceholder = "LotID, StructureID, Chainage";

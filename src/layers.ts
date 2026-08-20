@@ -49,6 +49,7 @@ import {
   station_renderer,
   lot_pte_renderer,
   lot_pte_f,
+  demolished_renderer,
 } from "./uniqueValues";
 
 //----------------------------------------------//
@@ -440,6 +441,19 @@ export const strucOwnershipLayer = new FeatureLayer({
   popupEnabled: false,
   elevationInfo: { mode: "on-the-ground" },
 });
+
+//--- DEMOLISHED LAYER ---//
+export const demolishedStrucLayer = new FeatureLayer({
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
+  renderer: demolished_renderer,
+  layerId: 2,
+  title: "Demolished Structure",
+  popupEnabled: false,
+  definitionExpression: `Demolition = 1`,
+  elevationInfo: { mode: "on-the-ground" },
+  visible: false,
+});
+demolishedStrucLayer.listMode = "hide";
 
 //--- NLO LAYER ---//
 export const nloLayer = new FeatureLayer({

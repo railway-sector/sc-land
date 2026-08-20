@@ -17,7 +17,12 @@ import {
   barangay_f,
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
-import { lotLayer, occupancyLayer, structureLayer } from "../layers";
+import {
+  demolishedStrucLayer,
+  lotLayer,
+  occupancyLayer,
+  structureLayer,
+} from "../layers";
 import { useQuery } from "@tanstack/react-query";
 import type { ChartResponse } from "../interfaceKeys";
 import {
@@ -55,13 +60,15 @@ function useStructureData(
         featureLayer: [structureLayer, occupancyLayer],
       });
 
+      demolishedStrucLayer.definitionExpression = `${q1.queryExpression()} AND Demolition = 1`;
+
       const baseArgs = {
         layer: structureLayer,
         statisticField: "OBJECTID",
         statisticType: "count" as const,
       };
 
-      const [chartData, totalNumber] = await Promise.all([
+      const [chartData, totalNumber, totalDemolish] = await Promise.all([
         new ChartPieSeries({
           ...baseArgs,
           where: q1.queryExpression(),
@@ -73,9 +80,17 @@ function useStructureData(
           ...baseArgs,
           where: new QueryExpressionLayers({ ...baseFilter }).queryExpression(),
         }),
+
+        fieldStatistic({
+          ...baseArgs,
+          where: new QueryExpressionLayers({
+            ...baseFilter,
+            qExpression: "Demolition = 1",
+          }).queryExpression(),
+        }),
       ]);
 
-      return { chartData, totalNumber, q1 };
+      return { chartData, totalNumber, totalDemolish, q1 };
     },
     staleTime: Infinity,
   });
@@ -92,10 +107,15 @@ const ChartStructure = memo(() => {
 
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
+  const [demolishCheckBox, setDemolishCheckBox] = useState<any>(false);
 
   //--- Initial date to display
   const { data: dateList } = useDateFields(lotLayer);
   const latestDate = toAsofdate(dateList?.latestdate);
+
+  useEffect(() => {
+    demolishedStrucLayer.visible = demolishCheckBox;
+  }, [demolishCheckBox]);
 
   //--- Chart parameters
   const new_fontSize = chartPanelwidth / 22.3;
@@ -128,7 +148,10 @@ const ChartStructure = memo(() => {
   //--- Call chart data
   const chartData = data?.chartData || [];
   const totalNumber = data?.totalNumber || 0;
-
+  const totalDemolish = data?.totalDemolish ?? 0;
+  const percDemolished = Number(
+    ((totalDemolish / totalNumber) * 100).toFixed(0),
+  );
   //------------------------------------//
   //       Optimized Structures         //
   //------------------------------------//
@@ -328,7 +351,7 @@ const ChartStructure = memo(() => {
           gap: "10px",
           alignItems: "center",
           justifyContent: "center",
-          marginTop: "8%",
+          marginTop: "7%",
         }}
       >
         <calcite-checkbox
@@ -366,13 +389,63 @@ const ChartStructure = memo(() => {
       <div
         id={chartID}
         style={{
-          height: "60vh",
+          height: "55vh",
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
-          // marginTop: "10%",
+          marginTop: "-5%",
           opacity: isLoading ? 0 : 1,
         }}
       ></div>
+
+      {/* Total Demolished structures */}
+      <div
+        style={{
+          display: "flex",
+          marginLeft: "3%",
+          marginRight: "5%",
+          justifyContent: "space-between",
+          marginTop: "3%",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "green",
+            height: "0",
+            marginTop: "13px",
+            marginRight: "-10px",
+          }}
+        >
+          <calcite-checkbox
+            name="handover-checkbox"
+            label="VIEW"
+            scale="l"
+            oncalciteCheckboxChange={() =>
+              setDemolishCheckBox((prev: any) => !prev)
+            }
+          ></calcite-checkbox>
+        </div>
+        <dl style={{ alignItems: "center" }}>
+          <dt
+            style={{ color: primaryLabelColor, fontSize: `${new_fontSize}px` }}
+          >
+            TOTAL DEMOLISHED
+          </dt>
+          <dd
+            style={{
+              color: valueLabelColor,
+              fontSize: `${new_valueSize}px`,
+              fontWeight: "bold",
+              fontFamily: "calibri",
+              lineHeight: "1.2",
+              margin: "auto",
+              opacity: isLoading ? 0 : 1,
+              textAlign: "center",
+            }}
+          >
+            {percDemolished}% ({thousands_separators(totalDemolish)})
+          </dd>
+        </dl>
+      </div>
     </>
   );
 }); // End of lotChartgs

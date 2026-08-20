@@ -93,7 +93,7 @@ export const lot_status_q = [
   { value: 3, category: "For Legal Pass", color: "#ffff00" },
   { value: 4, category: "For Offer to Buy", color: "#ffaa00" },
   { value: 5, category: "For Notice of Taking", color: "#FF5733" },
-  { value: 6, category: "With Certificate of No Objection", color: "#E2F4C5" },
+  { value: 6, category: "With CNO", color: "#E2F4C5" },
   { value: 7, category: "For Expropriation", color: "#6f0000" },
   { value: 8, category: "Optimized", color: "#B2B2B2" },
 ];
@@ -280,10 +280,7 @@ export const lot_pte_renderer = new SimpleRenderer({
   symbol: new SimpleFillSymbol({
     color: "#70AD47",
     style: "forward-diagonal",
-    outline: {
-      width: 1,
-      // color: "#70AD47",
-    },
+    outline: { width: "6px", color: "#70AD47" },
   }),
 });
 
@@ -307,12 +304,12 @@ export const rgb = [
 ];
 
 export const str_status_q = [
-  {
-    value: 1,
-    category: "Demolished",
-    color: "#00C5FF",
-    colrgb: rgb[0],
-  },
+  // {
+  //   value: 1,
+  //   category: "Demolished",
+  //   color: "#00C5FF",
+  //   colrgb: rgb[0],
+  // },
   { value: 2, category: "Paid", color: "#70AD47", colrgb: rgb[1] },
   {
     value: 3,
@@ -424,6 +421,21 @@ export const str_uniqueV_owner = str_owner_q.map((item: any) => {
 export const str_owner_renderer = new UniqueValueRenderer({
   field: str_owner_status_f,
   uniqueValueInfos: str_uniqueV_owner,
+});
+
+//--- DEMOLISHED STRUCTURE LAYER ---//
+export const demolished_renderer = new UniqueValueRenderer({
+  valueExpression: "When($feature.Demolition == 1, 'Demolished', 'others')",
+  uniqueValueInfos: [
+    {
+      value: "Demolished",
+      label: "Demolished",
+      symbol: new SimpleFillSymbol({
+        color: [0, 255, 255, 0.3],
+        outline: new SimpleLineSymbol({ color: "#00ffff", width: "4px" }),
+      }),
+    },
+  ],
 });
 
 //----------------------------------------------//
