@@ -282,9 +282,7 @@ export function thousands_separators(num: any) {
 export function zoomToLayer(layer: any, view: any) {
   return layer.queryExtent().then((response: any) => {
     view?.goTo(response.extent, { speedFactor: 2 }).catch((error: any) => {
-      if (error.name !== "AbortError") {
-        console.error(error);
-      }
+      if (error.name !== "AbortError") console.error(error);
     });
   });
 }
@@ -293,9 +291,7 @@ export function zoomToLayer(layer: any, view: any) {
 export function zoomToFullExtent(layer: any, view: any) {
   layer.fullExtent &&
     view?.goTo(layer.fullExtent).catch((error: any) => {
-      if (error.name !== "AbortError") {
-        console.error(error);
-      }
+      if (error.name !== "AbortError") console.error(error);
     });
 }
 
@@ -309,6 +305,11 @@ export async function highlightLot(layer: any, view: any) {
     layer?.queryObjectIds(query),
   ]);
 
-  highlight?.remove();
+  highlight && highlight?.remove();
   highlight = layerView.highlight(results);
+
+  view?.on("click", () => {
+    layerView.filter = null;
+    highlight && highlight.remove();
+  });
 }

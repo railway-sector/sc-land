@@ -83,6 +83,7 @@ export const lot_pho_f = "percentHandedOver";
 export const lot_aa_f = "AffectedArea";
 export const lot_tunnel_f = "TunnelAffected";
 export const lot_endorsed_arr = ["Not Endorsed", "Endorsed", "NA"];
+export const lot_pte_f = "PTE";
 
 //--- LOT LAYER ---//
 //Layer Query
@@ -92,7 +93,7 @@ export const lot_status_q = [
   { value: 3, category: "For Legal Pass", color: "#ffff00" },
   { value: 4, category: "For Offer to Buy", color: "#ffaa00" },
   { value: 5, category: "For Notice of Taking", color: "#FF5733" },
-  { value: 6, category: "With PTE", color: "#70AD47" },
+  { value: 6, category: "With Certificate of No Objection", color: "#E2F4C5" },
   { value: 7, category: "For Expropriation", color: "#6f0000" },
   { value: 8, category: "Optimized", color: "#B2B2B2" },
 ];
@@ -273,6 +274,18 @@ export const expro_status_q = [
   { category: "To secure WOP", color: "#FF474C   " },
   { category: "With WOP", color: "#6f0000" },
 ];
+
+//--- PTE STATUS LAYER ---//
+export const lot_pte_renderer = new SimpleRenderer({
+  symbol: new SimpleFillSymbol({
+    color: "#70AD47",
+    style: "forward-diagonal",
+    outline: {
+      width: 1,
+      // color: "#70AD47",
+    },
+  }),
+});
 
 //----------------------------------------------//
 //       Structure Layer Parameters             //
@@ -935,35 +948,52 @@ function zoomToAction(id: string) {
   ]);
 }
 
+function zommToHiglightAction(zoomId: string, hltId: string) {
+  return new Collection([
+    new Collection([
+      new ActionButton({
+        title: "Zoom to Area",
+        icon: "zoom-in-fixed",
+        id: zoomId,
+      }),
+      new ActionButton({
+        title: "Highlight Lots",
+        icon: "flash",
+        id: hltId,
+      }),
+    ]),
+  ]);
+}
+
 export async function defineActions(event: any) {
   const { item } = event;
 
   await item.layer.when();
 
   //--- Define IDs for zoom-to-Action in layer list
-  if (item.title === "Proposed Pole Working Areas") {
+  if (item.title === "With PTE")
+    item.actionsSections = zommToHiglightAction(
+      "zoom-pte-lots",
+      "highlight-pte-lots",
+    );
+
+  if (item.title === "Proposed Pole Working Areas")
     item.actionsSections = zoomToAction("full-extent-ngcpwa6");
-  }
 
-  if (item.title === "Proposed/Recorded NGCP Lines") {
+  if (item.title === "Proposed/Recorded NGCP Lines")
     item.actionsSections = zoomToAction("full-extent-ngcpline6");
-  }
 
-  if (item.title === "Proposed Pole Relocation") {
+  if (item.title === "Proposed Pole Relocation")
     item.actionsSections = zoomToAction("full-extent-ngcppolerelo6");
-  }
 
-  if (item.title === "Proposed/Recorded NGCP Lines") {
+  if (item.title === "Proposed/Recorded NGCP Lines")
     item.actionsSections = zoomToAction("full-extent-ngcpline7");
-  }
 
-  if (item.title === "Proposed Pole Relocation") {
+  if (item.title === "Proposed Pole Relocation")
     item.actionsSections = zoomToAction("full-extent-ngcppolerelo7");
-  }
 
-  if (item.layer.type !== "group") {
+  if (item.layer.type !== "group")
     item.panel = { content: "legend", open: true };
-  }
 
   item.title === "Chainage" ||
   item.title === "SC Alignment 7.1.6" ||

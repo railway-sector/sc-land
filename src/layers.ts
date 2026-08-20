@@ -47,6 +47,8 @@ import {
   substation_renderer,
   prow506_renderer,
   station_renderer,
+  lot_pte_renderer,
+  lot_pte_f,
 } from "./uniqueValues";
 
 //----------------------------------------------//
@@ -405,6 +407,20 @@ export const accessibleLotAreaLayer = new FeatureLayer({
   elevationInfo: { mode: "on-the-ground" },
 });
 
+//--- PTE STATUS LAYER ---//
+export const lotPteLayer = new FeatureLayer({
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
+  layerId: 1,
+  labelingInfo: [lot_label],
+  renderer: lot_pte_renderer,
+  definitionExpression: `${lot_pte_f} = 1`,
+  popupTemplate: lot_popup,
+  title: "With PTE",
+  minScale: 40000,
+  maxScale: 0,
+  elevationInfo: { mode: "on-the-ground" },
+});
+
 //--- STRUCUTURE LAYER ---//
 export const structureLayer = new FeatureLayer({
   portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
@@ -491,6 +507,7 @@ export const lotGroupLayer = new GroupLayer({
   visibilityMode: "independent",
   layers: [
     lotLayer,
+    lotPteLayer,
     optimizedLots_passengerLineLayer,
     studiedLots_optimizationLayer,
     tunnelAffectedLotLayer,

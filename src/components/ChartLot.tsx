@@ -1,5 +1,5 @@
 import { use, useEffect, useRef, useState } from "react";
-import { handedOverLotLayer, lotLayer } from "../layers";
+import { handedOverLotLayer, lotLayer, lotPteLayer } from "../layers";
 import {
   fieldStatistic,
   queryDefinitionExpression,
@@ -22,6 +22,7 @@ import {
   municipality_f,
   primaryLabelColor,
   valueLabelColor,
+  lot_pte_f,
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
@@ -77,6 +78,8 @@ function useLotData(
         queryExpression: q1.queryExpression(),
         featureLayer: [lotLayer, handedOverLotLayer],
       });
+
+      lotPteLayer.definitionExpression = `${q1.queryExpression()} AND ${lot_pte_f} = 1`;
 
       //--- Independent queries: run in parallel instead of sequentially
       const baseArgs = {

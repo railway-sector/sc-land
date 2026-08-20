@@ -12,14 +12,17 @@ import "@arcgis/map-components/components/arcgis-area-measurement-3d";
 import { defineActions } from "../uniqueValues";
 import HandedOverAreaChart from "./ChartHandedOverArea";
 import {
+  highlightLot,
   toAsofdate,
   updateLotSymbology,
   useDateFields,
   zoomToFullExtent,
+  zoomToLayer,
 } from "../query";
 import Timeslider from "./Timeslider";
 import {
   lotLayer,
+  lotPteLayer,
   ngcp_line6,
   ngcp_line7,
   ngcp_pole6,
@@ -220,6 +223,10 @@ function ActionPanel() {
                 zoomToFullExtent(ngcp_pole6, arcgisScene?.view);
               } else if (id === "full-extent-ngcppolerelo7") {
                 zoomToFullExtent(ngcp_pole7, arcgisScene?.view);
+              } else if (id === "zoom-pte-lots") {
+                zoomToLayer(lotPteLayer, arcgisScene?.view);
+              } else if (id === "highlight-pte-lots") {
+                highlightLot(lotPteLayer, arcgisScene?.view);
               }
             }}
           ></arcgis-layer-list>
