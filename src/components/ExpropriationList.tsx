@@ -22,7 +22,7 @@ import {
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import "../index.css";
 import { useQuery } from "@tanstack/react-query";
-import { memo, use, useEffect, useMemo, useRef } from "react";
+import { memo, use, useEffect, useMemo, useRef, useState } from "react";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { FilterContext } from "../contexts/FilterContext";
 import { fieldStatistic } from "../query";
@@ -137,9 +137,26 @@ function exproListData(
   });
 }
 
+// module-level helper — mirrors the qe logic, but evaluated against feature attributes
+function matchesCategory(attrs: any, q: any) {
+  if (!q) return true; // no selection -> show everything
+  if (q.field === lot_status_f) {
+    return attrs[q.field] === q.value && attrs[expro_wop_f] !== 1;
+  }
+  return attrs[expro_wop_f] === 1;
+}
+
 const ExpropriationList = memo(() => {
   const { municipality, barangay } = use(FilterContext);
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
+
+  //--- NEW: which pie category is currently selected
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  //--- NEW: reset selection whenever the base filter context changes
+  useEffect(() => {
+    setSelectedCategory(null);
+  }, [municipality, barangay]);
 
   //--- Base filter
   const baseFilter = {
@@ -160,8 +177,22 @@ const ExpropriationList = memo(() => {
   const totalExpro = data?.totalExpro ?? 0;
   const totalWop = data?.wop ?? 0;
 
+  //--- NEW: resolve the selected category back to its q entry
+  const selectedQ = useMemo(
+    () => expro_status_q.find((f: any) => f.category === selectedCategory),
+    [selectedCategory],
+  );
+
+  // NEW: filter the fetched list according to the selected slice
+  const filteredExproList = useMemo(() => {
+    if (!selectedCategory) return exproList;
+    return exproList.filter((f: any) =>
+      matchesCategory(f.attributes, selectedQ),
+    );
+  }, [exproList, selectedCategory, selectedQ]);
+
   //--- 3. Compile expro lots in an object
-  const exproItem = exproList
+  const exproItem = filteredExproList
     .map((feature: any, index: number) => {
       const attrs = feature.attributes;
       return {
@@ -179,7 +210,7 @@ const ExpropriationList = memo(() => {
       return 0;
     });
 
-  //--- Get unique expro lots (but re-rendered only when the list is changed.)
+  //--- Unique list
   const uniqueExproItems = useMemo(() => {
     if (!exproItem) return [];
     const seen = new Map<any, any>();
@@ -230,18 +261,26 @@ const ExpropriationList = memo(() => {
     //--- Click pie series ---//
     pieSeries.slices.template.events.on("click", (ev: any) => {
       const clicked = ev.target.dataItem?.dataContext?.category;
+      setSelectedCategory((prev) => (prev === clicked ? null : clicked));
       const q = expro_status_q.find((f: any) => f.category === clicked);
 
-      const q0 = new QueryExpressionLayers({
-        ...baseFilter,
-        qExpression: `${q?.field} = ${q?.value}`,
-      });
+      const qe =
+        q?.field === lot_status_f
+          ? `${q?.field} = ${q?.value} AND ${expro_wop_f} <> 1`
+          : `${expro_wop_f} = 1`;
+
+      const q0 = new QueryExpressionLayers({ ...baseFilter, qExpression: qe });
 
       highlightFilterLayerView({
         layer: lotLayer,
         view: arcgisScene?.view,
         qChart: q0,
       });
+    });
+
+    //--- Reset to the original list
+    const viewClickHandle = arcgisScene?.view?.on("click", () => {
+      setSelectedCategory(null);
     });
 
     pieSeries.data.setAll(chartData);
@@ -315,6 +354,7 @@ const ExpropriationList = memo(() => {
     // Dispose root
     return () => {
       root.dispose();
+      viewClickHandle?.remove();
     };
   }, [municipality, barangay, chartData, totalExpro, totalWop]);
 
