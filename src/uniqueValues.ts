@@ -271,8 +271,13 @@ export const lot_access_renderer = new SimpleRenderer({
 //--- EXPROT STATUS ---//
 export const expro_wop_f = "WOP";
 export const expro_status_q = [
-  { category: "To secure WOP", color: "#FF474C   " },
-  { category: "With WOP", color: "#6f0000" },
+  {
+    field: lot_status_f,
+    value: 7,
+    category: "To secure WOP",
+    color: "#FF474C",
+  },
+  { field: expro_wop_f, value: 1, category: "With WOP", color: "#6f0000" },
 ];
 
 //--- PTE STATUS LAYER ---//

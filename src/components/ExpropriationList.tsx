@@ -34,6 +34,7 @@ import {
   seriesSetter,
 } from "../chartSetter";
 import QueryExpressionLayers from "query-layers-expression";
+import { highlightFilterLayerView } from "chart-pie-series-render";
 
 //--- Highlight & zoom into clicked land
 let highlight: any;
@@ -138,6 +139,7 @@ function exproListData(
 
 const ExpropriationList = memo(() => {
   const { municipality, barangay } = use(FilterContext);
+  const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
 
   //--- Base filter
   const baseFilter = {
@@ -223,6 +225,23 @@ const ExpropriationList = memo(() => {
       strokeOpacity: 1,
       templateField: "sliceSettings",
       tooltipText: '{category}: {valuePercentTotal.formatNumber("#.")}%',
+    });
+
+    //--- Click pie series ---//
+    pieSeries.slices.template.events.on("click", (ev: any) => {
+      const clicked = ev.target.dataItem?.dataContext?.category;
+      const q = expro_status_q.find((f: any) => f.category === clicked);
+
+      const q0 = new QueryExpressionLayers({
+        ...baseFilter,
+        qExpression: `${q?.field} = ${q?.value}`,
+      });
+
+      highlightFilterLayerView({
+        layer: lotLayer,
+        view: arcgisScene?.view,
+        qChart: q0,
+      });
     });
 
     pieSeries.data.setAll(chartData);

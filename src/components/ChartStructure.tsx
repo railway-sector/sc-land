@@ -152,6 +152,7 @@ const ChartStructure = memo(() => {
   const percDemolished = Number(
     ((totalDemolish / totalNumber) * 100).toFixed(0),
   );
+
   //------------------------------------//
   //       Optimized Structures         //
   //------------------------------------//
