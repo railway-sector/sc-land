@@ -20,8 +20,6 @@ import {
   lot_status_f,
   lot_status_q,
   municipality_f,
-  primaryLabelColor,
-  valueLabelColor,
   lot_pte_f,
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
@@ -40,6 +38,7 @@ import ChartPieSeries from "chart-pie-series";
 import { TimesliderContext } from "../contexts/TimesliderContext";
 import { FilterContext } from "../contexts/FilterContext";
 import QueryExpressionLayers from "query-layers-expression";
+import { StatBlock } from "./statBlock";
 
 //--------------------------//
 //      useLotData          //
@@ -82,17 +81,7 @@ function useLotData(
       lotPteLayer.definitionExpression = `${q1.queryExpression()} AND ${lot_pte_f} = 1`;
 
       //--- Independent queries: run in parallel instead of sequentially
-      const baseArgs = {
-        where: q1.queryExpression(),
-        layer: lotLayer,
-        statisticType: "count" as const,
-      };
-
-      const baseArgs2 = {
-        where: q1.queryExpression(),
-        layer: lotLayer,
-        statisticType: "sum" as const,
-      };
+      const sharedArgs = { where: q1.queryExpression(), layer: lotLayer };
 
       const [
         chartData,
@@ -103,24 +92,31 @@ function useLotData(
         affectedAreaStatus,
       ] = await Promise.all([
         new ChartPieSeries({
-          ...baseArgs,
+          ...sharedArgs,
+          statisticType: "count",
           statusList: lot_status_q,
           statusField: statusField,
           statisticField: statusField,
         }).pieSeries(),
 
         //--- Total number of lots (public + private)
-        fieldStatistic({ ...baseArgs, statisticField: lot_id_f }),
+        fieldStatistic({
+          ...sharedArgs,
+          statisticType: "count",
+          statisticField: lot_id_f,
+        }),
 
         //--- Total affected area (m2)
         fieldStatistic({
-          ...baseArgs2,
+          ...sharedArgs,
+          statisticType: "sum",
           statisticField: afaField,
         }),
 
         //--- Total handed-over area (m2)
         fieldStatistic({
-          ...baseArgs2,
+          ...sharedArgs,
+          statisticType: "sum",
           statisticField: hoaField,
         }),
 
@@ -221,7 +217,7 @@ const ChartLot = () => {
   const new_fontSize = chartPanelwidth / 30;
   const new_valueSize = chartPanelwidth / 19;
   const new_asofDateSize = chartPanelwidth * 0.032;
-  const new_pieSeriesScale = 220;
+  const new_pieSeriesScale = 200;
   const new_pieInnerValueFontSize = "1.1rem";
   const new_pieInnerLabelFontSize = "0.45em";
 
@@ -247,7 +243,6 @@ const ChartLot = () => {
     }
 
     const root = rootSetter({ chartID: chartID });
-    root.setThemes([]);
     const chart = chartSetter({ root: root, y: 10 });
 
     //--- Call pie series
@@ -270,7 +265,6 @@ const ChartLot = () => {
       root: root,
       centerX: 50,
       x: 50,
-      scale: 1.0,
     });
     legendRef.current = legend;
     legend.setAll({ marginBottom: 10 });
@@ -287,8 +281,8 @@ const ChartLot = () => {
       status_field: timesliderOn ? newStatusField : lot_status_f,
       view: arcgisScene?.view,
       updateChartPanelwidth: setChartPanelwidth,
-      data: chartData,
       seriesScale: new_pieSeriesScale,
+      data: chartData,
       innerLabel: "PRIVATE LOTS",
       innerLabelFontSize: new_pieInnerLabelFontSize,
       innerValueFontSize: new_pieInnerValueFontSize,
@@ -327,58 +321,21 @@ const ChartLot = () => {
           marginBottom: "5px",
         }}
       >
-        <dl style={{ alignItems: "center" }}>
-          <dt
-            style={{ color: primaryLabelColor, fontSize: `${new_fontSize}px` }}
-          >
-            TOTAL LOTS
-          </dt>
-          <dd
-            style={{
-              color: valueLabelColor,
-              fontSize: `${new_valueSize}px`,
-              fontWeight: "bold",
-              fontFamily: "calibri",
-              lineHeight: "1.2",
-              margin: "auto",
-              opacity: isLoading ? 0 : 1,
-              textAlign: "center",
-            }}
-          >
-            {thousands_separators(totalNumber)}
-          </dd>
-        </dl>
-        <dl style={{ alignItems: "center" }}>
-          <dt
-            style={{ color: primaryLabelColor, fontSize: `${new_fontSize}px` }}
-          >
-            TOTAL AFFECTED AREA
-          </dt>
-          {/* #d3d3d3 */}
-          <dd
-            style={{
-              color: valueLabelColor,
-              fontSize: `${new_valueSize}px`,
-              fontFamily: "calibri",
-              lineHeight: "1.2",
-              margin: "auto",
-              fontWeight: "bold",
-              opacity: isLoading ? 0 : 1,
-              textAlign: "center",
-            }}
-          >
-            {affectedArea && thousands_separators(affectedArea.toFixed(0))}
-            <label
-              style={{ fontWeight: "normal", fontSize: `${new_fontSize}px` }}
-            >
-              {" "}
-              m
-            </label>
-            <label style={{ verticalAlign: "super", fontSize: "0.6rem" }}>
-              2
-            </label>
-          </dd>
-        </dl>
+        <StatBlock
+          label="TOTAL LOTS"
+          value={thousands_separators(totalNumber)}
+          fontSize={new_fontSize}
+          valueSize={new_valueSize}
+          isLoading={isLoading}
+        />
+        <StatBlock
+          label="TOTAL AFFECTED AREA"
+          value={affectedArea && thousands_separators(affectedArea.toFixed(0))}
+          fontSize={new_fontSize}
+          valueSize={new_valueSize}
+          isLoading={isLoading}
+          unit
+        />
       </div>
       <div
         style={{
@@ -430,65 +387,30 @@ const ChartLot = () => {
             label="VIEW"
             scale="l"
             oncalciteCheckboxChange={() =>
-              setHandedOverCheckBox(handedOverCheckBox === false ? true : false)
+              setHandedOverCheckBox((prev: boolean) => !prev)
             }
           ></calcite-checkbox>
         </div>
-        <dl style={{ alignItems: "center" }}>
-          <dt
-            style={{ color: primaryLabelColor, fontSize: `${new_fontSize}px` }}
-          >
-            TOTAL HANDED-OVER
-          </dt>
-          <dd
-            style={{
-              color: valueLabelColor,
-              fontSize: `${new_valueSize}px`,
-              fontWeight: "bold",
-              fontFamily: "calibri",
-              lineHeight: "1.2",
-              margin: "auto",
-              opacity: isLoading ? 0 : 1,
-              textAlign: "center",
-            }}
-          >
-            {handedOverPercent}% ({thousands_separators(handedOverNumber)})
-          </dd>
-        </dl>
-        <dl style={{ alignItems: "center" }}>
-          <dt
-            style={{ color: primaryLabelColor, fontSize: `${new_fontSize}px` }}
-          >
-            HANDED-OVER AREA
-          </dt>
-          {/* #d3d3d3 */}
-          <dd
-            style={{
-              color: valueLabelColor,
-              fontSize: `${new_valueSize}px`,
-              fontFamily: "calibri",
-              lineHeight: "1.2",
-              margin: "auto",
-              fontWeight: "bold",
-              opacity: isLoading ? 0 : 1,
-              textAlign: "center",
-            }}
-          >
-            {handedOverArea && thousands_separators(handedOverArea.toFixed(0))}
-            <label
-              style={{ fontWeight: "normal", fontSize: `${new_fontSize}px` }}
-            >
-              {" "}
-              m
-            </label>
-            <label style={{ verticalAlign: "super", fontSize: "0.6rem" }}>
-              2
-            </label>
-          </dd>
-        </dl>
+        <StatBlock
+          label="TOTAL HANDED-OVER"
+          value={`${handedOverPercent}% (${thousands_separators(handedOverNumber)})`}
+          fontSize={new_fontSize}
+          valueSize={new_valueSize}
+          isLoading={isLoading}
+        />
+        <StatBlock
+          label="HANDED-OVER AREA"
+          value={
+            handedOverArea && thousands_separators(handedOverArea.toFixed(0))
+          }
+          fontSize={new_fontSize}
+          valueSize={new_valueSize}
+          isLoading={isLoading}
+          unit
+        />
       </div>
     </>
   );
-}; // End of lotChartgs
+};
 
 export default ChartLot;

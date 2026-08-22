@@ -9,10 +9,8 @@ import {
 } from "../query";
 import "../index.css";
 import {
-  primaryLabelColor,
   str_status_q,
   str_status_f,
-  valueLabelColor,
   municipality_f,
   barangay_f,
 } from "../uniqueValues";
@@ -37,6 +35,7 @@ import ChartPieSeries from "chart-pie-series";
 import QueryExpressionLayers from "query-layers-expression";
 import * as XLSX from "xlsx";
 import Query from "@arcgis/core/rest/support/Query";
+import { StatBlock } from "./statBlock";
 
 //--------------------------//
 //     useStructureData     //
@@ -118,17 +117,17 @@ const ChartStructure = memo(() => {
   }, [demolishCheckBox]);
 
   //--- Chart parameters
-  const new_fontSize = chartPanelwidth / 22.3;
-  const new_valueSize = new_fontSize * 1.55;
+  const new_fontSize = chartPanelwidth / 30;
+  const new_valueSize = chartPanelwidth / 19;
   const new_imageSize = chartPanelwidth * 0.03;
   const new_asofDateSize = chartPanelwidth * 0.032;
   const new_optimized_font = chartPanelwidth * 0.038;
-  const new_pieSeriesScale = 220;
+  const new_pieSeriesScale = 200;
   const new_pieInnerValueFontSize = "1.2rem";
   const new_pieInnerLabelFontSize = "0.45em";
 
-  const pieSeriesRef = useRef<unknown | any | undefined>({});
-  const legendRef = useRef<unknown | any | undefined>({});
+  const pieSeriesRef = useRef<any>(null);
+  const legendRef = useRef<any>(null);
   const chartID = "structure-chart";
 
   //--- Base filter
@@ -297,7 +296,8 @@ const ChartStructure = memo(() => {
           display: "flex",
           marginLeft: "15px",
           marginRight: "15px",
-          justifyContent: "space-between",
+          justifyContent: "center",
+          gap: "25%",
         }}
       >
         <img
@@ -307,30 +307,14 @@ const ChartStructure = memo(() => {
           width={`${new_imageSize}%`}
           style={{ paddingTop: "2px", opacity: isLoading ? 0 : 1 }}
         />
-        <dl style={{ alignItems: "center" }}>
-          <dt
-            style={{
-              color: primaryLabelColor,
-              fontSize: `${new_fontSize}px`,
-              marginRight: "25px",
-            }}
-          >
-            TOTAL STRUCTURES
-          </dt>
-          <dd
-            style={{
-              color: valueLabelColor,
-              fontSize: `${new_valueSize}px`,
-              fontWeight: "bold",
-              fontFamily: "calibri",
-              lineHeight: "1.2",
-              margin: "auto",
-              opacity: isLoading ? 0 : 1,
-            }}
-          >
-            {thousands_separators(totalNumber)}
-          </dd>
-        </dl>
+        <StatBlock
+          label="TOTAL STRUCTURES"
+          value={thousands_separators(totalNumber)}
+          fontSize={new_fontSize}
+          valueSize={new_valueSize}
+          isLoading={isLoading}
+          labelMarginRight="25px"
+        />
       </div>
 
       <div
@@ -352,11 +336,11 @@ const ChartStructure = memo(() => {
           gap: "10px",
           alignItems: "center",
           justifyContent: "center",
-          marginTop: "7%",
+          marginTop: "10%",
         }}
       >
         <calcite-checkbox
-          name="handover-checkbox"
+          name="optimized-structures-checkbox"
           label="VIEW"
           scale="l"
           style={{ marginLeft: "1.5rem" }}
@@ -404,20 +388,16 @@ const ChartStructure = memo(() => {
           display: "flex",
           marginLeft: "3%",
           marginRight: "5%",
-          justifyContent: "space-between",
+          justifyContent: "center",
+          gap: "25%",
           marginTop: "3%",
         }}
       >
         <div
-          style={{
-            backgroundColor: "green",
-            height: "0",
-            marginTop: "13px",
-            marginRight: "-10px",
-          }}
+          style={{ backgroundColor: "green", height: "0", marginTop: "13px" }}
         >
           <calcite-checkbox
-            name="handover-checkbox"
+            name="demolished-structures-checkbox"
             label="VIEW"
             scale="l"
             oncalciteCheckboxChange={() =>
@@ -425,27 +405,14 @@ const ChartStructure = memo(() => {
             }
           ></calcite-checkbox>
         </div>
-        <dl style={{ alignItems: "center" }}>
-          <dt
-            style={{ color: primaryLabelColor, fontSize: `${new_fontSize}px` }}
-          >
-            TOTAL DEMOLISHED
-          </dt>
-          <dd
-            style={{
-              color: valueLabelColor,
-              fontSize: `${new_valueSize}px`,
-              fontWeight: "bold",
-              fontFamily: "calibri",
-              lineHeight: "1.2",
-              margin: "auto",
-              opacity: isLoading ? 0 : 1,
-              textAlign: "center",
-            }}
-          >
-            {percDemolished}% ({thousands_separators(totalDemolish)})
-          </dd>
-        </dl>
+        <StatBlock
+          label="TOTAL DEMOLISHED"
+          value={`${percDemolished}% (${thousands_separators(totalDemolish)})`}
+          fontSize={new_fontSize}
+          valueSize={new_valueSize}
+          isLoading={isLoading}
+          textAlign="center"
+        />
       </div>
     </>
   );

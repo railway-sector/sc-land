@@ -55,8 +55,8 @@ interface seriesSetterType {
   valueField: any;
   legendValueText?: any;
   legendLabelText?: any;
-  radius: number;
-  innerRadius: number;
+  radius?: number;
+  innerRadius?: number;
   scale?: number;
   marginTop?: number;
 }
@@ -79,8 +79,8 @@ export function seriesSetter({
       valueField: valueField,
       legendValueText: legendValueText ? legendValueText : "",
       legendLabelText: legendLabelText ? legendLabelText : "",
-      radius: am5.percent(radius), // outer radius
-      innerRadius: am5.percent(innerRadius),
+      radius: radius ? am5.percent(radius) : undefined, // outer radius
+      innerRadius: innerRadius ? am5.percent(innerRadius) : undefined,
       scale: scale ? scale : 1,
       marginTop: marginTop ? marginTop : 0,
     }),

@@ -51,8 +51,8 @@ export const chart_width = "26vw";
 export const chart_box_width = 250;
 
 // labeling and value label color
-export const primaryLabelColor = "#9ca3af";
-export const valueLabelColor = "#d1d5db";
+export const labelColor = "#9ca3af";
+export const valueColor = "#d1d5db";
 
 //----------------------------------------------//
 //          Lot Layer Parameters                //
@@ -731,7 +731,7 @@ export const pier_access_label = new LabelClass({
   symbol: new LabelSymbol3D({
     symbolLayers: [
       new TextSymbol3DLayer({
-        material: { color: valueLabelColor },
+        material: { color: valueColor },
         size: 15,
         font: { family: "Ubuntu Mono", weight: "bold" },
       }),

@@ -11,7 +11,7 @@ import "../index.css";
 import StructureChart from "./ChartStructure";
 import NloChart from "./ChartNlo";
 import ExpropriationList from "./ExpropriationList";
-import { primaryLabelColor } from "../uniqueValues";
+import { labelColor } from "../uniqueValues";
 import { useState } from "react";
 
 function ChartMain() {
@@ -45,7 +45,7 @@ function ChartMain() {
         id="chart-panel"
         collapseDirection="up"
         style={{
-          "--calcite-panel-heading-text-color": primaryLabelColor,
+          "--calcite-panel-heading-text-color": labelColor,
           borderStyle: "solid",
           borderRightWidth: 5,
           borderLeftWidth: 5,

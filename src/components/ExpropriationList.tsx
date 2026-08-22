@@ -146,6 +146,33 @@ function matchesCategory(attrs: any, q: any) {
   return attrs[expro_wop_f] === 1;
 }
 
+function buildUniqueExproItems(featureList: any[]) {
+  const seen = new Map<any, any>();
+
+  featureList
+    .map((feature: any, index: number) => {
+      const attrs = feature.attributes;
+      return {
+        id: index,
+        lotid: attrs.LotID,
+        landowner: attrs.LandOwner,
+        municipality: attrs.Municipality,
+        cp: attrs.CP,
+        objectid: attrs.OBJECTID,
+      };
+    })
+    .sort((a: any, b: any) => {
+      if (a.lotid < b.lotid) return -1;
+      if (a.lotid > b.lotid) return 1;
+      return 0;
+    })
+    .forEach((item: any) => {
+      if (!seen.has(item.objectid)) seen.set(item.objectid, item);
+    });
+
+  return [...seen.values()];
+}
+
 const ExpropriationList = memo(() => {
   const { municipality, barangay } = use(FilterContext);
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
@@ -192,33 +219,10 @@ const ExpropriationList = memo(() => {
   }, [exproList, selectedCategory, selectedQ]);
 
   //--- 3. Compile expro lots in an object
-  const exproItem = filteredExproList
-    .map((feature: any, index: number) => {
-      const attrs = feature.attributes;
-      return {
-        id: index,
-        lotid: attrs.LotID,
-        landowner: attrs.LandOwner,
-        municipality: attrs.Municipality,
-        cp: attrs.CP,
-        objectid: attrs.OBJECTID,
-      };
-    })
-    .sort((a: any, b: any) => {
-      if (a.lotid < b.lotid) return -1;
-      if (a.lotid > b.lotid) return 1;
-      return 0;
-    });
-
-  //--- Unique list
-  const uniqueExproItems = useMemo(() => {
-    if (!exproItem) return [];
-    const seen = new Map<any, any>();
-    for (const item of exproItem) {
-      if (!seen.has(item.objectid)) seen.set(item.objectid, item);
-    }
-    return [...seen.values()];
-  }, [exproItem]);
+  const uniqueExproitems = useMemo(
+    () => buildUniqueExproItems(filteredExproList),
+    [filteredExproList],
+  );
 
   //--- Pie chart renderer
   const pieSeriesRef = useRef<unknown | any | undefined>({});
@@ -378,7 +382,7 @@ const ExpropriationList = memo(() => {
             width: "100%",
             height: "41vh",
             color: "white",
-            opacity: isLoading || !uniqueExproItems.length ? 0 : 1,
+            opacity: isLoading || !uniqueExproitems.length ? 0 : 1,
           }}
         ></div>
       </div>
@@ -391,10 +395,10 @@ const ExpropriationList = memo(() => {
           overflowY: "auto",
           maxHeight: "40vh",
           scrollbarWidth: "none",
-          opacity: isLoading || !uniqueExproItems.length ? 0 : 1,
+          opacity: isLoading || !uniqueExproitems.length ? 0 : 1,
         }}
       >
-        {uniqueExproItems.map((result: any) => (
+        {uniqueExproitems.map((result: any) => (
           // need 'key' to upper div and inside CalciteListItem
           <calcite-list-item
             key={result.id}

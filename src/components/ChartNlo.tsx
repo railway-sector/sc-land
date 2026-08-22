@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useRef, useState, useEffect, memo, use } from "react";
 import {
   queryDefinitionExpression,
@@ -9,9 +8,7 @@ import {
 } from "../query";
 import {
   nlo_status_f,
-  primaryLabelColor,
   nlo_status_q,
-  valueLabelColor,
   municipality_f,
   barangay_f,
 } from "../uniqueValues";
@@ -29,9 +26,10 @@ import ChartPieSeriesRender from "chart-pie-series-render";
 import { FilterContext } from "../contexts/FilterContext";
 import ChartPieSeries from "chart-pie-series";
 import QueryExpressionLayers from "query-layers-expression";
+import { StatBlock } from "./statBlock";
 
 //--------------------------//
-//     useNloData     //
+//        useNloData        //
 //--------------------------//
 function useNloData(
   municipality: string,
@@ -89,22 +87,21 @@ const ChartNlo = memo(() => {
   const arcgisScene = document.querySelector("arcgis-scene") as ArcgisScene;
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
 
-  //--- As of date
   //--- Initial date to display
   const { data: dateList } = useDateFields(lotLayer);
   const latestDate = toAsofdate(dateList?.latestdate);
 
   //--- Chart parameters
-  const new_fontSize = chartPanelwidth / 22.3;
-  const new_valueSize = new_fontSize * 1.55;
+  const new_fontSize = chartPanelwidth / 30;
+  const new_valueSize = chartPanelwidth / 19;
   const new_imageSize = chartPanelwidth * 0.028;
   const new_pieSeriesScale = 280;
   const new_asofDateSize = chartPanelwidth * 0.032;
   const new_pieInnerValueFontSize = "1.3rem";
   const new_pieInnerLabelFontSize = "0.45em";
 
-  const pieSeriesRef = useRef<unknown | any | undefined>({});
-  const legendRef = useRef<unknown | any | undefined>({});
+  const pieSeriesRef = useRef<any>(null);
+  const legendRef = useRef<any>(null);
   const chartID = "nlo-chart";
 
   //--- Base filter
@@ -190,10 +187,10 @@ const ChartNlo = memo(() => {
       <div
         style={{
           display: "flex",
-          // marginTop: "3px",
           marginLeft: "15px",
           marginRight: "15px",
-          justifyContent: "space-between",
+          justifyContent: "center",
+          gap: "25%",
         }}
       >
         <img
@@ -207,30 +204,14 @@ const ChartNlo = memo(() => {
             opacity: isLoading ? 0 : 1,
           }}
         />
-        <dl style={{ alignItems: "center" }}>
-          <dt
-            style={{
-              color: primaryLabelColor,
-              fontSize: `${new_fontSize}px`,
-              marginRight: "20px",
-            }}
-          >
-            TOTAL HOUSEHOLDS
-          </dt>
-          <dd
-            style={{
-              color: valueLabelColor,
-              fontSize: `${new_valueSize}px`,
-              fontWeight: "bold",
-              fontFamily: "calibri",
-              lineHeight: "1.2",
-              margin: "auto",
-              opacity: isLoading ? 0 : 1,
-            }}
-          >
-            {thousands_separators(totalNumber)}
-          </dd>
-        </dl>
+        <StatBlock
+          label="TOTAL HOUSEHOLDS"
+          value={thousands_separators(totalNumber)}
+          fontSize={new_fontSize}
+          valueSize={new_valueSize}
+          isLoading={isLoading}
+          labelMarginRight="20px"
+        />
       </div>
       <div
         style={{
