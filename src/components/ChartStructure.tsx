@@ -377,7 +377,7 @@ const ChartStructure = memo(() => {
           height: "55vh",
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
-          // marginTop: "10%",
+          marginTop: "2%",
           opacity: isLoading ? 0 : 1,
         }}
       ></div>
