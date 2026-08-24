@@ -336,7 +336,7 @@ const ChartStructure = memo(() => {
           gap: "10px",
           alignItems: "center",
           justifyContent: "center",
-          marginTop: "10%",
+          marginTop: "7%",
         }}
       >
         <calcite-checkbox
@@ -377,7 +377,7 @@ const ChartStructure = memo(() => {
           height: "55vh",
           backgroundColor: "rgb(0,0,0,0)",
           color: "white",
-          marginTop: "-5%",
+          // marginTop: "10%",
           opacity: isLoading ? 0 : 1,
         }}
       ></div>
@@ -390,7 +390,7 @@ const ChartStructure = memo(() => {
           marginRight: "5%",
           justifyContent: "center",
           gap: "25%",
-          marginTop: "3%",
+          marginTop: "1%",
         }}
       >
         <div
