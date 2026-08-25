@@ -1,4 +1,4 @@
-import { memo, use, useEffect, useRef, useState } from "react";
+import { memo, use, useEffect, useMemo, useRef, useState } from "react";
 import {
   fieldStatistic,
   getStructuresWithinLots,
@@ -122,19 +122,22 @@ const ChartStructure = memo(() => {
   const new_imageSize = chartPanelwidth * 0.03;
   const new_asofDateSize = chartPanelwidth * 0.032;
   const new_optimized_font = chartPanelwidth * 0.038;
-  const new_pieSeriesScale = 200;
-  const new_pieInnerValueFontSize = "1.2rem";
-  const new_pieInnerLabelFontSize = "0.45em";
+  const seriesScale = 200;
+  const innerValueFontSize = "1.2rem";
+  const innerLabelFontSize = "0.45em";
 
   const pieSeriesRef = useRef<any>(null);
   const legendRef = useRef<any>(null);
   const chartID = "structure-chart";
 
   //--- Base filter
-  const baseFilter = {
-    qFields: [municipality_f, barangay_f],
-    qValues: [municipality, barangay],
-  };
+  const baseFilter = useMemo(
+    () => ({
+      qFields: [municipality_f, barangay_f],
+      qValues: [municipality, barangay],
+    }),
+    [municipality, barangay],
+  );
 
   //--- Fetch data
   const { data, isLoading } = useStructureData(
@@ -260,7 +263,7 @@ const ChartStructure = memo(() => {
     // Render chart
     new ChartPieSeriesRender({
       chart,
-      pieSeries: pieSeries,
+      pieSeries,
       legend,
       root,
       qChart: data?.q1,
@@ -269,25 +272,24 @@ const ChartStructure = memo(() => {
       view: arcgisScene?.view,
       updateChartPanelwidth: setChartPanelwidth,
       data: chartData,
-      seriesScale: new_pieSeriesScale,
+      seriesScale,
       innerLabel: "STRUCTURES",
-      innerLabelFontSize: new_pieInnerLabelFontSize,
-      innerValueFontSize: new_pieInnerValueFontSize,
+      innerLabelFontSize,
+      innerValueFontSize,
       layer: structureLayer,
       statusArray: str_status_q,
       bkg_color_switch: false,
       seriesFillHash: undefined,
     }).chartDataRenderer();
 
+    if (!pieSeriesRef.current) return;
+    pieSeriesRef.current?.data.setAll(chartData);
+    legendRef.current?.data.setAll(pieSeriesRef.current.dataItems);
+
     return () => {
       root.dispose();
     };
-  }, [chartID, chartData]);
-
-  useEffect(() => {
-    pieSeriesRef.current?.data.setAll(chartData);
-    legendRef.current?.data.setAll(pieSeriesRef.current.dataItems);
-  });
+  }, [chartData]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { handedOverLotLayer, lotLayer, lotPteLayer } from "../layers";
 import {
   fieldStatistic,
@@ -184,10 +184,13 @@ const ChartLot = () => {
   const latestDate = toAsofdate(dateList?.latestdate);
 
   //--- Base filter
-  const baseFilter = {
-    qFields: [municipality_f, barangay_f],
-    qValues: [municipality, barangay],
-  };
+  const baseFilter = useMemo(
+    () => ({
+      qFields: [municipality_f, barangay_f],
+      qValues: [municipality, barangay],
+    }),
+    [municipality, barangay],
+  );
 
   //--- Fetch data
   const { data, isLoading } = useLotData(
@@ -217,9 +220,9 @@ const ChartLot = () => {
   const new_fontSize = chartPanelwidth / 30;
   const new_valueSize = chartPanelwidth / 19;
   const new_asofDateSize = chartPanelwidth * 0.032;
-  const new_pieSeriesScale = 200;
-  const new_pieInnerValueFontSize = "1.1rem";
-  const new_pieInnerLabelFontSize = "0.45em";
+  const seriesScale = 220;
+  const innerValueFontSize = "1.1rem";
+  const innerLabelFontSize = "0.45em";
 
   const pieSeriesRef = useRef<any>(null);
   const legendRef = useRef<any>(null);
@@ -273,7 +276,7 @@ const ChartLot = () => {
     //--- Chart Render
     new ChartPieSeriesRender({
       chart,
-      pieSeries: pieSeries,
+      pieSeries,
       legend,
       root,
       qChart: data?.query,
@@ -281,11 +284,11 @@ const ChartLot = () => {
       status_field: timesliderOn ? newStatusField : lot_status_f,
       view: arcgisScene?.view,
       updateChartPanelwidth: setChartPanelwidth,
-      seriesScale: new_pieSeriesScale,
+      seriesScale,
       data: chartData,
       innerLabel: "PRIVATE LOTS",
-      innerLabelFontSize: new_pieInnerLabelFontSize,
-      innerValueFontSize: new_pieInnerValueFontSize,
+      innerLabelFontSize,
+      innerValueFontSize,
       layer: lotLayer,
       statusArray: lot_status_q,
       bkg_color_switch: false,
@@ -298,16 +301,15 @@ const ChartLot = () => {
       lot_status_q.map((f: any) => f.category),
     );
 
+    if (!pieSeriesRef.current) return;
+    pieSeriesRef.current?.data.setAll(chartData);
+    legendRef.current?.data.setAll(pieSeriesRef.current.dataItems);
+
     //--- Dispose root
     return () => {
       root.dispose();
     };
-  }, [chartID, chartData, affectedAreaStatus]);
-
-  useEffect(() => {
-    pieSeriesRef.current?.data.setAll(chartData);
-    legendRef.current?.data.setAll(pieSeriesRef.current.dataItems);
-  });
+  }, [chartData]);
 
   return (
     <>

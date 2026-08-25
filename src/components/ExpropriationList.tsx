@@ -218,6 +218,8 @@ const ExpropriationList = memo(() => {
     );
   }, [exproList, selectedCategory, selectedQ]);
 
+  console.log(filteredExproList);
+
   //--- 3. Compile expro lots in an object
   const uniqueExproitems = useMemo(
     () => buildUniqueExproItems(filteredExproList),
