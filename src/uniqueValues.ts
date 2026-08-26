@@ -289,6 +289,23 @@ export const lot_pte_renderer = new SimpleRenderer({
   }),
 });
 
+//--- PARTIAL PAYMENT LAYER ---//
+export const lot_partialPayment_renderer = new UniqueValueRenderer({
+  valueExpression:
+    "When($feature.PartialPayment == 1, 'partialPayment', 'others')",
+  uniqueValueInfos: [
+    {
+      value: "partialPayment",
+      label: " ",
+      symbol: new SimpleFillSymbol({
+        style: "vertical",
+        color: "#0070ff",
+        outline: new SimpleLineSymbol({ color: "#0070ff", width: "4px" }),
+      }),
+    },
+  ],
+});
+
 //----------------------------------------------//
 //       Structure Layer Parameters             //
 //----------------------------------------------//
@@ -309,12 +326,6 @@ export const rgb = [
 ];
 
 export const str_status_q = [
-  // {
-  //   value: 1,
-  //   category: "Demolished",
-  //   color: "#00C5FF",
-  //   colrgb: rgb[0],
-  // },
   { value: 2, category: "Paid", color: "#70AD47", colrgb: rgb[1] },
   {
     value: 3,
@@ -438,23 +449,6 @@ export const demolished_renderer = new UniqueValueRenderer({
       symbol: new SimpleFillSymbol({
         color: [0, 255, 255, 0.3],
         outline: new SimpleLineSymbol({ color: "#00ffff", width: "4px" }),
-      }),
-    },
-  ],
-});
-
-//--- PARTIAL PAYMENT LAYER ---//
-export const lot_partialPayment_renderer = new UniqueValueRenderer({
-  valueExpression:
-    "When($feature.PartialPayment == 1, 'partialPayment', 'others')",
-  uniqueValueInfos: [
-    {
-      value: "partialPayment",
-      label: " ",
-      symbol: new SimpleFillSymbol({
-        style: "vertical",
-        color: "#0070ff",
-        outline: new SimpleLineSymbol({ color: "#0070ff", width: "4px" }),
       }),
     },
   ],
