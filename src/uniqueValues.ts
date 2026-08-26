@@ -443,6 +443,23 @@ export const demolished_renderer = new UniqueValueRenderer({
   ],
 });
 
+//--- PARTIAL PAYMENT LAYER ---//
+export const lot_partialPayment_renderer = new UniqueValueRenderer({
+  valueExpression:
+    "When($feature.PartialPayment == 1, 'partialPayment', 'others')",
+  uniqueValueInfos: [
+    {
+      value: "partialPayment",
+      label: " ",
+      symbol: new SimpleFillSymbol({
+        style: "vertical",
+        color: "#0070ff",
+        outline: new SimpleLineSymbol({ color: "#0070ff", width: "4px" }),
+      }),
+    },
+  ],
+});
+
 //----------------------------------------------//
 //       Households Layer Parameters             //
 //----------------------------------------------//
@@ -982,6 +999,34 @@ function zommToHiglightAction(zoomId: string, hltId: string) {
   ]);
 }
 
+const HIDDEN_TITLES = new Set<string>([
+  "Chainage",
+  "SC Alignment 7.1.6",
+  "SC Alignment 3.9.3",
+  "Substation",
+  "Households Ownership (Structure)",
+  "Super Urgent Lot",
+  "Handed-Over (public + private)",
+  "For Land Optimization",
+  "With Partial Payment",
+  "Tunnel Affected",
+  "Candidate Lots of NSCR-Ex Passenger & Freight Line for Optimization",
+  "Optimized Lots with Issued Notice of Taking",
+  "Structure",
+  "Households",
+  "Occupancy (Structure)",
+  "Proposed Pole Working Areas",
+  "Proposed/Recorded NGCP Lines",
+  "Proposed Pole Relocation",
+  "Proposed East Service Road",
+  "Temporary Fencing",
+  "Permanent Fencing",
+  "Drainage",
+  "Provision for Freight Line",
+  "Maintenance Road",
+  "Handed-Over Area",
+]);
+
 export async function defineActions(event: any) {
   const { item } = event;
 
@@ -1012,31 +1057,5 @@ export async function defineActions(event: any) {
   if (item.layer.type !== "group")
     item.panel = { content: "legend", open: true };
 
-  item.title === "Chainage" ||
-  item.title === "SC Alignment 7.1.6" ||
-  item.title === "SC Alignment 3.9.3" ||
-  item.title === "Substation" ||
-  item.title === "Households Ownership (Structure)" ||
-  item.title === "Super Urgent Lot" ||
-  item.title === "Handed-Over (public + private)" ||
-  item.title === "For Land Optimization" ||
-  item.title === "Tunnel Affected" ||
-  item.title ===
-    "Candidate Lots of NSCR-Ex Passenger & Freight Line for Optimization" ||
-  item.title === "Optimized Lots with Issued Notice of Taking" ||
-  item.title === "Structure" ||
-  item.title === "Households" ||
-  item.title === "Occupancy (Structure)" ||
-  item.title === "Proposed Pole Working Areas" ||
-  item.title === "Proposed/Recorded NGCP Lines" ||
-  item.title === "Proposed Pole Relocation" ||
-  item.title === "Proposed East Service Road" ||
-  item.title === "Temporary Fencing" ||
-  item.title === "Permanent Fencing" ||
-  item.title === "Drainage" ||
-  item.title === "Provision for Freight Line" ||
-  item.title === "Maintenance Road" ||
-  item.title === "Handed-Over Area"
-    ? (item.visible = false)
-    : (item.visible = true);
+  item.visible = !HIDDEN_TITLES.has(item.title);
 }
