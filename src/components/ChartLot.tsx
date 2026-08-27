@@ -94,7 +94,9 @@ function useLotData(
         new ChartPieSeries({
           ...sharedArgs,
           statisticType: "count",
-          statusList: lot_status_q,
+          statusList: lot_status_q.map((item) =>
+            item.value === 6 ? { ...item, category: "With CNO" } : item,
+          ),
           statusField: statusField,
           statisticField: statusField,
         }).pieSeries(),
