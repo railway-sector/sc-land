@@ -14,7 +14,7 @@ import {
 } from "../uniqueValues";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { lotLayer, nloLayer } from "../layers";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ChartResponse } from "../interfaceKeys";
 import {
   chartSetter,
@@ -56,7 +56,7 @@ function useNloData(
         statisticType: "count" as const,
       };
 
-      const [chartData, totalNumber] = await Promise.all([
+      const [chartData, totalNumber, totalHouseholds] = await Promise.all([
         new ChartPieSeries({
           ...baseArgs,
           where: q1.queryExpression(),
@@ -68,10 +68,16 @@ function useNloData(
           ...baseArgs,
           where: new QueryExpressionLayers({ ...baseFilter }).queryExpression(),
         }),
+
+        fieldStatistic({
+          ...baseArgs,
+          where: q1.queryExpression(),
+        }),
       ]);
 
-      return { chartData, totalNumber, q1 };
+      return { chartData, totalNumber, totalHouseholds, q1 };
     },
+    placeholderData: keepPreviousData,
     staleTime: Infinity,
   });
 }
@@ -102,6 +108,7 @@ const ChartNlo = memo(() => {
 
   const pieSeriesRef = useRef<any>(null);
   const legendRef = useRef<any>(null);
+  const renderRef = useRef<ChartPieSeriesRender | null>(null);
   const chartID = "nlo-chart";
 
   //--- Base filter
@@ -121,10 +128,32 @@ const ChartNlo = memo(() => {
   //--- Call chart data
   const chartData = data?.chartData || [];
   const totalNumber = data?.totalNumber || 0;
+  const totalHouseholds =
+    thousands_separators(data?.totalHouseholds.toFixed(0)) || 0;
+
+  //--- Keep click-handler-relevant values fresh without rebuilding the
+  //    chart. view lives here too (not passed statically to the
+  //    renderer) since arcgis-scene's view may not be ready on first
+  //    mount.
+  const configRef = useRef({
+    qChart: data?.q1,
+    q2Expression: undefined,
+    status_field: nlo_status_f,
+    view: arcgisScene?.view,
+  });
 
   useEffect(() => {
+    configRef.current = {
+      qChart: data?.q1,
+      q2Expression: undefined,
+      status_field: nlo_status_f,
+      view: arcgisScene?.view,
+    };
+  }, [data, nlo_status_f, arcgisScene]);
+
+  //--- Pie Chart Renderer - created ONCE (mount only)
+  useEffect(() => {
     const root = rootSetter({ chartID: chartID });
-    root.setThemes([]);
     const chart = chartSetter({ root: root, y: -10 });
 
     const pieSeries = seriesSetter({
@@ -148,21 +177,22 @@ const ChartNlo = memo(() => {
       x: 50,
     });
     legendRef.current = legend;
+    legend.setAll({ marginBottom: 30 });
     legend.data.setAll(pieSeries.dataItems);
 
-    // Render chart
-    new ChartPieSeriesRender({
+    //--- NOTE: no `view` here — it's read live from configRef.current
+    //    inside chartrender.ts, since arcgis-scene may not have a
+    //    ready `.view` yet at this point.
+    const renderer = new ChartPieSeriesRender({
       chart,
       pieSeries,
       legend,
       root,
-      qChart: data?.q1,
-      q2Expression: undefined,
-      status_field: nlo_status_f,
-      view: arcgisScene?.view,
+      configRef,
       updateChartPanelwidth: setChartPanelwidth,
-      data: chartData,
+      data: [],
       seriesScale,
+      innerValue: totalHouseholds,
       innerLabel: "HOUSEHOLDS",
       innerLabelFontSize,
       innerValueFontSize,
@@ -170,16 +200,27 @@ const ChartNlo = memo(() => {
       statusArray: nlo_status_q,
       bkg_color_switch: false,
       seriesFillHash: undefined,
-    }).chartDataRenderer();
-
-    if (!pieSeriesRef.current) return;
-    pieSeriesRef.current?.data.setAll(chartData);
-    legendRef.current?.data.setAll(pieSeriesRef.current.dataItems);
+    });
+    renderRef.current = renderer;
+    renderer.chartDataRenderer();
 
     return () => {
       root.dispose();
-    };
-  }, [chartData]);
+      renderRef.current = null;
+    }; // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-once — do not add dependencies here
+
+  //--- Push new data / inner value / affected-area figures into the
+  //    already-mounted chart. No dispose, no rebuild -> no blink.
+  //    NOTE: affectedAreaValue is NOT called here directly — it's
+  //    registered once inside chartrender.ts and reads live data via
+  //    closures, which updateData() keeps in sync. Calling it here on
+  //    every render would both miss the first paint and stack
+  //    duplicate adapters.
+  useEffect(() => {
+    if (!renderRef.current) return;
+    renderRef.current.updateData(chartData, totalHouseholds, nlo_status_q);
+  }, [chartData, totalHouseholds, nlo_status_q]);
 
   return (
     <>

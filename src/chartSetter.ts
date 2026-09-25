@@ -2,7 +2,6 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import am5themes_Responsive from "@amcharts/amcharts5/themes/Responsive";
-import { thousands_separators } from "./query";
 
 // Dispose function
 export function maybeDisposeRoot(divId: any) {
@@ -55,8 +54,8 @@ interface seriesSetterType {
   valueField: any;
   legendValueText?: any;
   legendLabelText?: any;
-  radius?: number;
-  innerRadius?: number;
+  radius: number;
+  innerRadius: number;
   scale?: number;
   marginTop?: number;
 }
@@ -79,8 +78,8 @@ export function seriesSetter({
       valueField: valueField,
       legendValueText: legendValueText ? legendValueText : "",
       legendLabelText: legendLabelText ? legendLabelText : "",
-      radius: radius ? am5.percent(radius) : undefined, // outer radius
-      innerRadius: innerRadius ? am5.percent(innerRadius) : undefined,
+      radius: am5.percent(radius), // outer radius
+      innerRadius: am5.percent(innerRadius),
       scale: scale ? scale : 1,
       marginTop: marginTop ? marginTop : 0,
     }),
@@ -124,34 +123,4 @@ export function legendSetter({
   );
 
   return legend;
-}
-
-//---- Label affected area for individual status
-function affected_area_label(affectAreaPie: any, category: any) {
-  return (
-    "{value}[/]" +
-    " (" +
-    thousands_separators(
-      affectAreaPie.find((emp: any) => emp.category === category)?.value,
-    ) +
-    " m2" +
-    ")"
-  );
-}
-
-export function affectedAreaValue(
-  legend: any,
-  affectAreaPie: any,
-  statusLotLabel: any,
-) {
-  legend.valueLabels.template.adapters.add("text", (text: any, target: any) => {
-    const category = target.dataItem?.dataContext?.category;
-    if (target.dataItem) {
-      return statusLotLabel.includes(category)
-        ? affected_area_label(affectAreaPie, category)
-        : "{value}";
-    }
-
-    return text;
-  });
 }

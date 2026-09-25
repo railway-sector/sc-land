@@ -24,10 +24,9 @@ import {
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ChartResponse } from "../interfaceKeys";
 import {
-  affectedAreaValue,
   chartSetter,
   legendSetter,
   rootSetter,
@@ -87,6 +86,7 @@ function useLotData(
       const [
         chartData,
         totalNumber,
+        privateLots,
         affectedArea,
         handedOverArea,
         handedOverNumber,
@@ -105,6 +105,14 @@ function useLotData(
           ...sharedArgs,
           statisticType: "count",
           statisticField: lot_id_f,
+        }),
+
+        //--- Number of private lots
+        fieldStatistic({
+          where: q3.queryExpression(),
+          layer: lotLayer,
+          statisticField: statusField,
+          statisticType: "count",
         }),
 
         //--- Total affected area (m2)
@@ -148,6 +156,7 @@ function useLotData(
       return {
         chartData,
         totalNumber,
+        privateLots,
         affectedArea,
         handedOverArea,
         handedOverNumber,
@@ -156,6 +165,7 @@ function useLotData(
         query: q1,
       };
     },
+    placeholderData: keepPreviousData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -212,6 +222,7 @@ const ChartLot = () => {
   //--- Call chart data
   const chartData = data?.chartData || [];
   const totalNumber = data?.totalNumber || 0;
+  const privateLots = thousands_separators(data?.privateLots.toFixed(0)) || 0;
   const affectedArea = data?.affectedArea || 0;
   const handedOverArea = data?.handedOverArea || 0;
   const handedOverNumber = data?.handedOverNumber || 0;
@@ -232,6 +243,7 @@ const ChartLot = () => {
 
   const pieSeriesRef = useRef<any>(null);
   const legendRef = useRef<any>(null);
+  const rendererRef = useRef<ChartPieSeriesRender | null>(null);
   const chartID = "pie-two";
 
   //--- Signature of the filters that should trigger a re-zoom.
@@ -250,11 +262,32 @@ const ChartLot = () => {
       zoomFiltersRef.current = currentZoomFilters;
       if (!timesliderOn) zoomToLayer(lotLayer, arcgisScene?.view);
     }
+  }, [chartData]);
 
+  //--- Keep click-handler-relevant values fresh without rebuilding the
+  //    chart. view lives here too (not passed statically to the
+  //    renderer) since arcgis-scene's view may not be ready on first
+  //    mount.
+  const configRef = useRef({
+    qChart: data?.query,
+    q2Expression: undefined,
+    status_field: timesliderOn ? newStatusField : lot_status_f,
+    view: arcgisScene?.view,
+  });
+  useEffect(() => {
+    configRef.current = {
+      qChart: data?.query,
+      q2Expression: undefined,
+      status_field: timesliderOn ? newStatusField : lot_status_f,
+      view: arcgisScene?.view,
+    };
+  }, [data, timesliderOn, newStatusField, arcgisScene]);
+
+  //---  Pie Chart Renderer — created ONCE (mount only)
+  useEffect(() => {
     const root = rootSetter({ chartID: chartID });
     const chart = chartSetter({ root: root, y: 10 });
 
-    //--- Call pie series
     const pieSeries = seriesSetter({
       chart: chart,
       root: root,
@@ -268,54 +301,66 @@ const ChartLot = () => {
     pieSeriesRef.current = pieSeries;
     chart.series.push(pieSeries);
 
-    //--- Call legend
     const legend = legendSetter({
       chart: chart,
       root: root,
       centerX: 50,
       x: 50,
+      scale: 1.0,
     });
     legendRef.current = legend;
     legend.setAll({ marginBottom: 10 });
     legend.data.setAll(pieSeries.dataItems);
 
-    //--- Chart Render
-    new ChartPieSeriesRender({
+    //--- NOTE: no `view` here — it's read live from configRef.current
+    //    inside chartrender.ts, since arcgis-scene may not have a
+    //    ready `.view` yet at this point.
+    const renderer = new ChartPieSeriesRender({
       chart,
       pieSeries,
       legend,
       root,
-      qChart: data?.query,
-      q2Expression: undefined,
-      status_field: timesliderOn ? newStatusField : lot_status_f,
-      view: arcgisScene?.view,
+      configRef,
       updateChartPanelwidth: setChartPanelwidth,
+      data: [],
       seriesScale,
-      data: chartData,
+      innerValue: privateLots,
       innerLabel: "PRIVATE LOTS",
       innerLabelFontSize,
       innerValueFontSize,
       layer: lotLayer,
       statusArray: lot_status_q2,
+      affectedAreaStatus,
+      statusLotLabel: lot_status_q2.map((f: any) => f.category),
       bkg_color_switch: false,
       seriesFillHash: undefined,
-    }).chartDataRenderer();
+    });
+    rendererRef.current = renderer;
+    renderer.chartDataRenderer();
 
-    affectedAreaValue(
-      legend,
+    return () => {
+      root.dispose();
+      rendererRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-once — do not add dependencies here
+
+  //--- Push new data / inner value / affected-area figures into the
+  //    already-mounted chart. No dispose, no rebuild -> no blink.
+  //    NOTE: affectedAreaValue is NOT called here directly — it's
+  //    registered once inside chartrender.ts and reads live data via
+  //    closures, which updateData() keeps in sync. Calling it here on
+  //    every render would both miss the first paint and stack
+  //    duplicate adapters.
+  useEffect(() => {
+    if (!rendererRef.current) return;
+    rendererRef.current.updateData(
+      chartData,
+      privateLots,
       affectedAreaStatus,
       lot_status_q2.map((f: any) => f.category),
     );
-
-    if (!pieSeriesRef.current) return;
-    pieSeriesRef.current?.data.setAll(chartData);
-    legendRef.current?.data.setAll(pieSeriesRef.current.dataItems);
-
-    //--- Dispose root
-    return () => {
-      root.dispose();
-    };
-  }, [chartData]);
+  }, [chartData, privateLots, affectedAreaStatus]);
 
   return (
     <>
