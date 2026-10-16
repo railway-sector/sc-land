@@ -214,6 +214,15 @@ export const lot_lu_arr = [
   "Special Exempt",
 ];
 
+//--- FREE AND CLEAR LOTS ---//
+export const free_and_clear_renderer = new SimpleRenderer({
+  symbol: new SimpleFillSymbol({
+    color: [129, 129, 129, 0.5],
+    style: "solid",
+    outline: { color: labelColor, width: "3.5px" },
+  }),
+});
+
 //--- HANDED-OVER LOTS (PUBLIC + PRIATE LOTS) ---//
 export const lot_ho_renderer = new UniqueValueRenderer({
   valueExpression:
@@ -264,13 +273,13 @@ export const lot_tunnel_renderer = new UniqueValueRenderer({
 });
 
 //--- ACCESSIBLE LOT AREA BY CONTRACTORS ---//
-export const lot_access_renderer = new SimpleRenderer({
-  symbol: new SimpleFillSymbol({
-    color: "purple",
-    style: "solid",
-    outline: { width: 1, color: "black" },
-  }),
-});
+// export const lot_access_renderer = new SimpleRenderer({
+//   symbol: new SimpleFillSymbol({
+//     color: "purple",
+//     style: "solid",
+//     outline: { width: 1, color: "black" },
+//   }),
+// });
 
 //--- EXPROT STATUS ---//
 export const expro_wop_f = "WOP";
@@ -1033,7 +1042,9 @@ const HIDDEN_TITLES = new Set<string>([
   "Substation",
   "Households Ownership (Structure)",
   "Super Urgent Lot",
+  "Free and Clear Lots",
   "Handed-Over (public + private)",
+  "Handed-Over Area",
   "For Land Optimization",
   "With Partial Payment",
   "Tunnel Affected",
@@ -1052,7 +1063,6 @@ const HIDDEN_TITLES = new Set<string>([
   "Drainage",
   "Provision for Freight Line",
   "Maintenance Road",
-  "Handed-Over Area",
 ]);
 
 export async function defineActions(event: any) {

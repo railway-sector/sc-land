@@ -13,7 +13,7 @@ import {
   lot_studied_renderer,
   lot_ho_renderer,
   lot_tunnel_renderer,
-  lot_access_renderer,
+  // lot_access_renderer,
   str_owner_renderer,
   nlo_renderer,
   nlo_popup,
@@ -53,6 +53,7 @@ import {
   lot_partialPayment_renderer,
   str_occup_f,
   relocated_renderer,
+  free_and_clear_renderer,
 } from "./uniqueValues";
 
 //----------------------------------------------//
@@ -392,6 +393,15 @@ export const studiedLots_optimizationLayer = new FeatureLayer({
   elevationInfo: { mode: "on-the-ground" },
 });
 
+//--- FREE AND CLEAR LOTS ---//
+export const freeAndClearLotLayer = new FeatureLayer({
+  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
+  renderer: free_and_clear_renderer,
+  popupTemplate: lot_popup,
+  title: "Free and Clear Lots",
+  elevationInfo: { mode: "on-the-ground" },
+});
+
 //--- HANDED-OVER LOTS (PUBLIC + PRIATE LOTS) ---//
 export const handedOverLotLayer = new FeatureLayer({
   portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
@@ -417,12 +427,12 @@ export const tunnelAffectedLotLayer = new FeatureLayer({
 });
 
 //--- ACCESSIBLE LOT AREA BY CONTRACTORS ---//
-export const accessibleLotAreaLayer = new FeatureLayer({
-  portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
-  renderer: lot_access_renderer,
-  title: "Handed-Over Area",
-  elevationInfo: { mode: "on-the-ground" },
-});
+// export const accessibleLotAreaLayer = new FeatureLayer({
+//   portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
+//   renderer: lot_access_renderer,
+//   title: "Handed-Over Area",
+//   elevationInfo: { mode: "on-the-ground" },
+// });
 
 //--- PTE STATUS LAYER ---//
 export const lotPteLayer = new FeatureLayer({
@@ -533,6 +543,7 @@ export const alignmentGroupLayer = new GroupLayer({
     drainageLayer,
     provisionForFreightLineLayer,
     proposedEastServiceRoadLayer,
+    somco_fense_layer,
   ],
 }); //map.add(alignmentGroupLayer, 0);
 
@@ -557,7 +568,9 @@ export const lotGroupLayer = new GroupLayer({
     studiedLots_optimizationLayer,
     tunnelAffectedLotLayer,
     pnrLayer,
-    accessibleLotAreaLayer,
+    // accessibleLotAreaLayer,
+    freeAndClearLotLayer,
+    handedOverLotLayer,
   ],
 });
 
