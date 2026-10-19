@@ -396,6 +396,7 @@ export const studiedLots_optimizationLayer = new FeatureLayer({
 //--- FREE AND CLEAR LOTS ---//
 export const freeAndClearLotLayer = new FeatureLayer({
   portalItem: portalItems("99500faf0251426ea1df934a739faa6f"),
+  layerId: 6,
   renderer: free_and_clear_renderer,
   popupTemplate: lot_popup,
   title: "Free and Clear Lots",
