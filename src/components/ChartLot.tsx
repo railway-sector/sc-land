@@ -21,6 +21,9 @@ import {
   lot_status_q,
   municipality_f,
   lot_pte_f,
+  popupTimeslider,
+  lot_popup,
+  customContentLot,
 } from "../uniqueValues";
 import "@arcgis/map-components/dist/components/arcgis-scene";
 import "@arcgis/map-components/components/arcgis-scene";
@@ -218,6 +221,11 @@ const ChartLot = () => {
     baseFilter,
     lot_status_q2,
   );
+
+  //--- Re-configure POPUP
+  if (timesliderOn)
+    lot_popup.content = [popupTimeslider(newStatusField, newHoaField)];
+  else lot_popup.content = [customContentLot];
 
   //--- Call chart data
   const chartData = data?.chartData || [];

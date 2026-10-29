@@ -138,7 +138,44 @@ export const lot_renderer = new UniqueValueRenderer({
 const highlight = (value: unknown) =>
   `<span style="color: #d9dc00ff; font-weight: bold">${value}</span>`;
 
-const customContentLot = new CustomContent({
+export const popupTimeslider = (field1: any, field2: any) => {
+  const baseFields = [municipality_f, barangay_f, lot_lo_f, cp_f, lot_aa_f];
+
+  const cusomContent = new CustomContent({
+    outFields: [...baseFields, field1, field2],
+    creator: (event: any) => {
+      const attrs = event.graphic.attributes;
+      const statusV = attrs[field1];
+      const hoa = ((attrs[field2] / attrs[lot_aa_f]) * 100).toFixed(0);
+
+      const municipal = attrs[municipality_f];
+      const barangay = attrs[barangay_f];
+      const lo = attrs[lot_lo_f];
+      const cp = attrs[cp_f];
+
+      //--- Status with label
+      const statusLabel =
+        lot_status_q.find((f: any) => f.value === statusV)?.category ?? "";
+
+      return `
+    <div style='line-height: 1.7'>
+      <style>
+        .lbl { padding: 2px 8px 2px 3px; font-weight: bold; }
+      </style>
+    <ul><li>Handed-Over Area: ${highlight(`${hoa} %`)}</li>
+    <li>Status:           ${highlight(statusLabel ?? "")}</li>
+    <li>Municipality:     ${highlight(municipal ?? "")}</li>
+    <li>Barangay:         ${highlight(barangay ?? "")}</li>
+    <li>Land Owner:       ${highlight(lo ?? "")}</li>
+    <li>CP:               ${highlight(cp ?? "")}</li>
+    </div>
+              `;
+    },
+  });
+  return cusomContent;
+};
+
+export const customContentLot = new CustomContent({
   outFields: ["*"],
   creator: (event: any) => {
     const attrs = event.graphic.attributes;
@@ -166,7 +203,7 @@ const customContentLot = new CustomContent({
     //--- Handed-Over Date
     let hdod1: any;
     if (hdod) {
-      const { year, month, day } = yearMonthDay(new Date(hod));
+      const { year, month, day } = yearMonthDay(new Date(hdod));
       hdod1 = `${year}-${month}-${day}`;
     }
 
@@ -178,8 +215,8 @@ const customContentLot = new CustomContent({
     return `
     <div style='color: #eaeaea'>
     <ul><li>Handed-Over Area: ${highlight(`${hoa ?? ""} %`)}</li>
-    <li>Hand-Over Date: ${highlight(hdod1 ?? "")}</li>
-    <li>Handed-Over Date: ${highlight(hod1 ?? "")}</li>
+    <li>Hand-Over Date: ${highlight(hod1 ?? "")}</li>
+    <li>Handed-Over Date: ${highlight(hdod1 ?? "")}</li>
     <li>Status:           ${highlight(statusLabel ?? "")}</li>
     <li>Land Use:         ${highlight(lu_label ?? "")}</li>
     <li>Municipality:     ${highlight(municipal ?? "")}</li>
