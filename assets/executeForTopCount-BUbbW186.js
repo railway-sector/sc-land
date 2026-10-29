@@ -1,1 +1,0 @@
-import{dW as m}from"./index-DoLjfjv-.js";import{a as n}from"./queryTopFeatures-Btfux-as.js";import f from"./TopFeaturesQuery-D3EnJjZr.js";async function i(o,t,r){const a=m(o);return(await n(a,f.from(t),{...r})).data.count}export{i as executeForTopCount};
