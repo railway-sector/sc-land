@@ -35,6 +35,7 @@ import { TimesliderContext } from "../contexts/TimesliderContext";
 function ActionPanel() {
   const { updateAsofdate, updateTimesliderOn } = use(TimesliderContext);
   const arcgisScene = document.querySelector("arcgis-scene");
+  const timeBar: any = document.querySelector("arcgis-time-bar");
   const shellPanel: any = document.getElementById("left-shell-panel");
 
   //-----------------------------------------
@@ -62,9 +63,6 @@ function ActionPanel() {
   );
   const areaMeasure = document.querySelector("arcgis-area-measurement-3d");
 
-  //--- Timeslider component
-  const timeSlider = document.querySelector("arcgis-time-slider");
-
   //---------------------------------------------
   //  Call date list for the time slider
   //---------------------------------------------
@@ -90,8 +88,8 @@ function ActionPanel() {
       //  updating shared context/consumers like
       //  ChartLot)
       //------------------------------------------
-      if (activeWidget === "timeslider" && timeSlider) {
-        timeSlider.timeExtent = null;
+      if (activeWidget === "timeslider" && timeBar) {
+        timeBar.timeExtent = null;
         shellPanel.collapsed = true;
 
         if (!data) return; // wait until the query has resolved.
@@ -116,6 +114,7 @@ function ActionPanel() {
       //--- Manually collapse shellPanel when
       // timeslider widget is closes.
       if (nextWidget === "timeslider") {
+        updateTimesliderOn(true);
         shellPanel.collapsed = true;
       }
 

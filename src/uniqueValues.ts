@@ -158,7 +158,7 @@ export const popupTimeslider = (field1: any, field2: any) => {
         lot_status_q.find((f: any) => f.value === statusV)?.category ?? "";
 
       return `
-    <div style='line-height: 1.7'>
+    <div style='line-height: 1.3'>
       <style>
         .lbl { padding: 2px 8px 2px 3px; font-weight: bold; }
       </style>
@@ -213,7 +213,7 @@ export const customContentLot = new CustomContent({
     const lu_label = lu >= 1 ? lot_lu_arr[lu - 1] : "";
 
     return `
-    <div style='color: #eaeaea'>
+    <div style='color: #eaeaea, line-height: 1.3'>
     <ul><li>Handed-Over Area: ${highlight(`${hoa ?? ""} %`)}</li>
     <li>Hand-Over Date: ${highlight(hod1 ?? "")}</li>
     <li>Handed-Over Date: ${highlight(hdod1 ?? "")}</li>

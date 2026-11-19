@@ -30,6 +30,15 @@ export default function MapDisplay() {
   const arcgisSearch = document.querySelector("arcgis-search") as ArcgisSearch;
   const [_mapView, setMapView] = useState<any>();
 
+  if (arcgisScene?.popup) {
+    arcgisScene.popup.dockEnabled = true;
+    arcgisScene.popup.dockOptions = {
+      buttonEnabled: false,
+      breakpoint: false, // keeps it docked at all sizes
+      position: "top-right",
+    };
+  }
+
   //---------------------------------
   //       Add layers
   //---------------------------------
@@ -70,6 +79,8 @@ export default function MapDisplay() {
         onarcgisViewReadyChange={(event: any) => {
           setMapView(event.target);
         }}
+        popupComponentEnabled={false}
+        popupDisabled={false}
       >
         <arcgis-compass slot="top-right"></arcgis-compass>
         <arcgis-expand close-on-esc slot="top-right" mode="floating">
